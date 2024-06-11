@@ -2084,9 +2084,33 @@ def _T_diago(v):
         res = np.diag(v)
 
     return res
-
-@nb.njit
+"""
+from imahalanobis import py_imahalanobis
 def _T_imahalanobis(x, muk, wk, Qk, aki):
+    res = py_imahalanobis(x, muk, wk, Qk, aki)
+    return res
+"""
+
+from scipy.linalg.blas import dgemm
+def _T_imahalanobis_lapack(x, muk, wk, Qk, aki):
+    X = x - muk
+    Qi = dgemm(alpha=1, a = wk, b = Qk)
+    XQi = dgemm(alpha=1, a = X, b = Qi)
+    proj = dgemm(alpha=1, a = XQi, b = aki)
+    res = np.sum(proj **2, axis=1)
+    
+    return res
+"""
+import timeit
+def time_mahalanobis(x, muk, wk, Qk, aki):
+    numpy_time = timeit.timeit('_T_imahalanobis_py(x, muk, wk, Qk, aki)', globals=globals(), number=100000)
+    c_time = timeit.timeit('_T_imahalanobis(x, muk, wk, Qk, aki)', globals=globals(), number=100000)
+    lapack_time = timeit.timeit('_T_imahalanobis_lapack(x, muk, wk, Qk, aki)', globals=globals(), number=100000)
+
+    print(f"NumPy: {numpy_time}\nCython: {c_time}\nSciPy LAPACK: {lapack_time}")
+"""
+@nb.njit
+def _T_imahalanobis_py(x, muk, wk, Qk, aki):
     
     #C code not working for now, try compiling dll on current machine?
     #so_file = "./src/TFunHDDC.so"
