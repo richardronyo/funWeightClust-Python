@@ -1,6 +1,6 @@
 import sys
 sys.path.append('.')
-import tfunHDDC as tfun
+import skewfunHDDC as tfun
 import triangleSimulation as tri
 from sklearn import metrics as met
 

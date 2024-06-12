@@ -32,3 +32,24 @@ void c_svd(int M, int N, double *A, double *s, double *u, double *vtt)
     SVDType svd = (SVDType)GetProcAddress(hModule, "svd");
     svd(M, N, A, s, u, vtt);
 }
+
+void c_Gam1(int *NN, int *pp, int *qq,int *GG, double *x,double *y, double *z, int *gg, double *gam)
+{
+    HMODULE hModule = LoadLibrary("funclustweight.dll");
+    Gam1Type gam1 = (Gam1Type)GetProcAddress(hModule, "gam1");
+    gam1(NN, pp, qq, GG, x, y, z, gg, gam);
+}
+
+void c_CovarianceY(int *NN, int *pp, int *qq,int *GG, double *x,double *y, double *z,double *gam, int *gg, double *Sigma)
+{
+    HMODULE hModule = LoadLibrary("funclustweight.dll");
+    CovarianceYType covy = (CovarianceYType)GetProcAddress(hModule, "CovarianceY");
+    covy(NN, pp, qq, GG, x, y, z, gam, gg, Sigma);
+}
+
+void c_C_mstep(char** modely, int *NN, int *pp, int* qq, int *GG,double *pi, double *x, double *y, double *t, double *gami ,double *covyi,double *icovyi,double *logi,double *mtol, int *mmax)
+{
+    HMODULE hModule = LoadLibrary("funclustweight.dll");
+    C_mstepType c_mstep = (C_mstepType)GetProcAddress(hModule, "C_mstep");
+    c_mstep(modely, NN, pp, qq, GG, pi, x, y, t, gami, covyi, icovyi, logi, mtol, mmax);
+}

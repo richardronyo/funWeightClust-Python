@@ -14,6 +14,15 @@ cdef extern from "src/mixture_wrapper.h":
 cdef extern from "src/mixture_wrapper.h":
     void c_svd(int M, int N, double *A, double *s, double *u, double *vtt)
 
+cdef extern from "src/mixture_wrapper.h":
+    void c_Gam1(int *NN, int *pp, int *qq,int *GG, double *x,double *y, double *z, int *gg, double *gam);
+    
+cdef extern from "src/mixture_wrapper.h":
+    void c_CovarianceY(int *NN, int *pp, int *qq,int *GG, double *x,double *y, double *z,double *gam, int *gg, double *Sigma);
+
+cdef extern from "src/mixture_wrapper.h":
+    void c_C_mstep(char** modely, int *NN, int *pp, int* qq, int *GG,double *pi, double *x, double *y, double *t, double *gami ,double *covyi,double *icovyi,double *logi,double *mtol, int *mmax);
+
 def determinant(np.ndarray[np.float64_t, ndim=2] A):
     cdef int k = A.shape[0]
     cdef int lda = A.shape[1]
@@ -61,4 +70,35 @@ def svd(np.ndarray[np.float64_t, ndim=2] A):
     return s, u, vtt
 
 
+def Gam1(np.ndarray[np.int_t, ndim=1] NN, np.ndarray[np.int_t, ndim=1] pp, np.ndarray[np.int_t, ndim=1] qq, np.ndarray[np.int_t, ndim=1] GG, np.ndarray[np.float64_t, ndim=2] x, np.ndarray[np.float64_t, ndim=2] y, np.ndarray[np.float64_t, ndim=2] z, np.ndarray[np.int_t, ndim=1] gg, np.ndarray[np.float64_t, ndim=1] gam):
+    cdef int NN_val = NN[0]
+    cdef int pp_val = pp[0]
+    cdef int qq_val = qq[0]
+    cdef int GG_val = GG[0]
+    cdef int gg_val = gg[0]
 
+    c_Gam1(&NN_val, &pp_val, &qq_val, &GG_val, <double*>x.data, <double*>y.data, <double*>z.data, &gg_val, <double*>gam.data)
+
+def CovarianceY(np.ndarray[np.int_t, ndim=1] NN, np.ndarray[np.int_t, ndim=1] pp, np.ndarray[np.int_t, ndim=1] qq, np.ndarray[np.int_t, ndim=1] GG, np.ndarray[np.float64_t, ndim=2] x, np.ndarray[np.float64_t, ndim=2] y, np.ndarray[np.float64_t, ndim=2] z, np.ndarray[np.float64_t, ndim=1] gam, np.ndarray[np.int_t, ndim=1] gg, np.ndarray[np.float64_t, ndim=2] Sigma):
+    cdef int NN_val = NN[0]
+    cdef int pp_val = pp[0]
+    cdef int qq_val = qq[0]
+    cdef int GG_val = GG[0]
+    cdef int gg_val = gg[0]
+
+    c_CovarianceY(&NN_val, &pp_val, &qq_val, &GG_val, <double*>x.data, <double*>y.data, <double*>z.data, <double*>gam.data, &gg_val, <double*>Sigma.data)
+
+def C_mstep(list modely, np.ndarray[np.int_t, ndim=1] NN, np.ndarray[np.int_t, ndim=1] pp, np.ndarray[np.int_t, ndim=1] qq, np.ndarray[np.int_t, ndim=1] GG, np.ndarray[np.float64_t, ndim=1] pi, np.ndarray[np.float64_t, ndim=2] x, np.ndarray[np.float64_t, ndim=2] y, np.ndarray[np.float64_t, ndim=2] t, np.ndarray[np.float64_t, ndim=2] gami, np.ndarray[np.float64_t, ndim=2] covyi, np.ndarray[np.float64_t, ndim=2] icovyi, np.ndarray[np.float64_t, ndim=1] logi, np.ndarray[np.float64_t, ndim=1] mtol, np.ndarray[np.int_t, ndim=1] mmax):
+    cdef int NN_val = NN[0]
+    cdef int pp_val = pp[0]
+    cdef int qq_val = qq[0]
+    cdef int GG_val = GG[0]
+    cdef int mmax_val = mmax[0]
+
+    cdef double mtol_val = mtol[0]
+
+    cdef const char* modely_cstr = modely[0].encode('utf-8')
+    cdef char* modely_ptrs[1]
+    modely_ptrs[0] = <char*>modely_cstr
+
+    c_C_mstep(modely_ptrs, &NN_val, &pp_val, &qq_val, &GG_val, <double*>pi.data, <double*>x.data, <double*>y.data, <double*>t.data, <double*>gami.data, <double*>covyi.data, <double*>icovyi.data, <double*>logi.data, &mtol_val, &mmax_val)

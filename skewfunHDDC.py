@@ -1377,9 +1377,8 @@ def _T_funhddt_e_step1(fdobj, Wlist, par, clas=0, known=None, kno=None):
     return {'t': t, 'tw': tw, 'L': L}
 
 
-
-def _T_funhddt_m_step1(fdobj, Wlist, K, t, tw, nux, dfupdate, dfconstr, model, 
-                       threshold, method, noise_ctrl, com_dim, d_max, d_set):
+def _T_funhddt_m_step1(fdobj, bigDATA, fdobjy, Wlist, K, t, model, modely, threshold, method, noise_ctrl, com_dim, d_max, d_set):
+    #'list' in R means len(fdobj) > 1 -> MULTI = True
 
     if(type(fdobj) == skfda.FDataBasis):
        MULTI = False
@@ -1401,19 +1400,42 @@ def _T_funhddt_m_step1(fdobj, Wlist, K, t, tw, nux, dfupdate, dfconstr, model,
         else:
             x = fdobj[0].coefficients
 
+    if(type(fdobjy) == skfda.FDataBasis):
+        MULTI = False
+        y = fdobjy.coefficients
+
+    else:
+
+        if len(fdobjy) > 1:
+            MULTI = True
+            datay = []
+            y = fdobjy[0].coefficients
+            datay.append(fdobjy[0].coefficients)
+
+            for i in range(1, len(fdobjy)):
+                y = np.c_[y, fdobj[i].coefficients]
+                data.append(fdobjy[i].coefficients)
+            
+            datay = np.array(datay)
+        else:
+            y = fdobjy[0].coefficients
+
+    bigx = np.transpose(bigDATA)
+
     N = x.shape[0]
     p = x.shape[1]
+    q = y.shape[1]
     n = np.sum(t, axis=0)
     prop = n/N
     #matrix with K columns and p rows
     mu = np.repeat(0., K*p).reshape((K, p))
     mu1 = np.repeat(0., K*p).reshape((K, p))
 
-    corX = t*tw
+    corX = t
 
     for i in range(0, K):
-        mu[i] = np.apply_along_axis(np.sum,1,np.atleast_2d(np.atleast_2d(corX[:, i]).T@np.atleast_2d(np.repeat(1,p))).T * x.T)  / np.sum(corX[:,i])
-        mu1[i] = np.sum(np.atleast_2d(corX[:,i])*x.T, axis=1)/np.sum(corX[:,i])
+        mu[i] = np.sum(np.atleast_2d(t[:, i]) * x.T, axis=1) / n[i]
+    
 
     #ind = np.apply_along_axis(np.where, 1, t>0)
     
@@ -1421,22 +1443,6 @@ def _T_funhddt_m_step1(fdobj, Wlist, K, t, tw, nux, dfupdate, dfconstr, model,
     #for i in range(0,K):
         #verify this is the same in R code. Should be, since [[i]] acceses the list item i
         #n_bis[i] = len(ind[i])
-
-
-    match dfupdate:
-
-        case "approx":
-            jk861 = _T_tyxf8(dfconstr, nux, n, t, tw, K, p, N)
-            testing = jk861
-            if np.all(np.isfinite(testing)):
-                nux = jk861
-        
-        case "numeric":
-            jk681 = _T_tyxf7(dfconstr, nux, n, t, tw, K, p, N)
-            testing = jk681
-            if np.all(np.isfinite(testing)):
-                nux = jk681
-
 
     traceVect = np.zeros(K)
 
@@ -1637,7 +1643,7 @@ def _T_mypcat_fd1_Multi(data, W_m, Ti, corI):
     for i in range(len(data)):
         for j in range(data[i].shape[-1]):
 
-            coefmean[:, j] = np.sum(((np.ascontiguousarray(corI.T)@np.atleast_2d(np.repeat(1., data[i].shape[-1]))).T * data[i].T)[:, i])/np.sum(corI)
+            coefmean[:, j] = np.sum(((np.ascontiguousarray(corI.TW)@np.atleast_2d(np.repeat(1., data[i].shape[-1]))).T * data[i].T)[:, i])/np.sum(corI)
 
     # Swept values not used anywhere
     # temp = np.zeros(coefmean.shape)
@@ -1651,7 +1657,7 @@ def _T_mypcat_fd1_Multi(data, W_m, Ti, corI):
     M = np.repeat(1., n).reshape((n, 1))@(v)
     rep = (M * coefficients.T).T
     mat_cov = (rep.T@rep) / np.sum(Ti)
-    cov = (W_m@ mat_cov)@(W_m.T)
+    cov = (W_m@ mat_cov)@(W_m.T) #sigma in the paper
     if not np.all(np.abs(cov-cov.T) < 1.e-12):
         ind = np.nonzero(cov - cov.T > 1.e-12)
         for i in ind:

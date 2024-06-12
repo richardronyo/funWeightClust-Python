@@ -884,7 +884,7 @@ def _funhddt_m_step1(fdobj, Wlist, K, t, model,threshold, method, noise_ctrl, co
     mu = np.repeat(0., K*p).reshape((K, p))
 
     for i in range(0, K):
-        mu[i] = np.sum(np.atleast_2d(t[:,i])*x.T, axis=1)/n[i]    
+        mu[i] = np.sum(np.atleast_2d(t[:,i])*x.T, axis=1)/n[i]
     traceVect = np.zeros(K)
     ev = np.repeat(0., K*p).reshape((K,p))
 

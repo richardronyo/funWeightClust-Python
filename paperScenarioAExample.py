@@ -1,6 +1,6 @@
 import sys
 sys.path.append('../')
-import tfunHDDC as tfun
+import skewfunHDDC as tfun
 import funHDDC as fun
 import numpy as np
 import modelSimulation as sim
