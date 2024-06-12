@@ -1173,121 +1173,6 @@ def _T_funhddt_init(fdobj, Wlist, K, t, nux, model, threshold, method, noise_ctr
     return {'model': model, "K": K, 'd':d, 'a':ai, 'b':bi, 'mu':mu, 'prop':prop,
             'nux':nux, 'ev':ev, 'Q':Q, 'fpcaobj': fpcaobj, 'Q1':Q1}
 
-def _T_initmypca_fd1(fdobj, Wlist, Ti):
-        
-    #Univariate here
-    if type(fdobj) == skfda.FDataBasis:
-        temp = fdobj.copy()
-        mean_fd = fdobj.copy()
-        coef = fdobj.coefficients.copy()
-        #by default numpy cov function uses rows as variables and columns as observations, opposite to R
-        mat_cov = np.cov(m=coef, aweights=Ti, ddof=0, rowvar=False)
-        #may need to try this with other params depending on how weights are passed in
-        coefmean = np.average(coef, axis=0, weights=Ti)
-        #Verify this
-        temp.coefficients = np.apply_along_axis(lambda row: row - coefmean, axis=1, arr=temp.coefficients)
-        #Replaces as.matrix(data.frame(mean=coefmean))
-        mean_fd.coefficients = coefmean
-        cov = (Wlist['W_m']@mat_cov)@(Wlist['W_m'].T)
-        if not check_symmetric(cov, 1.e-12):
-            ind = np.nonzero((cov - cov.T) > 1.e-12)
-            cov[ind] = cov.T[ind]
-            
-
-        
-        valeurs_propres, vecteurs_propres = scil.eig(cov)
-        #indices = valeurs_propres.argsort()
-        #valeurs_propres = valeurs_propres[indices[::-1]]
-        #vecteurs_propres = vecteurs_propres[indices[::-1]]
-        fonctionspropres = fdobj.copy()
-        bj = scil.solve(Wlist['W_m'], np.eye(Wlist['W_m'].shape[0]))@np.real(vecteurs_propres)
-        fonctionspropres.coefficients = bj
-
-        #scores = skfda.misc.inner_product_matrix(temp.basis, fonctionspropres.basis)
-        varprop = valeurs_propres / np.sum(valeurs_propres)
-        ipcafd = {'valeurs_propres': np.real(valeurs_propres), 'harmonic': fonctionspropres, 'covariance': cov, 'U':bj, 'meanfd': mean_fd, 'mux': coefmean}
-
-    #Multivariate
-    else:
-        temp = fdobj.copy()
-
-        coef = temp[0].coefficients
-        for i in range(1, len(fdobj)):
-            coef = np.c_[coef, temp[i].coefficients.copy()]
-
-        mat_cov = np.cov(m=coef, aweights=Ti, ddof=0, rowvar=False)
-        coefmean = np.average(coef, axis=0, weights=Ti)
-
-        n_lead = 0
-        #R Doesn't transpose this here, might need shape[1] instead
-        n_var = temp[0].coefficients.shape[1]
-        #Sweep
-        tempi = temp[0].copy()
-        tempi.coefficients = np.apply_along_axis(lambda row: row - coefmean[(n_lead):(n_var + n_lead)], axis=1, arr=tempi.coefficients)
-
-
-        for i in range(1, len(fdobj)):
-            tempi = temp[i].copy()
-            n_lead = n_lead + n_var
-            
-            n_var = temp[i].coefficients.shape[1]
-            tempi.coefficients = np.apply_along_axis(lambda row: row - coefmean[(n_lead):(n_var + n_lead)], axis=1, arr=tempi.coefficients)
-
-        cov = (Wlist['W_m']@mat_cov)@(Wlist['W_m'].T)
-        if not check_symmetric(cov, 1.e-12):
-            ind = np.nonzero(cov - cov.T > 1.e-12)
-            cov[ind] = cov.T[ind]
-
-        valeurs_propres, vecteurs_propres = scil.eig(cov)
-        bj = scil.solve(Wlist['W_m'], np.eye(Wlist['W_m'].shape[0]))@np.real(vecteurs_propres)
-
-        ipcafd = {'valeurs_propres': np.real(valeurs_propres),
-                  'covariance': cov, 'U': bj, 'mux': coefmean}
-
-    return ipcafd
-
-
-# Why not just pass in x instead of fdobj?
-def _T_funhddt_twinit(fdobj, wlist, par, nux):
-
-    if(type(fdobj) == skfda.FDataBasis):
-       x = fdobj.coefficients
-
-    else:
-        #Multivariate
-        if len(fdobj) > 1:
-            x = fdobj[0].coefficients
-            for i in range(1, len(fdobj)):
-                x = np.c_[x, fdobj[i].coefficients]
-        #univariate
-        else:
-            x = fdobj[0].coefficients
-
-    p = x.shape[1]
-    n = x.shape[0]
-    K = par['K']
-    a = par['a']
-    b = par['b']
-    mu = par['mu']
-    d = par['d']
-    Q1 = par['Q1']
-    W = np.zeros(n*K).reshape((n,K))
-
-    b[b<1e-6]  = 1e-6
-
-    mah_pen = np.zeros(n*K).reshape((n,K))
-
-    for i in range(0, K):
-        Qk = Q1[f'{i}']
-
-        aki = np.sqrt(np.diag(np.concatenate((1/a[i, 0:int(d[i])],np.repeat(1/b[i], p-int(d[i])) ))))
-        muki = mu[i]
-
-        wki = wlist['W_m']
-        mah_pen[:,i] = _T_imahalanobis(x, muki, wki, Qk, aki)
-        W[:, i] = (nux[i] + p) / (nux[i] + mah_pen[:, i])
-
-    return W
 
 
 # In R, this function doesn't return anything?
@@ -1423,19 +1308,7 @@ def _T_funhddt_m_step1(fdobj, Wlist, K, t, tw, nux, dfupdate, dfconstr, model,
         #n_bis[i] = len(ind[i])
 
 
-    match dfupdate:
-
-        case "approx":
-            jk861 = _T_tyxf8(dfconstr, nux, n, t, tw, K, p, N)
-            testing = jk861
-            if np.all(np.isfinite(testing)):
-                nux = jk861
-        
-        case "numeric":
-            jk681 = _T_tyxf7(dfconstr, nux, n, t, tw, K, p, N)
-            testing = jk681
-            if np.all(np.isfinite(testing)):
-                nux = jk681
+    
 
 
     traceVect = np.zeros(K)
@@ -1506,90 +1379,160 @@ def _T_funhddt_m_step1(fdobj, Wlist, K, t, tw, nux, dfupdate, dfconstr, model,
     return result        
 
 
-#degrees of freedom functions modified yxf7 and yxf8 functions
-# /*
-# * Authors: Andrews, J. Wickins, J. Boers, N. McNicholas, P.
-# * Date Taken: 2023-01-01
-# * Original Source: teigen (modified)
-# * Address: https://github.com/cran/teigen
-# *
-# */
-def _T_tyxf7(dfconstr, nux, n, t, tw, K, p, N):
-    newnux = nux.copy()
-    if dfconstr == "no":
-        dfoldg = nux.copy()
 
-        #scipy digamma is slow? https://gist.github.com/timvieira/656d9c74ac5f82f596921aa20ecb6cc8
-        for i in range(0, K):
-            constn = 1 + (1/n[i]) * np.sum(t[:, i] * (np.log(tw[:, i]) - tw[:, i])) + digamma((dfoldg[i] + p)/2) - np.log((dfoldg[i] + p)/2)
-            
-            f = lambda v : np.log(v/2) - digamma(v/2) + constn
-          
-            #Verify this outputs the same as R: may need to set rtol to 0
-            newnux[i] = brentq(f, 0.0001, 1000, xtol=0.00001)
-
-            if newnux[i] > 200.:
-                newnux[i] = 200.
-
-            if newnux[i] < 2.:
-                newnux[i] = 2.
-
-    else:
-        dfoldg = nux[0]
-
-        constn = 1 + (1/N) * np.sum(t *(np.log(tw) - tw)) + digamma( (dfoldg + p) / 2) - np.log( (dfoldg + p) / 2)
-
-        f = lambda v : np.log(v/2) - digamma(v/2) + constn
-            #Verify this outputs the same as R: may need to set rtol to 0
-        
-        dfsamenewg = brentq(f, a=0.0001, b=1000, xtol=0.01)
-
-        if dfsamenewg > 200.:
-            dfsamenewg = 200.
-        
-        if dfsamenewg < 2.:
-            dfsamenewg = 2.
-
-        newnux = np.repeat(dfsamenewg, K)
-
-    return newnux
-
-def _T_tyxf8(dfconstr, nux, n, t, tw, K, p, N):
-    newnux = nux.copy()
-
-    if(dfconstr == "no"):
-        dfoldg = nux.copy()
-        
-        for i in range(0, K):
-            constn = 1 + (1 / n[i]) * np.sum(t[:, i] * (np.log(tw[:, i]) - tw[:, i])) + digamma((dfoldg[i] + p)/2) - np.log( (dfoldg[i] + p)/2)
-            
-            constn = -constn
-            newnux[i] = (-np.exp(constn) + 2 * (np.exp(constn)) * (np.exp(digamma(dfoldg[i] / 2)) - ( (dfoldg[i]/2) - (1/2)))) / (1 - np.exp(constn))
-
-            if newnux[i] > 200.:
-                newnux[i] = 200.
-
-            if newnux[i] < 2.:
-                newnux[i] = 2.
-
-    else:
-        dfoldg = nux[0]
-        constn = 1 + (1 / N) * np.sum(t * (np.log(tw) - tw)) + digamma((dfoldg + p)/2) - np.log( (dfoldg + p)/2)
-        constn = -constn
-
-        dfsamenewg = (-np.exp(constn) + 2 * (np.exp(constn)) * (np.exp(digamma(dfoldg / 2)) - ( (dfoldg/2) - (1/2)))) / (1 - np.exp(constn))
-
-        if dfsamenewg > 200.:
-            dfsamenewg = 200.
-
-        if dfsamenewg < 2.:
-            dfsamenewg = 2.
-
-        newnux = np.repeat(dfsamenewg, K)
-
-    return newnux
 
 @nb.njit
+def _mypcat_fd1_Uni(data, W_m, Ti):
+    
+    #Univariate case
+    coefmean = np.zeros(data.shape)
+    n = data.shape[0]
+    ones_matrix = np.ones((1, n))
+    Ti_matrix = Ti[:, np.newaxis]
+    product = np.dot(Ti_matrix, ones_matrix) * data.T
+    coefmean = np.sum(product, axis=0) / np.sum(Ti)
+    # Update fdobj_coefs using sweep equivalent
+    data1 = data - coefmean[:, np.newaxis]
+    n = data.shape[1]
+    v = np.sqrt(Ti)
+    M = np.repeat(1., n).reshape((n, 1))@(v)
+    rep = (M * data1.T).T
+    mat_cov = (rep.T@rep) / np.sum(Ti)
+    cov = (W_m@ mat_cov)@(W_m.T)
+    if not np.all(np.abs(cov-cov.T) < 1.e-12):
+        ind = np.nonzero(cov - cov.T > 1.e-12)
+        for i in ind:
+            cov[i] = cov.T[i]
+
+    valeurs_propres, vecteurs_propres = np.linalg.eig(cov.astype(complex128))
+    for i in range(len(valeurs_propres)):
+        if np.imag(i) > 0:
+            valeurs_propres[i] = 0
+    bj = np.linalg.solve(W_m, np.eye(W_m.shape[0]))@np.ascontiguousarray(np.real(vecteurs_propres))
+
+    return np.real(valeurs_propres), cov, bj
+
+@nb.njit
+def _mypcat_fd1_Multi(data, W_m, Ti):
+
+    #Multivariate here
+    # coefficients = np.zeros((data.shape[1], data.shape[-1]*data.shape[0]))
+    # for i in range(0,len(data)):
+    #     coefficients[:, i*data.shape[-1]] = data[i]
+    coefficients = data.reshape(data.shape[1], data.shape[-1]*data.shape[0])
+
+    coefmean = np.zeros((coefficients.shape))
+
+    for i in range(len(data)):
+        for j in range(data[i].shape[-1]):
+
+            coefmean[:, j] = np.sum(((np.ascontiguousarray(Ti.T)@np.atleast_2d(np.repeat(1., data[i].shape[-1]))).T * data[i].T)[:, i])/np.sum(Ti)
+
+    n = coefficients.shape[1]
+    v = np.sqrt(Ti)
+    M = np.repeat(1., n).reshape((n, 1))@(v)
+    rep = (M * coefficients.T).T
+    mat_cov = (rep.T@rep) / np.sum(Ti)
+    cov = (W_m@ mat_cov)@(W_m.T)
+    if not np.all(np.abs(cov-cov.T) < 1.e-12):
+        ind = np.nonzero(cov - cov.T > 1.e-12)
+        for i in ind:
+            cov[i] = cov.T[i]
+
+    valeurs_propres, vecteurs_propres = np.linalg.eig(cov.astype(complex128))
+    for i in range(len(valeurs_propres)):
+        if np.imag(i) > 0:
+            valeurs_propres[i] = 0
+    bj = np.linalg.solve(W_m, np.eye(W_m.shape[0]))@np.ascontiguousarray(np.real(vecteurs_propres))
+
+    return np.real(valeurs_propres), cov, bj
+
+
+    '''
+    #Univariate here
+    if type(fdobj) == skfda.FDataBasis:
+        temp = fdobj.copy()
+
+        mean_fd = fdobj.copy()
+        #Check this element-wise multiplication
+        coefmean = np.apply_along_axis(np.sum, axis=1, arr=np.atleast_2d(np.atleast_2d(np.atleast_2d(corI).T@np.atleast_2d(np.repeat(1, fdobj.coefficients.shape[1]))).T * temp.coefficients.T)) / np.sum(corI)
+        temp.coefficients = np.apply_along_axis(lambda row: row - coefmean, axis=1, arr=temp.coefficients)
+        mean_fd.coefficients = coefmean
+        coef = temp.coefficients.copy().T
+        rep = (_T_repmat(np.sqrt(corI), n=coef.shape[0], p=1) * coef).T
+        mat_cov = (rep.T@rep) / np.sum(Ti)
+        cov = (Wlist['W_m']@ mat_cov)@(Wlist['W_m'].T)
+        if not check_symmetric(cov, 1.e-12):
+            ind = np.nonzero(cov - cov.T > 1.e-12)
+            cov[ind] = cov.T[ind]
+
+
+        valeurs_propres, vecteurs_propres = scil.eig(cov)
+        #indices = valeurs_propres.argsort()
+        #valeurs_propres = valeurs_propres[indices[::-1]]
+        #vecteurs_propres = vecteurs_propres[indices[::-1]]
+
+        fonctionspropres = fdobj.copy()
+        bj = scil.solve(Wlist['W_m'], np.eye(Wlist['W_m'].shape[0]))@np.real(vecteurs_propres)
+        fonctionspropres.coefficients = bj
+
+        #scores = skfda.misc.inner_product_matrix(temp.basis, fonctionspropres.basis)
+        varprop = valeurs_propres / np.sum(valeurs_propres)
+        pcafd = {'valeurs_propres': np.real(valeurs_propres), 'harmonic': fonctionspropres, 'covariance': cov, 'U':bj, 'meanfd': mean_fd}
+
+    #Multivariate here
+    else:
+        mean_fd = {}
+        temp = fdobj.copy()
+        for i in range(len(fdobj)):
+            #TODO should we start indexing multivariate at 0? or at 1?
+            mean_fd[f'{i}'] = temp[f'{i}'].copy()
+
+
+        for i in range(len(fdobj)):
+            #Check this element-wise multiplication
+            coefmean = np.apply_along_axis(np.sum, axis=1, arr=np.atleast_2d(np.atleast_2d(np.atleast_2d(corI).T@np.atleast_2d(np.repeat(1, fdobj[f'{i}'].coefficients.shape[1]))).T * temp[f'{i}'].coefficients.T)) / np.sum(corI)
+            temp[f'{i}'].coefficients = np.apply_along_axis(lambda row: row - coefmean, axis=1, arr=temp[f'{i}'].coefficients)
+            mean_fd[f'{i}'].coefficients = coefmean
+        
+        #R transposes here
+        coef = temp['0'].coefficients.copy()
+
+        for i in range(1, len(fdobj)):
+            coef = np.c_[coef, temp[f'{i}'].coefficients.copy()]
+
+        rep = (_T_repmat(np.sqrt(corI), n=coef.shape[1], p=1) * coef).T
+        mat_cov = (rep.T@rep) / np.sum(Ti)
+        cov = (Wlist['W_m']@ mat_cov)@(Wlist['W_m'].T)
+
+        valeurs_propres, vecteurs_propres = scil.eig(cov)
+        # indices = valeurs_propres.argsort()
+        # valeurs_propres = valeurs_propres[indices[::-1]]
+        # vecteurs_propres = vecteurs_propres[indices[::-1]]
+
+        bj = scil.solve(Wlist['W_m'], np.eye(Wlist['W_m'].shape[0]))@np.real(vecteurs_propres)
+        
+        fonctionspropres = fdobj['0']
+        fonctionspropres.coefficients = bj
+        scores = (coef@Wlist['W_m'])@bj
+
+        varprop = valeurs_propres/np.sum(valeurs_propres)
+
+        pcafd = {'valeurs_propres': np.real(valeurs_propres), 'harmonic': fonctionspropres, 'scores': scores,
+                 'covariance': cov, 'U':bj, 'varprop': varprop, 'meanfd': mean_fd}
+    '''
+    return pcafd
+
+
+
+
+
+
+
+
+
+
+
 def _T_mypcat_fd1_Uni(data, W_m, Ti, corI):
 
     #Univariate case
