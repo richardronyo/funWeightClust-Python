@@ -36,7 +36,7 @@ void c_svd(int M, int N, double *A, double *s, double *u, double *vtt)
 void c_Gam1(int *NN, int *pp, int *qq,int *GG, double *x,double *y, double *z, int *gg, double *gam)
 {
     HMODULE hModule = LoadLibrary("funclustweight.dll");
-    Gam1Type gam1 = (Gam1Type)GetProcAddress(hModule, "gam1");
+    Gam1Type gam1 = (Gam1Type)GetProcAddress(hModule, "Gam1");
     gam1(NN, pp, qq, GG, x, y, z, gg, gam);
 }
 

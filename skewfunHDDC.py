@@ -968,7 +968,7 @@ def _T_funhddc_main1(fdobj, wlist, K, dfstart, dfupdate, dfconstr, model,
     initx = _T_funhddt_init(fdobj, wlist, K, t, nux, model, threshold, method, noise_ctrl, com_dim, d_max, d_set)
     
     #call to twinit function here
-    tw = _T_funhddt_twinit(fdobj, wlist, initx, nux)
+    #tw = _T_funhddt_twinit(fdobj, wlist, initx, nux)
 
     #Start I at 0, likely compared on second iteration when I == 1
     I = 0
@@ -1261,7 +1261,7 @@ def _T_funhddt_e_step1(fdobj, Wlist, par, clas=0, known=None, kno=None):
     # Return this for testing purposes
     return {'t': t, 'tw': tw, 'L': L}
 
-
+from py_mixture import C_mstep
 def _T_funhddt_m_step1(fdobj, bigDATA, fdobjy, Wlist, K, t, model, modely, threshold, method, noise_ctrl, com_dim, d_max, d_set):
     #'list' in R means len(fdobj) > 1 -> MULTI = True
 
@@ -1345,6 +1345,8 @@ def _T_funhddt_m_step1(fdobj, bigDATA, fdobjy, Wlist, K, t, model, modely, thres
             valeurs_propres, cov, U = _T_mypcat_fd1_Multi(data, Wlist['W_m'], np.atleast_2d(t[:,i]), np.atleast_2d(corX[:,i]))
         else:
             valeurs_propres, cov, U = _T_mypcat_fd1_Uni(x, Wlist['W_m'], np.atleast_2d(t[:,i]), np.atleast_2d(corX[:,i]))
+
+        
         traceVect[i] = np.sum(np.diag(valeurs_propres))
         ev[i] = valeurs_propres
         Q[f'{i}'] = U
@@ -1397,7 +1399,15 @@ def _T_funhddt_m_step1(fdobj, bigDATA, fdobjy, Wlist, K, t, model, modely, thres
             b = b+remainEV*prop[i]
         bi[0:K] = b/(min(N,p)-eps)
 
-    result = {'model':model, "K": K, "d":d, "a":ai, "b": bi, "mu":mu, "prop": prop, "nux":nux, "ev":ev, "Q":Q, "fpcaobj":fpcaobj, "Q1":Q1}
+    gami = np.zeros((K, q*p), dtype=np.float64)
+    covyi = np.zeros((K, q*q), dtype=np.float64)
+    icovyi = np.zeros((K, q*q), dtype=np.float64)
+    logi = np.zeros(K, dtype=np.float64)
+
+    gami, covyi, icovyi, logi = C_mstep(modely, N, p, q, K, prop, bigx, y, t, gami, covyi, icovyi, logi, mtol=1e-12, mmax=1000)
+
+    result = {'model':model, "K": K, "d":d, "a":ai, "b": bi, "mu":mu, "prop": prop, "ev":ev, "Q":Q, "fpcaobj":fpcaobj, "Q1":Q1, "gami": gami, "covyi": covyi, "icovyi": icovyi, "logi": logi}    
+
     return result        
 
 
@@ -1546,17 +1556,7 @@ def _mypcat_fd1_Multi(data, W_m, Ti):
     return pcafd
 
 
-
-
-
-
-
-
-
-
-
 def _T_mypcat_fd1_Uni(data, W_m, Ti, corI):
-
     #Univariate case
     coefmean = np.zeros(data.shape)
     for i in range(data.shape[1]):
@@ -1567,11 +1567,14 @@ def _T_mypcat_fd1_Uni(data, W_m, Ti, corI):
     # temp = np.zeros(data.shape)
     # for i in range(data.shape[1]):
     #     temp[:, i] = data[:, i] - coefmean[:, i]
+    mean_fd = np.mean(data, axis=1)
+    swept_data = data.copy()
+    swept_data -= mean_fd[:, np.newaxis]
 
-    n = data.shape[1]
+    n = swept_data.shape[1]
     v = np.sqrt(corI)
     M = np.repeat(1., n).reshape((n, 1))@(v)
-    rep = (M * data.T).T
+    rep = (M * swept_data.T).T
     mat_cov = (rep.T@rep) / np.sum(Ti)
     cov = ((W_m@ mat_cov)@(W_m.T))
     if not np.all(np.abs(cov-cov.T) < 1.e-12):
@@ -1579,7 +1582,7 @@ def _T_mypcat_fd1_Uni(data, W_m, Ti, corI):
         for i in ind:
             cov[i] = cov.T[i]
     
-    valeurs_propres, vecteurs_propres = np.linalg.eig(cov.astype(complex128))
+    valeurs_propres, vecteurs_propres = np.linalg.eig(cov.astype(np.complex128))
     for i in range(len(valeurs_propres)):
         if np.imag(i) > 0:
             valeurs_propres[i] = 0

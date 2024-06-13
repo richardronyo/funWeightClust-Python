@@ -1,108 +1,36 @@
 # test_mixture.py
-import numba
+import skfda
 import numpy as np
-from py_mixture import determinant, inverse, eigen, svd, Gam1, CovarianceY, C_mstep
-import timeit
+import modelSimulation as sim
+from sklearn import metrics as met
+from skewfunHDDC import _T_funhddt_m_step1, _T_mypcat_fd1_Uni
+from scipy import linalg as scil
 
-A = np.array([[1, 1, 1], [3.0, 4.0, 5]], dtype=np.float64)  # Example 2x2 matrix in row-major order
 
-def custom():
-    return eigen(A)
 
-def numpy():
-    return np.linalg.inv(A)
 if __name__ == "__main__":
+    data = sim.genModelFD(ncurves=1000, nsplines=35, alpha=[0.9, 0.9, 0.9], eta=[10, 5, 15])
 
-    A = np.array([[1.0, 2.0], [3.0, 4.0]], dtype=np.float64)  # Example 2x2 matrix in row-major order
-    k = 2  # Number of rows/columns of the matrix
-    lda = 2  # Leading dimension of the matrix
+    fdobj = data['data'][0]  # Assuming data is a list with fdobj at index 0
+    fdobjy = data['data'][1]  # Assuming fdobjy is at index 1
+    bigDATA = np.random.rand(35, 1000)  # Example bigDATA, adjust dimensions as needed
+    Wlist = {'W_m': np.eye(35)}  # Example Wlist, adjust as needed
+    K = 3
+    t = np.random.rand(1000, K)  # Example t, adjust dimensions as needed
+    model = 'AKJBKQKDK'  # Example model, adjust as needed
+    modely = 'VII'  # Example modely, adjust as needed
+    threshold = 0.5  # Example threshold, adjust as needed
+    method = 'bic'  # Example method, adjust as needed
+    noise_ctrl = False  # Example noise_ctrl, adjust as needed
+    com_dim = 5  # Example com_dim, adjust as needed
+    d_max = 10  # Example d_max, adjust as needed
+    d_set = np.array([1, 2, 3])  # Example d_set, adjust as needed
 
-    print(A)
-    print(f"Determinant: {determinant(A)}")
-    
-    print(f"Inverse: {inverse(A.copy())}")
+    corX = t
+    eigenvalues, cov, bj = _T_mypcat_fd1_Uni(fdobj.coefficients, Wlist['W_m'], np.atleast_2d(t[:,0]), np.atleast_2d(corX[:,0]))
+    print("eigenvalues: ", eigenvalues)
+    print("Covariance Matrix: ", cov)
+    print("bj: ", bj)
 
-    wr, vr = eigen(A.copy())
-    print(f"Eigenvalues: {wr}")
-    print(f"Eigenvectors: {vr}")
-
-    s, u, vtt = svd(A.copy())
-    print("Singular values:")
-    print(s)
-    
-    print("Left singular vectors:")
-    print(u)
-    
-    print("Right singular vectors:")
-    print(vtt)
-
-    # Number of repetitions for timeit
-    num_repeats = 1000
-
-    # Time custom determinant function
-    custom_time = timeit.timeit('custom()', globals=globals(), number=num_repeats)
-    print(f"Custom inverse function time: {custom_time / num_repeats} seconds per call")
-
-    # Time numpy determinant function
-    numpy_time = timeit.timeit('numpy()', globals=globals(), number=num_repeats)
-    print(f"NumPy inverse function time: {numpy_time / num_repeats} seconds per call")
-
-    # Number of observations, predictors, responses, and groups
-    NN = np.array([10], dtype=np.int32)
-    pp = np.array([3], dtype=np.int32)
-    qq = np.array([2], dtype=np.int32)
-    GG = np.array([2], dtype=np.int32)
-
-    # Predictor matrix (N x p)
-    x = np.array([
-        [0.1, 0.2, 0.3],
-        [0.4, 0.5, 0.6],
-        [0.7, 0.8, 0.9],
-        [1.0, 1.1, 1.2],
-        [1.3, 1.4, 1.5],
-        [1.6, 1.7, 1.8],
-        [1.9, 2.0, 2.1],
-        [2.2, 2.3, 2.4],
-        [2.5, 2.6, 2.7],
-        [2.8, 2.9, 3.0]
-    ], dtype=np.float64)
-
-    # Response matrix (N x q)
-    y = np.array([
-        [0.1, 0.2],
-        [0.3, 0.4],
-        [0.5, 0.6],
-        [0.7, 0.8],
-        [0.9, 1.0],
-        [1.1, 1.2],
-        [1.3, 1.4],
-        [1.5, 1.6],
-        [1.7, 1.8],
-        [1.9, 2.0]
-    ], dtype=np.float64)
-
-    # Weights matrix (N x G)
-    z = np.array([
-        [0.1, 0.2],
-        [0.3, 0.4],
-        [0.5, 0.6],
-        [0.7, 0.8],
-        [0.9, 1.0],
-        [1.1, 1.2],
-        [1.3, 1.4],
-        [1.5, 1.6],
-        [1.7, 1.8],
-        [1.9, 2.0]
-    ], dtype=np.float64)
-
-    # Current group index
-    gg = np.array([1], dtype=np.int32)
-
-    # Result array (q * p)
-    gam = np.zeros(qq[0] * pp[0], dtype=np.float64)
-
-    # Call the function
-    Gam1(NN, pp, qq, GG, x, y, z, gg, gam)
-
-    # Output the result
-    print("gam:", gam)
+    result = _T_funhddt_m_step1(fdobj, bigDATA, fdobjy, Wlist, K, t, model, modely, threshold, method, noise_ctrl, com_dim, d_max, d_set)
+    print(result)

@@ -70,35 +70,47 @@ def svd(np.ndarray[np.float64_t, ndim=2] A):
     return s, u, vtt
 
 
-def Gam1(np.ndarray[np.int_t, ndim=1] NN, np.ndarray[np.int_t, ndim=1] pp, np.ndarray[np.int_t, ndim=1] qq, np.ndarray[np.int_t, ndim=1] GG, np.ndarray[np.float64_t, ndim=2] x, np.ndarray[np.float64_t, ndim=2] y, np.ndarray[np.float64_t, ndim=2] z, np.ndarray[np.int_t, ndim=1] gg, np.ndarray[np.float64_t, ndim=1] gam):
-    cdef int NN_val = NN[0]
-    cdef int pp_val = pp[0]
-    cdef int qq_val = qq[0]
-    cdef int GG_val = GG[0]
-    cdef int gg_val = gg[0]
-
+def Gam1(int NN, int pp, int qq, int GG, np.ndarray[np.float64_t, ndim=2] x, np.ndarray[np.float64_t, ndim=2] y, np.ndarray[np.float64_t, ndim=2] z, int gg, np.ndarray[np.float64_t, ndim=2] gam):
+    cdef int NN_val  = <int>NN
+    cdef int pp_val = <int>pp
+    cdef int qq_val = <int>qq
+    cdef int GG_val = <int>GG
+    cdef int gg_val = <int>gg
+    
+    x = np.ascontiguousarray(x)
+    y = np.ascontiguousarray(y)
+    z = np.ascontiguousarray(z)
+    gam = np.ascontiguousarray(gam)
     c_Gam1(&NN_val, &pp_val, &qq_val, &GG_val, <double*>x.data, <double*>y.data, <double*>z.data, &gg_val, <double*>gam.data)
 
-def CovarianceY(np.ndarray[np.int_t, ndim=1] NN, np.ndarray[np.int_t, ndim=1] pp, np.ndarray[np.int_t, ndim=1] qq, np.ndarray[np.int_t, ndim=1] GG, np.ndarray[np.float64_t, ndim=2] x, np.ndarray[np.float64_t, ndim=2] y, np.ndarray[np.float64_t, ndim=2] z, np.ndarray[np.float64_t, ndim=1] gam, np.ndarray[np.int_t, ndim=1] gg, np.ndarray[np.float64_t, ndim=2] Sigma):
-    cdef int NN_val = NN[0]
-    cdef int pp_val = pp[0]
-    cdef int qq_val = qq[0]
-    cdef int GG_val = GG[0]
-    cdef int gg_val = gg[0]
+
+def CovarianceY(int NN, int pp, int qq, int GG, np.ndarray[np.float64_t, ndim=2] x, np.ndarray[np.float64_t, ndim=2] y, np.ndarray[np.float64_t, ndim=2] z, np.ndarray[np.float64_t, ndim=2] gam, int gg, np.ndarray[np.float64_t, ndim=2] Sigma):
+    cdef int NN_val  = <int>NN
+    cdef int pp_val = <int>pp
+    cdef int qq_val = <int>qq
+    cdef int GG_val = <int>GG
+    cdef int gg_val = <int>gg
+
+    x = np.ascontiguousarray(x)
+    y = np.ascontiguousarray(y)
+    z = np.ascontiguousarray(z)
+    gam = np.ascontiguousarray(gam)
+    Sigma = np.ascontiguousarray(Sigma)
 
     c_CovarianceY(&NN_val, &pp_val, &qq_val, &GG_val, <double*>x.data, <double*>y.data, <double*>z.data, <double*>gam.data, &gg_val, <double*>Sigma.data)
 
-def C_mstep(list modely, np.ndarray[np.int_t, ndim=1] NN, np.ndarray[np.int_t, ndim=1] pp, np.ndarray[np.int_t, ndim=1] qq, np.ndarray[np.int_t, ndim=1] GG, np.ndarray[np.float64_t, ndim=1] pi, np.ndarray[np.float64_t, ndim=2] x, np.ndarray[np.float64_t, ndim=2] y, np.ndarray[np.float64_t, ndim=2] t, np.ndarray[np.float64_t, ndim=2] gami, np.ndarray[np.float64_t, ndim=2] covyi, np.ndarray[np.float64_t, ndim=2] icovyi, np.ndarray[np.float64_t, ndim=1] logi, np.ndarray[np.float64_t, ndim=1] mtol, np.ndarray[np.int_t, ndim=1] mmax):
-    cdef int NN_val = NN[0]
-    cdef int pp_val = pp[0]
-    cdef int qq_val = qq[0]
-    cdef int GG_val = GG[0]
-    cdef int mmax_val = mmax[0]
+def C_mstep(str modely, int NN, int pp, int qq, int GG, np.ndarray[np.float64_t, ndim=1] pi, np.ndarray[np.float64_t, ndim=2] x, np.ndarray[np.float64_t, ndim=2] y, np.ndarray[np.float64_t, ndim=2] t, np.ndarray[np.float64_t, ndim=2] gami, np.ndarray[np.float64_t, ndim=2] covyi, np.ndarray[np.float64_t, ndim=2] icovyi, np.ndarray[np.float64_t, ndim=1] logi, float mtol, int mmax):
+    cdef int NN_val  = <int>NN
+    cdef int pp_val = <int>pp
+    cdef int qq_val = <int>qq
+    cdef int GG_val = <int>GG
+    cdef int mmax_val = <int>mmax
 
-    cdef double mtol_val = mtol[0]
+    cdef double mtol_val = <double>mtol
 
-    cdef const char* modely_cstr = modely[0].encode('utf-8')
-    cdef char* modely_ptrs[1]
-    modely_ptrs[0] = <char*>modely_cstr
+    byte_modely = modely.encode('utf-8')
+    cdef char* modely_cstr = byte_modely
 
-    c_C_mstep(modely_ptrs, &NN_val, &pp_val, &qq_val, &GG_val, <double*>pi.data, <double*>x.data, <double*>y.data, <double*>t.data, <double*>gami.data, <double*>covyi.data, <double*>icovyi.data, <double*>logi.data, &mtol_val, &mmax_val)
+    c_C_mstep(&modely_cstr, &NN_val, &pp_val, &qq_val, &GG_val, <double*>pi.data, <double*>x.data, <double*>y.data, <double*>t.data, <double*>gami.data, <double*>covyi.data, <double*>icovyi.data, <double*>logi.data, &mtol_val, &mmax_val)
+
+    return (gami, covyi, icovyi, logi)
