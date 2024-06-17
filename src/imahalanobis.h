@@ -1,11 +1,11 @@
-#include <R_ext/Applic.h>
+//#include <R_ext/Applic.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <R.h>
+//#include <R.h>
 #include <math.h>
-#include <Rmath.h>
-#include <R_ext/Lapack.h>
-#include <R_ext/BLAS.h>
+//#include <Rmath.h>
+//#include <R_ext/Lapack.h>
+//#include <R_ext/BLAS.h>
 #include "TFunHDDC.h"
 
 #ifndef _IMAHALANOBIS_H_

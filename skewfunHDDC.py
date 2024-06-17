@@ -15,7 +15,7 @@ from scipy.optimize import brentq
 from shutil import get_terminal_size
 import numba as nb
 from numba import complex128
-import os
+import math
 #------------------------------------------------------------------------------#
 
 #GLOBALS
@@ -1176,46 +1176,73 @@ def _T_funhddt_init(fdobj, Wlist, K, t, nux, model, threshold, method, noise_ctr
 
 
 # In R, this function doesn't return anything?
-
-def _T_funhddt_e_step1(fdobj, Wlist, par, clas=0, known=None, kno=None):
+from py_mixture import C_rmahalanobis
+def _T_funhddt_e_step1(fdobj, bigDATA, fdobjy, Wlist, N, p, q, par, clas=0, known=None, kno=None):
 
     if(type(fdobj) == skfda.FDataBasis):
        x = fdobj.coefficients
+       x = x.reshape((N, p))
 
     else:
         #Multivariate
         if len(fdobj) > 1:
             x = fdobj[0].coefficients
+            x = x.reshape((N, p))
+
             for i in range(1, len(fdobj)):
-                x = np.c_[x, fdobj[i].coefficients]
+                new_coef = fdobj[i].coefficients
+                new_coef = np.reshape((N, p))
+                x = np.c_[x, new_coef]
         #univariate
         else:
             x = fdobj[0].coefficients
+            x = np.reshape((N, p))
+
+    if (type(fdobjy) == skfda.FDataBasis):
+        y = fdobj.coefficients
+        y = y.reshape((N, q))
+
+    else:
+        if len(fdobj) > 1:
+            y = fdobjy[0].coefficients
+            y = y.reshape((N, q))
+
+            for i in range(1, len(fdobjy)):
+                new_coef = fdobjy[i].coefficients
+                new_coef = new_coef.reshape((N, q))
+                y = np.c_[y, new_coef]
+        else:
+            y = fdobjy[0].coefficients
+            y = y.reshape((N, q))
 
 
-
-    p = x.shape[1]
-    N = x.shape[0]
+    bigx = (bigDATA.T).reshape((N, p+1))
+    
     K = par["K"]
-    nux = par["nux"]
     a = par["a"]
     b = par["b"]
     mu = par["mu"]
     d = par["d"]
     prop = par["prop"]
+    Q = par["Q"]
     Q1 = par["Q1"].copy()
+    icovy = par["icovy"]
+    ldetcov = par["logi"]
+    gam = par["gam"]
+    dety = Wlist["dety"]
+
     b[b<1e-6] = 1e-6
 
     if clas > 0:
         unkno = np.atleast_2d((kno-1)*(-1)).T
 
-    t = np.repeat(0., N*K).reshape(N, K)
-    tw = np.repeat(0., N*K).reshape(N, K)
-    mah_pen = np.repeat(0., N*K).reshape(N,K)
-    K_pen = np.repeat(0., N*K).reshape(N,K)
-    ft = np.repeat(0., N*K).reshape(N,K)
+    t = np.zeros((N, K))
+    tw = np.zeros((N, K)) 
+    mah_pen = np.zeros((N, K))
+    K_pen = np.zeros((K, N))
+    ft = np.zeros((N, K))
 
-    s = np.repeat(0., K)
+    s = np.zeros(K)
 
     for i in range(0,K):
         s[i] = np.sum(np.log(a[i, 0:int(d[i])]))
@@ -1226,15 +1253,32 @@ def _T_funhddt_e_step1(fdobj, Wlist, par, clas=0, known=None, kno=None):
 
         Wki = Wlist["W_m"]
         dety = Wlist["dety"]
+        pqp = p+1
+        delta = np.zeros(N)
+        mah_pen[:, i] = C_rmahalanobis(N, pqp, q, K, i, bigx, y, gam, icovy, delta)
 
-        mah_pen[:, i] = _T_imahalanobis(x, muki, Wki, Qk, aki)
-        tw[:, i] = (nux[i]+p)/(nux[i] + mah_pen[:,i])
+        pi = math.pi
+        print(mah_pen)
+        K_pen[i, :] = 2 * np.log(prop[i]) + (p + q) * np.log(2 * pi) + s[i] - np.log(dety) + (p - d[i]) * np.log(b[i]) + mah_pen[:, i] + mah_pen[:, i] + ldetcov[i]
 
-        K_pen[:,i] = np.log(prop[i]) + loggamma((nux[i] + p)/2) - (1/2) * \
-        (s[i] + (p-d[i])*np.log(b[i]) - np.log(dety)) - ((p/2) * (np.log(np.pi)\
-        + np.log(nux[i])) + loggamma(nux[i]/2) + ((nux[i] + p)/2) * \
-        (np.log(1+mah_pen[:, i] / nux[i])))
+    A = (-1/2)*K_pen.T
+    L = np.sum(np.log(np.sum(np.exp(A - np.max(A, axis=1)[:, np.newaxis]), axis=1)) + np.max(A, axis=1))
+    for i in range(K):
+        adjusted_values = (K_pen[i, :] - K_pen.T) / 2
+        exponentiated_values = np.exp(adjusted_values)
+        row_sums = np.sum(exponentiated_values, axis=1)
 
+    t[:, i] = 1 / row_sums    
+    if (clas > 0):
+        t = unkno * t
+        for i in range(N):
+            if kno[i] == 1:
+                t[i, known[i]] = 1
+    
+    return {'t': t, 'L': L}
+
+
+    """
     ft = np.exp(K_pen)
     ft_den = np.sum(ft, axis=1)
     kcon = - np.apply_along_axis(np.max, 1, K_pen)
@@ -1256,14 +1300,33 @@ def _T_funhddt_e_step1(fdobj, Wlist, par, clas=0, known=None, kno=None):
         for i in range(0,N):
             if (kno[i] == 1):
                 t[i, int(known[i])] = 1
+    """
 
     #Nothing is returned here in R
     # Return this for testing purposes
-    return {'t': t, 'tw': tw, 'L': L}
 
 from py_mixture import C_mstep
-def _T_funhddt_m_step1(fdobj, bigDATA, fdobjy, Wlist, K, t, model, modely, threshold, method, noise_ctrl, com_dim, d_max, d_set):
+def _T_funhddt_m_step1(fdobj, bigDATA, fdobjy, Wlist, N, p, q, K, t, model, modely, threshold, method, noise_ctrl, com_dim, d_max, d_set):
+    """
+    Parameters:
+        fdobj -> functional data object that contains the coefficient matrix for the first variable in functional data. np.ndarray((1, N), dtype=np.float64) -> np.ndarray((N, p), dtype=np.float64)
+        bigDATA -> np.ndarray((p+1, N), dtype=np.float64)
+        fdobjy -> functional data object that contains the coefficient matrix fo the second variable in functional data. np.ndarray((1, N), dtype=np.float64) -> np.ndarray((N, p), dtype=np.float64)
+        Wlist -> a dictionary containing symmetric matrix W, the Cholesky decomposition of W, and the determinant of W. {'W': np.ndarray((p, p), dtype=np.float64), 'W_m': np.ndarray((p, p), dtype=np.float64), 'dety': float}
+        N -> number of curves
+        p -> Number of points per curve of variable 1
+        q -> Number of points per curve of variable 2
+        K -> number of clusters
+        t -> (Maybe a matrix that contains the probability of each curve belonging to one of the K clusters). np.ndarray((N, k), dtype=np.float64)
+        model -> str
+        modely -> str
+        threshold -> float
+        method -> str
+    """
+    
     #'list' in R means len(fdobj) > 1 -> MULTI = True
+    t = np.ascontiguousarray(np.reshape(t, (N, K)))
+
 
     if(type(fdobj) == skfda.FDataBasis):
        MULTI = False
@@ -1284,6 +1347,8 @@ def _T_funhddt_m_step1(fdobj, bigDATA, fdobjy, Wlist, K, t, model, modely, thres
         #univariate
         else:
             x = fdobj[0].coefficients
+            x = np.reshape(x, (N, p))
+            
 
     if(type(fdobjy) == skfda.FDataBasis):
         MULTI = False
@@ -1304,22 +1369,22 @@ def _T_funhddt_m_step1(fdobj, bigDATA, fdobjy, Wlist, K, t, model, modely, thres
             datay = np.array(datay)
         else:
             y = fdobjy[0].coefficients
+            y = np.reshape(y, (N, q))
 
+    #After all matrices, reshape according to document
     bigx = np.transpose(bigDATA)
+    bigx = np.reshape(bigx, (N, p+1))
 
-    N = x.shape[0]
-    p = x.shape[1]
-    q = y.shape[1]
+
     n = np.sum(t, axis=0)
     prop = n/N
-    #matrix with K columns and p rows
-    mu = np.repeat(0., K*p).reshape((K, p))
-    mu1 = np.repeat(0., K*p).reshape((K, p))
-
-    corX = t
+    #matrix with K rows and p columns
+    mu = np.zeros((K, p))
+    x = np.reshape(x, (N, p))
 
     for i in range(0, K):
-        mu[i] = np.sum(np.atleast_2d(t[:, i]) * x.T, axis=1) / n[i]
+
+        mu[i, :] = np.sum(t[:, i].reshape(-1, 1) * x, axis=0) / n[i]
     
 
     #ind = np.apply_along_axis(np.where, 1, t>0)
@@ -1335,16 +1400,16 @@ def _T_funhddt_m_step1(fdobj, bigDATA, fdobjy, Wlist, K, t, model, modely, thres
 
     traceVect = np.zeros(K)
 
-    ev = np.repeat(0., K*p).reshape((K,p))
+    ev = np.zeros((K, p))
 
     Q = {}
     fpcaobj = {}
 
     for i in range(0, K):
         if MULTI:
-            valeurs_propres, cov, U = _T_mypcat_fd1_Multi(data, Wlist['W_m'], np.atleast_2d(t[:,i]), np.atleast_2d(corX[:,i]))
+            valeurs_propres, cov, U = _T_mypcat_fd1_Multi(data, Wlist['W_m'], np.atleast_2d(t[:,i]))
         else:
-            valeurs_propres, cov, U = _T_mypcat_fd1_Uni(x, Wlist['W_m'], np.atleast_2d(t[:,i]), np.atleast_2d(corX[:,i]))
+            valeurs_propres, cov, U = _T_mypcat_fd1_Uni(x, Wlist['W_m'], np.atleast_2d(t[:,i]))
 
         
         traceVect[i] = np.sum(np.diag(valeurs_propres))
@@ -1364,9 +1429,9 @@ def _T_funhddt_m_step1(fdobj, bigDATA, fdobjy, Wlist, K, t, model, modely, thres
     Q1 = Q.copy()
     for i in range(0, K):
         Q[f'{i}'] = Q[f'{i}'][:,0:d[i]]
+        print(Q[f'{i}'])
 
     #Parameter a
-
     ai = np.repeat(np.NaN, K*np.max(d)).reshape((K, np.max(d)))
     if model in ['AKJBKQKDK', 'AKJBQKDK']:
         for i in range(0, K):
@@ -1384,7 +1449,6 @@ def _T_funhddt_m_step1(fdobj, bigDATA, fdobjy, Wlist, K, t, model, modely, thres
         ai = np.repeat(a/eps, K*np.max(d)).reshape((K, np.max(d)))
 
     #Parameter b
-
     bi = np.repeat(np.NaN, K)
     if model in ['AKJBKQKDK', 'AKBKQKDK', 'ABKQKDK']:
         for i in range(K):
@@ -1399,14 +1463,14 @@ def _T_funhddt_m_step1(fdobj, bigDATA, fdobjy, Wlist, K, t, model, modely, thres
             b = b+remainEV*prop[i]
         bi[0:K] = b/(min(N,p)-eps)
 
-    gami = np.zeros((K, q*p), dtype=np.float64)
+    gami = np.zeros((K, q*(p+1)), dtype=np.float64)
     covyi = np.zeros((K, q*q), dtype=np.float64)
     icovyi = np.zeros((K, q*q), dtype=np.float64)
     logi = np.zeros(K, dtype=np.float64)
+    pqp = p+1
+    gami, covyi, icovyi, logi = C_mstep(modely, N, pqp, q, K, prop, bigx, y, t, gami, covyi, icovyi, logi, mtol=1e-12, mmax=1000)
 
-    gami, covyi, icovyi, logi = C_mstep(modely, N, p, q, K, prop, bigx, y, t, gami, covyi, icovyi, logi, mtol=1e-12, mmax=1000)
-
-    result = {'model':model, "K": K, "d":d, "a":ai, "b": bi, "mu":mu, "prop": prop, "ev":ev, "Q":Q, "fpcaobj":fpcaobj, "Q1":Q1, "gami": gami, "covyi": covyi, "icovyi": icovyi, "logi": logi}    
+    result = {'model':model, "K": K, "d":d, "a":ai, "b": bi, "mu":mu, "prop": prop, "ev":ev, "Q":Q, "fpcaobj":fpcaobj, "Q1":Q1, "gam": gami, "covy": covyi, "icovy": icovyi, "logi": logi}    
 
     return result        
 
@@ -1555,27 +1619,25 @@ def _mypcat_fd1_Multi(data, W_m, Ti):
     '''
     return pcafd
 
+@nb.njit
+def _T_mypcat_fd1_Uni(fdobj_coefficients, W_m, Ti):
+    """
+    Parameters: fdobj_coefficients -> np.array(())
+    """
 
-def _T_mypcat_fd1_Uni(data, W_m, Ti, corI):
-    #Univariate case
-    coefmean = np.zeros(data.shape)
-    for i in range(data.shape[1]):
+    Ti = np.atleast_2d(Ti)
 
-        coefmean[:, i] = np.sum(((np.ascontiguousarray(corI.T)@np.atleast_2d(np.repeat(1., data.shape[1]))).T * data.T)[:, i])/np.sum(corI)
+    coefmean = np.sum(np.transpose(Ti) @ (np.ones((1, fdobj_coefficients.shape[1]))) * fdobj_coefficients, axis=0) / np.sum(Ti)
 
-    # Swept values not used anywhere
-    # temp = np.zeros(data.shape)
-    # for i in range(data.shape[1]):
-    #     temp[:, i] = data[:, i] - coefmean[:, i]
-    mean_fd = np.mean(data, axis=1)
-    swept_data = data.copy()
-    swept_data -= mean_fd[:, np.newaxis]
+    swept_fdobj_coefficients = fdobj_coefficients.copy()
+    swept_fdobj_coefficients -= coefmean
 
-    n = swept_data.shape[1]
-    v = np.sqrt(corI)
+    n = swept_fdobj_coefficients.shape[1]
+    v = np.sqrt(Ti)
     M = np.repeat(1., n).reshape((n, 1))@(v)
-    rep = (M * swept_data.T).T
+    rep = (M * swept_fdobj_coefficients.T).T
     mat_cov = (rep.T@rep) / np.sum(Ti)
+    
     cov = ((W_m@ mat_cov)@(W_m.T))
     if not np.all(np.abs(cov-cov.T) < 1.e-12):
         ind = np.nonzero(cov - cov.T > 1.e-12)

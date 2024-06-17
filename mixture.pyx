@@ -23,6 +23,9 @@ cdef extern from "src/mixture_wrapper.h":
 cdef extern from "src/mixture_wrapper.h":
     void c_C_mstep(char** modely, int *NN, int *pp, int* qq, int *GG,double *pi, double *x, double *y, double *t, double *gami ,double *covyi,double *icovyi,double *logi,double *mtol, int *mmax);
 
+cdef extern from "src/mixture_wrapper.h":
+    void c_C_rmahalanobis(int *NN, int *pp,int *qq,int *GG, int *gg, double *x,double *y, double *gam, double *cov, double *delta)
+
 def determinant(np.ndarray[np.float64_t, ndim=2] A):
     cdef int k = A.shape[0]
     cdef int lda = A.shape[1]
@@ -114,3 +117,22 @@ def C_mstep(str modely, int NN, int pp, int qq, int GG, np.ndarray[np.float64_t,
     c_C_mstep(&modely_cstr, &NN_val, &pp_val, &qq_val, &GG_val, <double*>pi.data, <double*>x.data, <double*>y.data, <double*>t.data, <double*>gami.data, <double*>covyi.data, <double*>icovyi.data, <double*>logi.data, &mtol_val, &mmax_val)
 
     return (gami, covyi, icovyi, logi)
+
+def C_rmahalanobis(int NN, int pp, int qq, int GG, int gg, np.ndarray[np.float64_t, ndim=2] x, np.ndarray[np.float64_t, ndim=2] y, np.ndarray[np.float64_t, ndim=2] gam, np.ndarray[np.float64_t, ndim=2] cov, np.ndarray[np.float64_t, ndim=1] delta):
+    # Ensure arrays are C-contiguous
+    cdef np.ndarray[np.float64_t, ndim=2] new_x = np.ascontiguousarray(x)
+    cdef np.ndarray[np.float64_t, ndim=2] new_y = np.ascontiguousarray(y)
+    cdef np.ndarray[np.float64_t, ndim=2] new_gam = np.ascontiguousarray(gam)
+    cdef np.ndarray[np.float64_t, ndim=2] new_cov = np.ascontiguousarray(cov)
+    cdef np.ndarray[np.float64_t, ndim=1] final_delta = np.ascontiguousarray(delta)
+
+    # Convert to 1D arrays
+    cdef double* x_ptr = <double*>new_x.data
+    cdef double* y_ptr = <double*>new_y.data
+    cdef double* gam_ptr = <double*>new_gam.data
+    cdef double* cov_ptr = <double*>new_cov.data
+    cdef double* delta_ptr = <double*>final_delta.data
+
+    c_C_rmahalanobis(&NN, &pp, &qq, &GG, &gg, x_ptr, y_ptr, gam_ptr, cov_ptr, delta_ptr)
+
+    return final_delta

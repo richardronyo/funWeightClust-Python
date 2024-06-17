@@ -53,3 +53,10 @@ void c_C_mstep(char** modely, int *NN, int *pp, int* qq, int *GG,double *pi, dou
     C_mstepType c_mstep = (C_mstepType)GetProcAddress(hModule, "C_mstep");
     c_mstep(modely, NN, pp, qq, GG, pi, x, y, t, gami, covyi, icovyi, logi, mtol, mmax);
 }
+
+void c_C_rmahalanobis(int *NN, int *pp,int *qq,int *GG, int *gg, double *x,double *y, double *gam, double *cov, double *delta)
+{
+    HMODULE hModule = LoadLibrary("funclustweight.dll");
+    C_rmahalanobisType C_rmahalanobis = (C_rmahalanobisType)GetProcAddress(hModule, "C_rmahalanobis");
+    C_rmahalanobis(NN, pp, qq, GG, gg, x, y, gam, cov, delta);
+}
