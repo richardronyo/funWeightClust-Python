@@ -1180,8 +1180,8 @@ from py_mixture import C_rmahalanobis
 def _T_funhddt_e_step1(fdobj, bigDATA, fdobjy, Wlist, N, p, q, par, clas=0, known=None, kno=None):
 
     if(type(fdobj) == skfda.FDataBasis):
-       x = fdobj.coefficients
-       x = x.reshape((N, p))
+       x = np.transpose(fdobj.coefficients)
+       x = x.reshape((p, N))
 
     else:
         #Multivariate
@@ -1195,29 +1195,28 @@ def _T_funhddt_e_step1(fdobj, bigDATA, fdobjy, Wlist, N, p, q, par, clas=0, know
                 x = np.c_[x, new_coef]
         #univariate
         else:
-            x = fdobj[0].coefficients
-            x = np.reshape((N, p))
+            x = np.transpose(fdobj[0].coefficients)
+            x = np.reshape((p, N))
 
     if (type(fdobjy) == skfda.FDataBasis):
-        y = fdobj.coefficients
-        y = y.reshape((N, q))
+        y = np.transpose(fdobjy.coefficients)
+        y = y.reshape((q, N))
 
     else:
         if len(fdobj) > 1:
-            y = fdobjy[0].coefficients
-            y = y.reshape((N, q))
+            y = np.transpose(fdobjy[0].coefficients)
+            y = y.reshape((q, N))
 
             for i in range(1, len(fdobjy)):
-                new_coef = fdobjy[i].coefficients
-                new_coef = new_coef.reshape((N, q))
+                new_coef = np.transpose(fdobjy[i].coefficients)
+                new_coef = new_coef.reshape((q, N))
                 y = np.c_[y, new_coef]
         else:
-            y = fdobjy[0].coefficients
-            y = y.reshape((N, q))
+            y = np.transpose(fdobjy[0].coefficients)
+            y = y.reshape((q, N))
 
 
     bigx = (bigDATA.T).reshape((N, p+1))
-    
     K = par["K"]
     a = par["a"]
     b = par["b"]
@@ -1230,13 +1229,10 @@ def _T_funhddt_e_step1(fdobj, bigDATA, fdobjy, Wlist, N, p, q, par, clas=0, know
     ldetcov = par["logi"]
     gam = par["gam"]
     dety = Wlist["dety"]
-
     b[b<1e-6] = 1e-6
-
     if clas > 0:
         unkno = np.atleast_2d((kno-1)*(-1)).T
 
-    t = np.zeros((N, K))
     tw = np.zeros((N, K)) 
     mah_pen = np.zeros((N, K))
     K_pen = np.zeros((K, N))
@@ -1246,7 +1242,6 @@ def _T_funhddt_e_step1(fdobj, bigDATA, fdobjy, Wlist, N, p, q, par, clas=0, know
 
     for i in range(0,K):
         s[i] = np.sum(np.log(a[i, 0:int(d[i])]))
-
         Qk = Q1[f"{i}"]
         aki = np.sqrt(np.diag(np.concatenate((1/a[i, 0:int(d[i])],np.repeat(1/b[i], p-int(d[i])) ))))
         muki = mu[i]
@@ -1256,19 +1251,19 @@ def _T_funhddt_e_step1(fdobj, bigDATA, fdobjy, Wlist, N, p, q, par, clas=0, know
         pqp = p+1
         delta = np.zeros(N)
         mah_pen[:, i] = C_rmahalanobis(N, pqp, q, K, i, bigx, y, gam, icovy, delta)
-
         pi = math.pi
-        print(mah_pen)
         K_pen[i, :] = 2 * np.log(prop[i]) + (p + q) * np.log(2 * pi) + s[i] - np.log(dety) + (p - d[i]) * np.log(b[i]) + mah_pen[:, i] + mah_pen[:, i] + ldetcov[i]
-
+    
     A = (-1/2)*K_pen.T
     L = np.sum(np.log(np.sum(np.exp(A - np.max(A, axis=1)[:, np.newaxis]), axis=1)) + np.max(A, axis=1))
-    for i in range(K):
-        adjusted_values = (K_pen[i, :] - K_pen.T) / 2
-        exponentiated_values = np.exp(adjusted_values)
-        row_sums = np.sum(exponentiated_values, axis=1)
+    
+    t = np.zeros((N, K))
 
-    t[:, i] = 1 / row_sums    
+    for j in range(0, K):
+        new_K = K_pen.copy().T
+        new_K -= new_K[:, j][:, np.newaxis]
+        t[:, j] = 1 / np.sum((np.exp(new_K/2)), axis=1)
+
     if (clas > 0):
         t = unkno * t
         for i in range(N):
@@ -1306,7 +1301,7 @@ def _T_funhddt_e_step1(fdobj, bigDATA, fdobjy, Wlist, N, p, q, par, clas=0, know
     # Return this for testing purposes
 
 from py_mixture import C_mstep
-def _T_funhddt_m_step1(fdobj, bigDATA, fdobjy, Wlist, N, p, q, K, t, model, modely, threshold, method, noise_ctrl, com_dim, d_max, d_set):
+def _T_funhddt_m_step1(fdobj, bigDATA, fdobjy, Wlist, N, p, q, K, t, model, modely, threshold, method, noise_ctrl, d_set, com_dim=101, d_max=100):
     """
     Parameters:
         fdobj -> functional data object that contains the coefficient matrix for the first variable in functional data. np.ndarray((1, N), dtype=np.float64) -> np.ndarray((N, p), dtype=np.float64)
@@ -1325,7 +1320,7 @@ def _T_funhddt_m_step1(fdobj, bigDATA, fdobjy, Wlist, N, p, q, K, t, model, mode
     """
     
     #'list' in R means len(fdobj) > 1 -> MULTI = True
-    t = np.ascontiguousarray(np.reshape(t, (N, K)))
+    t = (np.reshape(t, (N, K)))
 
 
     if(type(fdobj) == skfda.FDataBasis):
@@ -1377,14 +1372,15 @@ def _T_funhddt_m_step1(fdobj, bigDATA, fdobjy, Wlist, N, p, q, K, t, model, mode
 
 
     n = np.sum(t, axis=0)
+
+    d_max = min(N, p, d_max)
+
     prop = n/N
     #matrix with K rows and p columns
     mu = np.zeros((K, p))
-    x = np.reshape(x, (N, p))
 
     for i in range(0, K):
-
-        mu[i, :] = np.sum(t[:, i].reshape(-1, 1) * x, axis=0) / n[i]
+        mu[i, :] = np.sum(x*((t[:, i]).reshape(-1, 1)), axis=0) / n[i]
     
 
     #ind = np.apply_along_axis(np.where, 1, t>0)
@@ -1418,43 +1414,73 @@ def _T_funhddt_m_step1(fdobj, bigDATA, fdobjy, Wlist, N, p, q, K, t, model, mode
         fpcaobj[f'{i}'] = {'valeurs_propres': valeurs_propres, 'cov': cov, 'U':U}
 
     #Intrinsic dimensions selection
-    
     #TODO try refactoring this for numba
     d = _T_hdclassif_dim_choice(ev, n, method, threshold, False, noise_ctrl, d_set)
     #correct for Python indices
     d+=1
 
     #Setup Qi matrices
-
     Q1 = Q.copy()
     for i in range(0, K):
         Q[f'{i}'] = Q[f'{i}'][:,0:d[i]]
-        print(Q[f'{i}'])
+
+
+    #com_dim statements
+    if model in ["AJBQD", "ABQD"]:
+        d = np.full(K, com_dim)
+    elif model in ["AKJBKQKD", "AKBKQKD", "ABKQKD", "AKJBQKD", "AKBQKD", "ABQKD"]:
+        # Create the logical matrix and the repeated vector
+        logical_matrix = ev > noise_ctrl
+        repeated_vector = np.tile(np.arange(1, ev.shape[1] + 1), (K, 1))
+
+        # Element-wise multiplication
+        scaled_matrix = logical_matrix * repeated_vector
+
+        # Apply np.argmax along rows
+        indices = np.apply_along_axis(np.argmax, 1, scaled_matrix) + 1
+
+        # Find the minimum index and subtract 1
+        dmax = np.min(indices) - 1
+        if com_dim != None and (com_dim > d_max):
+            com_dim = max(d_max, 1)
+        d = np.full(K, com_dim)
+    else:
+        n = np.sum(t, axis=0)
+        d = _T_hdclassif_dim_choice(ev, n, method, threshold, False, noise_ctrl, d_set)
 
     #Parameter a
-    ai = np.repeat(np.NaN, K*np.max(d)).reshape((K, np.max(d)))
-    if model in ['AKJBKQKDK', 'AKJBQKDK']:
-        for i in range(0, K):
-            ai[i, 0:d[i]] = ev[i, 0:d[i]]
-
-    elif model in ['AKBKQKDK', 'AKBQKDK']:
-        for i in range(0, K):
-            ai[i] = np.repeat(np.sum(ev[i, 0:d[i]]/d[i]), np.max(d))
-
+    ai = np.full((K, max(d)), np.nan)
+    if model in ['AKJBKQKDK', 'AKJBQKDK', 'AKJBKQKD', 'AKJBQKD']:
+        for i in range(K):
+            ai[i, :d[i]] = ev[i, :d[i]]
+    elif model in ['AKBKQKDK', 'AKBQKDK', 'AKBKQKD', 'AKBQKD']:
+        for i in range(K):
+            ave_val = np.sum(ev[i, :d[i]]) / d[i]
+            ai[i, :] = np.full(max(d), ave_val)
+    elif model == "AJBQD":
+        for i in range(K):
+            ai[i, :] = ev[:d[0], 0]
+    elif model == "ABQD":
+        ai[:] = np.sum(ev[:d[0], 0]) / d[0]
     else:
         a = 0
-        eps = np.sum(prop*d)
+        eps = np.sum(prop * d)
         for i in range(K):
-            a = a + np.sum(ev[i, 0:d[i]]) * prop[i]
-        ai = np.repeat(a/eps, K*np.max(d)).reshape((K, np.max(d)))
+            a += np.sum(ev[i, :d[i]]) * prop[i]
+        ai = np.full((K, max(d)), a / eps)
 
     #Parameter b
     bi = np.repeat(np.NaN, K)
+    denom = min(N, p)
+
     if model in ['AKJBKQKDK', 'AKBKQKDK', 'ABKQKDK']:
         for i in range(K):
             remainEV = traceVect[i] - np.sum(ev[i, 0:d[i]])
             bi[i] = remainEV/(p-d[i])
-
+    elif model in ["ABQD", "AJBQD"]:
+        remainEV = traceVect - np.sum(ev[:d[0], 0])
+        # Compute bi
+        bi[:K] = remainEV / (denom - d[0])
     else:
         b = 0
         eps = np.sum(prop*d)
@@ -1468,9 +1494,10 @@ def _T_funhddt_m_step1(fdobj, bigDATA, fdobjy, Wlist, N, p, q, K, t, model, mode
     icovyi = np.zeros((K, q*q), dtype=np.float64)
     logi = np.zeros(K, dtype=np.float64)
     pqp = p+1
-    gami, covyi, icovyi, logi = C_mstep(modely, N, pqp, q, K, prop, bigx, y, t, gami, covyi, icovyi, logi, mtol=1e-12, mmax=1000)
 
-    result = {'model':model, "K": K, "d":d, "a":ai, "b": bi, "mu":mu, "prop": prop, "ev":ev, "Q":Q, "fpcaobj":fpcaobj, "Q1":Q1, "gam": gami, "covy": covyi, "icovy": icovyi, "logi": logi}    
+    gami, covyi, icovyi, logi = C_mstep(modely, N, pqp, q, K, prop, bigx, y, t, gami, covyi, icovyi, logi, mtol=1e-10, mmax=10)
+    
+    result = {'model':model, 'modely': modely, "K": K, "d":d, "a":ai, "b": bi, "mu":mu, "prop": prop, "ev":ev, "Q":Q, "fpcaobj":fpcaobj, "Q1":Q1, "gam": gami, "covy": covyi, "icovy": icovyi, "logi": logi, "x": x, "y": y, "ev": ev}    
 
     return result        
 
@@ -1619,7 +1646,6 @@ def _mypcat_fd1_Multi(data, W_m, Ti):
     '''
     return pcafd
 
-@nb.njit
 def _T_mypcat_fd1_Uni(fdobj_coefficients, W_m, Ti):
     """
     Parameters: fdobj_coefficients -> np.array(())
@@ -1628,8 +1654,10 @@ def _T_mypcat_fd1_Uni(fdobj_coefficients, W_m, Ti):
     Ti = np.atleast_2d(Ti)
 
     coefmean = np.sum(np.transpose(Ti) @ (np.ones((1, fdobj_coefficients.shape[1]))) * fdobj_coefficients, axis=0) / np.sum(Ti)
-
+    
     swept_fdobj_coefficients = fdobj_coefficients.copy()
+    swept_fdobj_coefficients = swept_fdobj_coefficients.astype(np.float64)
+
     swept_fdobj_coefficients -= coefmean
 
     n = swept_fdobj_coefficients.shape[1]
@@ -1802,7 +1830,12 @@ def _T_hdclassif_dim_choice(ev, n, method, threshold, graph, noise_ctrl, d_set):
             max_dev = np.apply_along_axis(np.nanmax, 1, dev)
             dev = (dev / np.repeat(max_dev, p-1).reshape(dev.shape)).T
             #Apply's axis should cover this situation. Try axis=1 in *args if doesn't work
-            d = np.apply_along_axis(np.argmax, 1, (dev > threshold).T*(np.arange(0, p-1))*((ev[:,1:] > noise_ctrl)))
+            transpose_compare = (ev[:, 1:] > noise_ctrl).T  # Transpose after excluding the first column
+            range_vector = np.arange(1, p).reshape(-1, 1)  # Reshape to a column vector for proper broadcasting
+
+            result_matrix = (dev > threshold) * range_vector * transpose_compare
+            d = np.apply_along_axis(lambda col: np.argmax(col) + 1, 0, result_matrix)  # Adding 1 to match R's 1-based index
+            old_d = np.apply_along_axis(np.argmax, 1, (dev > threshold).T*(np.arange(0, p-1))*((ev[:,1:] > noise_ctrl)))
         elif (method == "bic"):
 
             d = np.repeat(0, K)
@@ -1872,7 +1905,6 @@ def _T_hdclassif_dim_choice(ev, n, method, threshold, graph, noise_ctrl, d_set):
                 if B[kdim] > Bmax:
                     Bmax = B[kdim]
                     d = kdim
-
     if type(d) != np.ndarray:
         d=np.array([d])
     return d

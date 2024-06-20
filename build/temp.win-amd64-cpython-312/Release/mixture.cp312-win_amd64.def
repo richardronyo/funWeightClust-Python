@@ -1,3 +1,0 @@
-LIBRARY mixture.cp312-win_amd64.pyd
-EXPORTS
-PyInit_mixture

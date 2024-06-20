@@ -7,48 +7,132 @@ from skewfunHDDC import _T_funhddt_m_step1, _T_funhddt_e_step1
 from scipy import linalg as scil
 
 
-"""
-Coefficient Matrix Size: (1 x Number of Splines) -> (NCurves x Number of Splines/NCurves)
-    - N = Number of Curves
-    - p = Number of Splines / NCurves
-"""
-
+from py_mixture import C_mstep
 
 if __name__ == "__main__":
-    datax = sim.genModelFD(ncurves=5, nsplines=35, alpha=[0.9, 0.9, 0.9], eta=[10, 5, 15])
-    datay = sim.genModelFD(ncurves=5, nsplines=35, alpha=[0.9, 0.9, 0.9], eta=[10, 5, 15])
-    fdobj = datax['data'][0]  # Assuming data is a list with fdobj at index 0
-    fdobjy = datay['data'][1]  # Assuming fdobjy is at index 1
-    N = 5
+    datax = sim.genModelFD(ncurves=9, nsplines=7, alpha=[0.9, 0.9, 0.9], eta=[10, 5, 15])
+    datay = sim.genModelFD(ncurves=9, nsplines=8, alpha=[0.9, 0.9, 0.9], eta=[10, 5, 15])
+    fdobj = datax['data']  # Assuming data is a list with fdobj at index 0
+    fdobjy = datay['data']  # Assuming fdobjy is at index 1
+    N = 9
     p = 7
-    q = p
-    fdobj_coefficients = np.reshape(fdobj.coefficients, (N, p))
-    fdobjy_coefficients = np.reshape(fdobjy.coefficients, (N, p))
-    bigDATA = np.random.rand(p+1, N)  # Example bigDATA, adjust dimensions as needed
+    q = 8
+    K = 4
+
+    """
+                  [,1]      [,2]       [,3]      [,4]
+        [1,] 0.1386920 0.4736886 0.09821989 0.2893995
+        [2,] 0.2634635 0.2358751 0.28971799 0.2109434
+        [3,] 0.1864560 0.3335034 0.26260827 0.2174324
+        [4,] 0.4009334 0.1485603 0.07463583 0.3758704
+        [5,] 0.2652814 0.1247790 0.37873804 0.2312015
+        [6,] 0.2634635 0.2358751 0.28971799 0.2109434
+        [7,] 0.1864560 0.3335034 0.26260827 0.2174324
+        [8,] 0.4009334 0.1485603 0.07463583 0.3758704
+        [9,] 0.2652814 0.1247790 0.37873804 0.2312015
+    """
+
+    t = np.array([[0.1386920, 0.4736886, 0.09821989, 0.2893995], 
+                  [0.2634635, 0.2358751, 0.28971799, 0.2109434],
+                  [0.1864560, 0.3335034, 0.26260827, 0.2174324], 
+                  [0.4009334, 0.1485603, 0.07463583, 0.3758704],
+                  [0.2652814, 0.1247790, 0.37873804, 0.2312015],
+                  [0.2634635, 0.2358751, 0.28971799, 0.2109434],
+                  [0.1864560, 0.3335034, 0.26260827, 0.2174324], 
+                  [0.4009334, 0.1485603, 0.07463583, 0.3758704],
+                  [0.2652814, 0.1247790, 0.37873804, 0.2312015]]) 
+    t = t / np.sum(t, axis=1, keepdims=True)
+
+    #bigDATA = np.random.rand(p+1, N)  # Example bigDATA, adjust dimensions as needed
     #W should be symmetric
-    W= np.eye(7)
+    W = np.array([[3.57142857, 2.187510807, 0.461282867,  0.02976911, 0.000000000, 0.000000000, 0.00000000],
+                    [2.18751081, 5.535671059, 3.906319524,  0.86307362, 0.007442277, 0.000000000, 0.00000000],
+                    [0.46128287, 3.906319524, 8.169562887,  5.61510914, 0.590268892, 0.007442277, 0.00000000],
+                    [0.02976911, 0.863073625, 5.615109144, 11.98410777, 5.615109144, 0.863073625, 0.02976911],
+                    [0.00000000, 0.007442277, 0.590268892,  5.61510914, 8.169562887, 3.906319524, 0.46128287],
+                    [0.00000000, 0.000000000, 0.007442277,  0.86307362, 3.906319524, 5.535671059, 2.18751081],
+                    [0.00000000, 0.000000000, 0.000000000,  0.02976911, 0.461282867, 2.187510807, 3.57142857]])
+
     W_m = scil.cholesky(W)
     dety = scil.det(W)
     Wlist = {'W': W, 'W_m': W_m, 'dety':dety}
 
-    K = 4
-    t = np.random.rand(N, K)  # Example t, adjust dimensions as needed
+    """
+  > print(datax$fd$coefs)
+              [,1]       [,2]       [,3]        [,4]        [,5]       [,6]        [,7]        [,8]        [,9]
+  bspl4.1  6.975209 -25.374470   5.106936  5.34364957  1.14364892 -0.9567060   2.2669251  4.96926068   0.4666158
+  bspl4.2 -6.011672  12.161546  15.441212 -0.05835317 -0.08725381  0.5334753  20.1836295 28.15713266  27.6370006
+  bspl4.3 48.896901  51.096291  46.822291 78.91303997 78.94942627 79.9137561  -3.1463321  1.31714253  -0.7425437
+  bspl4.4 98.994185 100.900332 100.184342 -3.93976249  4.05736890 -0.0593720  84.7496828 77.70345732  80.0105587
+  bspl4.5  1.713074  -1.326145   1.013830 41.42632306 38.99251487 39.9617368  -0.6162164  0.73304323   1.0015858
+  bspl4.6  1.078834  -2.937808   2.099749 -3.51879619 -0.35190956  6.9705765  -4.0618515 -0.02847154   4.2831917
+  bspl4.7  1.587533  -2.293114  -3.179188 -2.65363966 -6.43054516 -0.1230321 101.5908642 98.79739757 100.3551914
+    """
+
+    fdobj_coefficients = np.array([[6.975209, -25.374470,   5.106936,  5.34364957,  1.14364892, -0.9567060,   2.2669251,  4.96926068,   0.4666158],
+                                   [-6.011672,  12.161546,  15.441212, -0.05835317, -0.08725381,  0.5334753,  20.1836295, 28.15713266,  27.6370006],
+                                   [48.896901,  51.096291,  46.822291, 78.91303997, 78.94942627, 79.9137561,  -3.1463321,  1.31714253,  -0.7425437],
+                                   [98.994185, 100.900332, 100.184342, -3.93976249,  4.05736890, -0.0593720,  84.7496828, 77.70345732,  80.0105587],
+                                   [1.713074,  -1.326145,   1.013830, 41.42632306, 38.99251487, 39.9617368,  -0.6162164,  0.73304323,   1.0015858],
+                                   [1.078834,  -2.937808,   2.099749, -3.51879619, -0.35190956,  6.9705765,  -4.0618515, -0.02847154,   4.2831917],
+                                   [1.587533,  -2.293114,  -3.179188, -2.65363966, -6.43054516, -0.1230321, 101.5908642, 98.79739757, 100.3551914]])
+    
+    """
+                [,1]        [,2]        [,3]       [,4]      [,5]      [,6]        [,7]       [,8]      [,9]
+  bspl4.1 -27.899484  11.1489636 -46.3886806  2.7903977 -4.688622 -3.202581   0.6795434 -7.8090843  9.664507
+  bspl4.2  -8.334852  -0.8383107 -23.8652221  1.8847113  8.551039 -1.659096  -0.4534810  1.3631019 -4.927672
+  bspl4.3  52.596706  44.9278364  53.7117855 87.1306644 75.821870 78.997904  26.1606131 25.6198399 21.653895
+  bspl4.4 101.330071 102.0813909 101.5781791 -0.2018827 16.466706 -3.268644   1.4967749  0.8489134 -4.602260
+  bspl4.5   2.086294   1.9960065   0.2620556 43.3339804 34.077488 40.406559  78.7167350 83.5458081 80.624288
+  bspl4.6   1.400237  -3.1792068   7.5548883  1.5165433  1.822034  2.855413  -1.0391202  1.7307989  1.377346
+  bspl4.7   1.882254   1.7688292 -15.6485095 -4.6320344  4.064055 -2.399680  -4.1817653  1.2434501  7.722039
+  bspl4.8   1.492811   2.9416251   8.4167240  1.7224368  6.901993 -2.975071 100.0103149 98.6120123 98.837598
+    """
+    
+    fdobjy_coefficients = np.array([[-27.899484,  11.1489636, -46.3886806,  2.7903977, -4.688622, -3.202581,   0.6795434, -7.8090843,  9.664507],
+                                    [-8.334852,  -0.8383107, -23.8652221,  1.8847113,  8.551039, -1.659096,  -0.4534810,  1.3631019, -4.927672],
+                                    [52.596706,  44.9278364,  53.7117855, 87.1306644, 75.821870, 78.997904,  26.1606131, 25.6198399, 21.653895],
+                                    [101.330071, 102.0813909, 101.5781791, -0.2018827, 16.466706, -3.268644,   1.4967749,  0.8489134, -4.602260],
+                                    [2.086294,   1.9960065,   0.2620556, 43.3339804, 34.077488, 40.406559,  78.7167350, 83.5458081, 80.624288],
+                                    [1.400237,  -3.1792068,   7.5548883,  1.5165433,  1.822034,  2.855413,  -1.0391202,  1.7307989,  1.377346],
+                                    [1.882254,   1.7688292, -15.6485095, -4.6320344,  4.064055, -2.399680,  -4.1817653,  1.2434501,  7.722039],
+                                    [1.492811,   2.9416251,   8.4167240,  1.7224368,  6.901993, -2.975071, 100.0103149, 98.6120123, 98.837598]])
+    
+    fdobj.coefficients = fdobj_coefficients.T
+    fdobjy.coefficients = fdobjy_coefficients.T
+
+    DATA = fdobj_coefficients
+    intermediate_bigDATA = W@(DATA)
+
+    ones_row = np.ones((1, N))
+    bigDATA = np.vstack((intermediate_bigDATA, ones_row))
+    
+
     model = 'AKJBKQKDK'  # Example model, adjust as needed
-    modely = 'VII'  # Example modely, adjust as needed
+    modely = 'EII'  # Example modely, adjust as needed
     threshold = 0.5  # Example threshold, adjust as needed
-    method = 'bic'  # Example method, adjust as needed
+    method = 'cattell'  # Example method, adjust as needed
     noise_ctrl = False  # Example noise_ctrl, adjust as needed
-    com_dim = 5  # Example com_dim, adjust as needed
-    d_max = 10  # Example d_max, adjust as needed
-    d_set = np.array([1, 2, 3])  # Example d_set, adjust as needed
+    com_dim = 4 # Example com_dim, adjust as needed
+    d_max = 100  # Example d_max, adjust as needed
+    d_set = np.array([2, 2, 2, 2])  # Example d_set, adjust as needed
 
     corX = t
-    ti = np.atleast_2d(t[:, 0])
-    
-    coefmean = np.sum(np.transpose(ti) @ (np.ones((1, fdobj_coefficients.shape[1]))) * fdobj_coefficients, axis=0) / np.sum(ti)
     print("-----------------------------------------------------------------------------------------------------")
-    ans = _T_funhddt_m_step1(fdobj, bigDATA, fdobjy, Wlist, N, p, q, 4, t, model, modely, threshold, method, noise_ctrl, com_dim, d_max, d_set)
-    print(list(ans.keys()))
+    par = _T_funhddt_m_step1(fdobj, bigDATA, fdobjy, Wlist, N, p, q, K, t, model, modely, threshold, method, noise_ctrl, d_set, com_dim, d_max)
+    print("model: ", par['model'])
+    print("modely: ", par['modely'])
+    print("ev:\t", par['ev'].shape, "\n", par['ev'])
+    print("a:\n", par['a'])
+    print("b:\n", par['b'])
+    print("d:\n", par['d'])
+    print("mu:\n", par['mu'])
+    print("prop:\n", par['prop'])
+    print("gami:\t", par['gam'].shape, "\n", par['gam'])
+    print("covy\t", par['covy'].shape, "\n:", par['covy'])
+    print("icovyi:\t", par['icovy'].shape, "\n", par['icovy'])
+    print("logi:\n", par['logi'])
     print("-----------------------------------------------------------------------------------------------------")
-    e_step = _T_funhddt_e_step1(fdobj, bigDATA, fdobjy, Wlist, N, p, q, ans, clas=0, known=None, kno=None)
-    print(e_step)
+    e = _T_funhddt_e_step1(fdobj, bigDATA, fdobjy, Wlist, N, p, q, par)
+    print("t:\t", e['t'].shape, "\n", e['t'])
+    print("L:\n", e['L'])

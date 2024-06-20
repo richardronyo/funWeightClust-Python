@@ -8,6 +8,8 @@ extensions = [
         "py_mixture",
         sources=["mixture.pyx", "src/mixture_wrapper.c"],
         include_dirs=[np.get_include()],
+        libraries=["src/funclustweight"],
+        library_dirs=["src"]
     )
 ]
 

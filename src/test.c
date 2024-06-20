@@ -4,35 +4,23 @@
 #include "functions.h"
 #include "mixture_wrapper.h"
 
-
 int main() {
-    int N = 3; // Example value for N
-    int p = 2; // Example value for p
-    int q = 2; // Example value for q
-    int G = 1; // Example value for G
-    int g = 0; // Example value for g
+    int N = 3;
+    int p = 2;
+    int q = 2;
+    int G = 1;
+    int g = 0;
 
-    // Example input arrays
-    double x[] = {1.0, 2.0,
-                  3.0, 4.0,
-                  5.0, 6.0}; // N x p matrix
-    double y[] = {2.0, 1.0,
-                  4.0, 3.0,
-                  6.0, 5.0}; // N x q matrix
-    double gam[] = {1.0, 0.0,
-                    0.0, 1.0}; // q x p matrix
-    double cov[] = {1.0, 0.0,
-                    0.0, 1.0}; // q x q matrix
+    double x[6] = {1, 2, 3, 4, 5, 6}; // 3x2 matrix
+    double y[6] = {2, 4, 6, 8, 10, 12}; // 3x2 matrix
+    double gam[4] = {1, 0, 0, 1}; // 2x2 identity matrix
+    double cov[4] = {1, 0, 0, 1}; // 2x2 identity matrix
+    double delta[3] = {0, 0, 0}; // Result array
 
-    // Result array
-    double delta[N];
-
-    // Call the function
     c_C_rmahalanobis(&N, &p, &q, &G, &g, x, y, gam, cov, delta);
 
-    // Print the results
-    printf("Result:\n");
-    for(int i = 0; i < N; i++) {
+    printf("Delta values:\n");
+    for (int i = 0; i < N; i++) {
         printf("%f\n", delta[i]);
     }
 
