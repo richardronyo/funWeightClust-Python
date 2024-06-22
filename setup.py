@@ -10,6 +10,13 @@ extensions = [
         include_dirs=[np.get_include()],
         libraries=["src/funclustweight"],
         library_dirs=["src"]
+    ),
+    Extension(
+        "imahalanobis",
+        sources=["imahalanobis.pyx", "src/imahalanobis_wrapper.c"],
+        include_dirs=[np.get_include()],
+        libraries=["src/TFunHDDC"],
+        library_dirs=["src"]
     )
 ]
 

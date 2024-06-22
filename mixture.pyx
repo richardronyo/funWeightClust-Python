@@ -37,13 +37,13 @@ def C_mstep(str modely, int NN, int pp, int qq, int GG, np.ndarray[np.float64_t,
 
     return (final_gami, final_covyi, final_icovyi, logi)
 
-def C_rmahalanobis(int NN, int pp, int qq, int GG, int gg, np.ndarray[np.float64_t, ndim=2] x, np.ndarray[np.float64_t, ndim=2] y, np.ndarray[np.float64_t, ndim=3] gam, np.ndarray[np.float64_t, ndim=3] cov, np.ndarray[np.float64_t, ndim=1] delta):
+def C_rmahalanobis(int NN, int pp, int qq, int GG, int gg, np.ndarray[np.float64_t, ndim=2] x, np.ndarray[np.float64_t, ndim=2] y, np.ndarray[np.float64_t, ndim=2] gam, np.ndarray[np.float64_t, ndim=2] cov, np.ndarray[np.float64_t, ndim=1] delta):
     # Ensure arrays are C-contiguous
-    cdef np.ndarray[np.float64_t, ndim=2] new_x = np.ascontiguousarray(x)
-    cdef np.ndarray[np.float64_t, ndim=2] new_y = np.ascontiguousarray(y)
-    cdef np.ndarray[np.float64_t, ndim=3] new_gam = np.ascontiguousarray(gam)
-    cdef np.ndarray[np.float64_t, ndim=3] new_cov = np.ascontiguousarray(cov)
-    cdef np.ndarray[np.float64_t, ndim=1] final_delta = np.ascontiguousarray(delta)
+    cdef np.ndarray[np.float64_t, ndim=2] new_x = np.ascontiguousarray(np.transpose(x))
+    cdef np.ndarray[np.float64_t, ndim=2] new_y = np.ascontiguousarray(np.transpose(y))
+    cdef np.ndarray[np.float64_t, ndim=2] new_gam = np.ascontiguousarray(np.transpose(gam))
+    cdef np.ndarray[np.float64_t, ndim=2] new_cov = np.ascontiguousarray(np.transpose(cov))
+    cdef np.ndarray[np.float64_t, ndim=1] final_delta = np.ascontiguousarray(np.transpose(delta))
 
     # Convert to 1D arrays
     cdef double* x_ptr = <double*>new_x.data
@@ -51,6 +51,5 @@ def C_rmahalanobis(int NN, int pp, int qq, int GG, int gg, np.ndarray[np.float64
     cdef double* gam_ptr = <double*>new_gam.data
     cdef double* cov_ptr = <double*>new_cov.data
     cdef double* delta_ptr = <double*>final_delta.data
-
     c_C_rmahalanobis(&NN, &pp, &qq, &GG, &gg, x_ptr, y_ptr, gam_ptr, cov_ptr, delta_ptr)
     return final_delta

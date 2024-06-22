@@ -42,7 +42,7 @@ void c_C_rmahalanobis(int *NN, int *pp,int *qq,int *GG, int *gg, double *x,doubl
         printf("Failed to load DLL\n");
         return;
     }
-
+    
     C_rmahalanobisType C_rmahalanobis = (C_rmahalanobisType)GetProcAddress(hModule, "C_rmahalanobis");
     if (!C_rmahalanobis) {
         fprintf(stderr, "Failed to get C_mstep function address\n");

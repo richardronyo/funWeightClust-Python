@@ -1177,46 +1177,56 @@ def _T_funhddt_init(fdobj, Wlist, K, t, nux, model, threshold, method, noise_ctr
 
 # In R, this function doesn't return anything?
 from py_mixture import C_rmahalanobis
+from imahalanobis import C_imahalanobis
 def _T_funhddt_e_step1(fdobj, bigDATA, fdobjy, Wlist, N, p, q, par, clas=0, known=None, kno=None):
 
+
+
     if(type(fdobj) == skfda.FDataBasis):
-       x = np.transpose(fdobj.coefficients)
-       x = x.reshape((p, N))
+       MULTI = False
+       x = fdobj.coefficients
 
     else:
         #Multivariate
         if len(fdobj) > 1:
+            MULTI = True
+            data = []
             x = fdobj[0].coefficients
-            x = x.reshape((N, p))
-
+            data.append(fdobj[0].coefficients)
             for i in range(1, len(fdobj)):
-                new_coef = fdobj[i].coefficients
-                new_coef = np.reshape((N, p))
-                x = np.c_[x, new_coef]
+                x = np.c_[x, fdobj[i].coefficients]
+                data.append(fdobj[i].coefficients)
+
+            data = np.array(data)
         #univariate
         else:
-            x = np.transpose(fdobj[0].coefficients)
-            x = np.reshape((p, N))
+            x = fdobj[0].coefficients
+            x = np.reshape(x, (N, p))
+            
 
-    if (type(fdobjy) == skfda.FDataBasis):
-        y = np.transpose(fdobjy.coefficients)
-        y = y.reshape((q, N))
+    if(type(fdobjy) == skfda.FDataBasis):
+        MULTI = False
+        y = fdobjy.coefficients
 
     else:
-        if len(fdobj) > 1:
-            y = np.transpose(fdobjy[0].coefficients)
-            y = y.reshape((q, N))
+
+        if len(fdobjy) > 1:
+            MULTI = True
+            datay = []
+            y = fdobjy[0].coefficients
+            datay.append(fdobjy[0].coefficients)
 
             for i in range(1, len(fdobjy)):
-                new_coef = np.transpose(fdobjy[i].coefficients)
-                new_coef = new_coef.reshape((q, N))
-                y = np.c_[y, new_coef]
+                y = np.c_[y, fdobj[i].coefficients]
+                data.append(fdobjy[i].coefficients)
+            
+            datay = np.array(datay)
         else:
-            y = np.transpose(fdobjy[0].coefficients)
-            y = y.reshape((q, N))
+            y = fdobjy[0].coefficients
+            y = np.reshape(y, (N, q))
 
-
-    bigx = (bigDATA.T).reshape((N, p+1))
+    pqp = p+1
+    bigx = (bigDATA.T)
     K = par["K"]
     a = par["a"]
     b = par["b"]
@@ -1234,8 +1244,9 @@ def _T_funhddt_e_step1(fdobj, bigDATA, fdobjy, Wlist, N, p, q, par, clas=0, know
         unkno = np.atleast_2d((kno-1)*(-1)).T
 
     tw = np.zeros((N, K)) 
-    mah_pen = np.zeros((N, K))
-    K_pen = np.zeros((K, N))
+    mah_pen = np.zeros((K, N))
+    mah_pen1 = np.zeros((K, N))
+    K_pen = np.zeros((N, K))
     ft = np.zeros((N, K))
 
     s = np.zeros(K)
@@ -1245,23 +1256,42 @@ def _T_funhddt_e_step1(fdobj, bigDATA, fdobjy, Wlist, N, p, q, par, clas=0, know
         Qk = Q1[f"{i}"]
         aki = np.sqrt(np.diag(np.concatenate((1/a[i, 0:int(d[i])],np.repeat(1/b[i], p-int(d[i])) ))))
         muki = mu[i]
-
         Wki = Wlist["W_m"]
-        dety = Wlist["dety"]
-        pqp = p+1
-        delta = np.zeros(N)
-        mah_pen[:, i] = C_rmahalanobis(N, pqp, q, K, i, bigx, y, gam, icovy, delta)
-        pi = math.pi
-        K_pen[i, :] = 2 * np.log(prop[i]) + (p + q) * np.log(2 * pi) + s[i] - np.log(dety) + (p - d[i]) * np.log(b[i]) + mah_pen[:, i] + mah_pen[:, i] + ldetcov[i]
-    
-    A = (-1/2)*K_pen.T
-    L = np.sum(np.log(np.sum(np.exp(A - np.max(A, axis=1)[:, np.newaxis]), axis=1)) + np.max(A, axis=1))
-    
-    t = np.zeros((N, K))
 
+        pp = x.shape[1]
+        pN = x.shape[0]
+        pdi = aki.shape[1]
+        """
+        print("x shape: ", x.shape)
+        print("muki shape: ", muki.shape)
+        print("Wki shape: ", Wki.shape)
+        print("Qk shape: ", Qk.shape)
+        print("aki shape", aki.shape)
+
+        print("pp: ", pp)
+        print("pN: ", pN)
+        print("pdi: ", pdi)
+        """
+        new_x = x.copy()
+        ans = C_imahalanobis(new_x, muki, Wki, Qk, aki, pp, pN, pdi, np.zeros(N))
+        mah_pen[i, :] = ans
+
+        dety = Wlist["dety"]
+        delta = np.zeros(N)
+        mah_pen1[i, :] = C_rmahalanobis(N, pqp, q, K, i, bigx, y, gam[i, :, :], icovy[i, :, :], delta)
+        pi = math.pi
+        K_pen[:, i] = (-2 * np.log(prop[i])) + (p + q) * np.log(2 * pi) + s[i] - np.log(dety) + (p - d[i]) * np.log(b[i]) + mah_pen[i, :]
+        
+    
+
+    
+    A = (-1/2)*K_pen
+    L = np.sum(np.log(np.sum(np.exp(A - np.max(A, axis=1).reshape(-1, 1)), axis=1)) + np.max(A, axis=1))
+    t = np.zeros((N, K))
     for j in range(0, K):
-        new_K = K_pen.copy().T
+        new_K = K_pen.copy()
         new_K -= new_K[:, j][:, np.newaxis]
+        new_K *= -1
         t[:, j] = 1 / np.sum((np.exp(new_K/2)), axis=1)
 
     if (clas > 0):
@@ -1270,7 +1300,7 @@ def _T_funhddt_e_step1(fdobj, bigDATA, fdobjy, Wlist, N, p, q, par, clas=0, know
             if kno[i] == 1:
                 t[i, known[i]] = 1
     
-    return {'t': t, 'L': L}
+    return {'t': t, 'L': L, 'mah_pen': mah_pen.T, 'mah_pen1': mah_pen1.T, 'K_pen':K_pen}
 
 
     """
@@ -1409,7 +1439,7 @@ def _T_funhddt_m_step1(fdobj, bigDATA, fdobjy, Wlist, N, p, q, K, t, model, mode
 
         
         traceVect[i] = np.sum(np.diag(valeurs_propres))
-        ev[i] = valeurs_propres
+        ev[i] = np.sort(valeurs_propres)[::-1]
         Q[f'{i}'] = U
         fpcaobj[f'{i}'] = {'valeurs_propres': valeurs_propres, 'cov': cov, 'U':U}
 
@@ -2153,12 +2183,16 @@ def _T_imahalanobis(x, muk, wk, Qk, aki):
     return res
 """
 
+
+
 from scipy.linalg.blas import dgemm
 def _T_imahalanobis_lapack(x, muk, wk, Qk, aki):
     X = x - muk
     Qi = dgemm(alpha=1, a = wk, b = Qk)
     XQi = dgemm(alpha=1, a = X, b = Qi)
-    proj = dgemm(alpha=1, a = XQi, b = aki)
+    print(XQi.shape)
+    print(aki.shape)
+    proj = dgemm(alpha=1, a = XQi.T, b = aki)
     res = np.sum(proj **2, axis=1)
     
     return res

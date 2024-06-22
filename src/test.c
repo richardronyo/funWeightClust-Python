@@ -1,28 +1,34 @@
 #include <windows.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include "functions.h"
-#include "mixture_wrapper.h"
+#include "imahalanobis_wrapper.h"
 
 int main() {
-    int N = 3;
-    int p = 2;
-    int q = 2;
-    int G = 1;
-    int g = 0;
+    int p = 3, N = 4, di = 2;
+    double x[12] = {1.0, 2.0, 3.0,
+                    4.0, 5.0, 6.0,
+                    7.0, 8.0, 9.0,
+                    10.0, 11.0, 12.0};
+    double muk[3] = {1.0, 2.0, 3.0};
+    double wk[6] = {1.0, 0.0,
+                    0.0, 1.0,
+                    1.0, 1.0};
+    double Qk[6] = {1.0, 0.5,
+                    0.5, 1.0,
+                    0.5, 0.5};
+    double aki[4] = {1.0, 0.0,
+                     0.0, 1.0};
+    double res[4];
 
-    double x[6] = {1, 2, 3, 4, 5, 6}; // 3x2 matrix
-    double y[6] = {2, 4, 6, 8, 10, 12}; // 3x2 matrix
-    double gam[4] = {1, 0, 0, 1}; // 2x2 identity matrix
-    double cov[4] = {1, 0, 0, 1}; // 2x2 identity matrix
-    double delta[3] = {0, 0, 0}; // Result array
+    c_C_imahalanobis(x, muk, wk, Qk, aki, &p, &N, &di, res);
 
-    c_C_rmahalanobis(&N, &p, &q, &G, &g, x, y, gam, cov, delta);
-
-    printf("Delta values:\n");
-    for (int i = 0; i < N; i++) {
-        printf("%f\n", delta[i]);
+    for (int i = 0; i < 4; i++)
+    {
+        printf("%f\t", res[i]);
     }
+
+    printf("\n");
+    
 
     return 0;
 }
