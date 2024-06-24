@@ -6,7 +6,7 @@ cdef extern from "src/mixture_wrapper.h":
     void c_C_mstep(char** modely, int *NN, int *pp, int* qq, int *GG, double *pi, double *x, double *y, double *t, double *gami, double *covyi, double *icovyi, double *logi, double *mtol, int *mmax)
     void c_C_rmahalanobis(int *NN, int *pp,int *qq,int *GG, int *gg, double *x,double *y, double *gam, double *cov, double *delta)
 
-def C_mstep(str modely, int NN, int pp, int qq, int GG, np.ndarray[np.float64_t, ndim=1] pi, np.ndarray[np.float64_t, ndim=2] x, np.ndarray[np.float64_t, ndim=2] y, np.ndarray[np.float64_t, ndim=2] t, np.ndarray[np.float64_t, ndim=2] gami, np.ndarray[np.float64_t, ndim=2] covyi, np.ndarray[np.float64_t, ndim=2] icovyi, np.ndarray[np.float64_t, ndim=1] logi, float mtol, int mmax):
+def C_mstep(str modely, int NN, int pp, int qq, int GG, pi, x, y, t, gami, covyi, icovyi, logi, float mtol, int mmax):
     cdef int NN_val = NN
     cdef int pp_val = pp
     cdef int qq_val = qq
@@ -17,6 +17,8 @@ def C_mstep(str modely, int NN, int pp, int qq, int GG, np.ndarray[np.float64_t,
 
     byte_modely = modely.encode('utf-8')
     cdef char* modely_cstr = byte_modely
+    t = np.ascontiguousarray(t, dtype=np.float64)
+
 
     cdef np.ndarray[np.float64_t, ndim=1] new_pi = np.ascontiguousarray(np.transpose(pi))
     cdef np.ndarray[np.float64_t, ndim=2] new_x = np.ascontiguousarray(np.transpose(x))

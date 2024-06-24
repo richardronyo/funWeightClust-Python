@@ -240,6 +240,8 @@ def funHDDC(data, K=np.arange(1,11), model='AKJBKQKDK', known=None, threshold=0.
             modelNo = mkt[1]
             mkt = mkt[0]
         model = mkt['model']
+        modely = mkt['modely']
+        #Include modely
         K = int(mkt['K'])
         threshold = float(mkt['threshold'])
 
@@ -249,6 +251,7 @@ def funHDDC(data, K=np.arange(1,11), model='AKJBKQKDK', known=None, threshold=0.
 
         #TODO may need to modify this from R
         try:
+            #change parameters as in R
             res = _funhddc_main1(fdobj=fdobj, wlist=Wlist, K=K, itermax=itermax, model=model, threshold=threshold,
                                     method=d_select, eps=eps, init=init, init_vector=init_vector,
                                     mini_nb=mini_nb, min_individuals=min_individuals, noise_ctrl=noise_ctrl,
@@ -320,7 +323,7 @@ def funHDDC(data, K=np.arange(1,11), model='AKJBKQKDK', known=None, threshold=0.
 
         #TODO do we need to add allcriteria here?
 
-        return {'model': model, 'K': K, 'threshold':threshold, 'LL':loglik_all, 'BIC': None, 'comment': comment_all}
+        return {'model': model, 'K': K, 'threshold':threshold, 'LL':loglik_all, 'BIC': None, 'comment': comment_all, 'modely': modely}
 
     n = len(mkt_expand)
     uniqueModels = mkt_expand[:int(n/nb_rep)]
@@ -331,6 +334,7 @@ def funHDDC(data, K=np.arange(1,11), model='AKJBKQKDK', known=None, threshold=0.
     #modelKeep = [(np.argmax(loglik_all[np.nonzero(uniqueModels[x] == mkt_expand)[0]])*len(uniqueModels)) + x for x in range(len(uniqueModels))]
     
     modelKeep = np.arange(0, len(res))
+    #modelKeepy
 
     # modelCheck = [isinstance(result, TFunHDDC) for result in modelKeep]
     # if len(modelCheck) == 0:
@@ -365,6 +369,7 @@ def funHDDC(data, K=np.arange(1,11), model='AKJBKQKDK', known=None, threshold=0.
             print("funHDDC: \n")
 
         printModel = np.array([x.rjust(max([len(a) for a in model])) for x in model])
+        #printModely
         printK = np.array([str(x).rjust(max([len(str(a)) for a in K])) for x in K])
         printTresh = np.array([str(x).rjust(max([len(str(a)) for a in threshold])) for x in threshold])
         resout = np.c_[printModel[resOrdering], printK[resOrdering], printTresh[resOrdering], _addCommas((np.array(bestCritRes.complexity_all)[resOrdering])[:,1].astype(float)), _addCommas(np.array(CRIT)[resOrdering])]
@@ -397,6 +402,11 @@ def funHDDC(data, K=np.arange(1,11), model='AKJBKQKDK', known=None, threshold=0.
 #TODO add default values
 #*args argument replaces ... in R code
 #fdobj should either be a FDataBasis object or a dictionary of FDataBasis objects
+"""
+Add fdobjy
+Look at tfunHDDC vs funHDDC
+model and modely
+"""
 def _funhddc_main1(fdobj, wlist, K, model,
                      itermax, threshold, method, eps, init, init_vector,
                      mini_nb, min_individuals, noise_ctrl, com_dim,
@@ -471,7 +481,7 @@ def _funhddc_main1(fdobj, wlist, K, model,
 
     if K > 1:
         t = np.zeros((n, K))
-        tw = np.zeros((n, K))
+        #tw = np.zeros((n, K))
 
         match init:
             case "vector":
@@ -547,10 +557,11 @@ def _funhddc_main1(fdobj, wlist, K, model,
                     t[np.nonzero(cluster == i)[0], i] = 1.
 
             #skip trimmed kmeans
-
+            #Update the parameters in function call
             case "mini-em":
                 prms_best = 1
                 for i in range(0, mini_nb[0]):
+                    #CALL NEW PARAMETERS IN FUNCTION RECALL!!
                     prms = _funhddc_main1(fdobj=fdobj, wlist=wlist, K=K, known=known, model=model,
                                             threshold=threshold, method=method, eps=eps,
                                             itermax=mini_nb[1], init_vector=0, init="random",
@@ -680,11 +691,11 @@ def _funhddc_main1(fdobj, wlist, K, model,
             #if (any(npsum(np.where(t>1/K,t,0), axis=0) < min_individuals))
             if(np.any(np.sum(t>(1/K), axis=0) < min_individuals)):
                 return "pop<min_individuals"
-        #m_step1 called here
+        #m_step1 called here (Update parameters)
         m =_funhddt_m_step1(fdobj, wlist, K, t, model, threshold, method, noise_ctrl, com_dim, d_max, d_set)
         
 
-        #e_step1 called here
+        #e_step1 called here (Update parameters)
         to = _funhddt_e_step1(fdobj, wlist, m, clas, known, kno)
 
         
@@ -748,6 +759,7 @@ def _funhddc_main1(fdobj, wlist, K, model,
 
     converged = test < eps
 
+    #MAKE SURE THIS OUTPUT MATCHES WITH R CODE, MISSING GAM, COVY, and ICOVY!
     params = {'wlist': wlist, 'model':model, 'K':K, 'd':d,
                 'a':a, 'b':b, 'mu':mu, 'prop':prop, 'ev': m['ev'],
                 'Q': m['Q'], 'fpca': m['fpcaobj'], 
@@ -759,7 +771,7 @@ def _funhddc_main1(fdobj, wlist, K, model,
     bic_icl = _hdclassift_bic(params, p)
     params['BIC'] = bic_icl["bic"]
     params["ICL"] = bic_icl['icl']
-
+    #Add new parameters here (COVY, GAM, ICOVY)
     tfunobj = FunHDDC(Wlist=params['wlist'], model=params['model'], K=params['K'], d=params['d'], 
                         a=params['a'], b=params['b'], mu=params['mu'], prop=params['prop'],
                         ev=params['ev'], Q=params['Q'], fpca=params['fpca'],
@@ -1201,6 +1213,7 @@ def _hdclassif_dim_choice(ev, n, method, threshold, graph, noise_ctrl, d_set):
         d=np.array([d])
     return d
 
+#Compare with R code and update
 def _hdclassift_bic(par, p):
     #mux and mu not used, should we get rid of them?
     model = par['model']
@@ -1270,6 +1283,7 @@ def _hdclassift_bic(par, p):
 
     return {'bic': bic, 'icl': icl}
 
+#Compare with R code and update
 def _hdc_getComplexityt(par, p):
     model = par['model']
     K = par['K']
@@ -1308,6 +1322,10 @@ def _hdc_getComplexityt(par, p):
         m = ro + tot + 2
 
     return m
+
+"""
+ModelY function. Just change ModelNames
+"""
 
 def _hdc_getTheModel(model, all2models = False):
     model_in = model

@@ -702,7 +702,7 @@ def tfunHDDC(data, K=np.arange(1,11), model='AKJBKQKDK', known=None, dfstart=50.
     return bestCritRes
 
 #TODO add default values
-def _T_funhddc_main1(fdobj, wlist, K, dfstart, dfupdate, dfconstr, model,
+def _T_funhddc_main1(fdobj, fdobjy, wlist, K, dfstart, dfupdate, dfconstr, model, modely,
                      itermax, threshold, method, eps, init, init_vector,
                      mini_nb, min_individuals, noise_ctrl, com_dim,
                      kmeans_control, d_max, d_set, known):
@@ -710,29 +710,68 @@ def _T_funhddc_main1(fdobj, wlist, K, dfstart, dfupdate, dfconstr, model,
     np.seterr(all='ignore')
     modelNames = ["AKJBKQKDK", "AKBKQKDK", "ABKQKDK", "AKJBQKDK", "AKBQKDK", 
                   "ABQKDK"]
-    #Univariate
-    if(type(fdobj) == skfda.FDataBasis):
-        data = fdobj.coefficients
+    modelNamesy = ["VVV"]
+
 
     
+    if(type(fdobj) == skfda.FDataBasis):
+       MULTI = False
+       x = fdobj.coefficients
+
     else:
         #Multivariate
         if len(fdobj) > 1:
             MULTI = True
-            data = fdobj[0].coefficients
+            data = []
+            x = fdobj[0].coefficients
+            data.append(fdobj[0].coefficients)
             for i in range(1, len(fdobj)):
-                data = np.c_[data, fdobj[i].coefficients]
-        #univariate in nested list
-        else:
-            data = fdobj[0].coefficients
+                x = np.c_[x, fdobj[i].coefficients]
+                data.append(fdobj[i].coefficients)
 
-    n, p = data.shape
+            data = np.array(data)
+        #univariate
+        else:
+            x = fdobj[0].coefficients
+            
+
+    if(type(fdobjy) == skfda.FDataBasis):
+        MULTI = False
+        y = fdobjy.coefficients
+
+    else:
+
+        if len(fdobjy) > 1:
+            MULTI = True
+            datay = []
+            y = fdobjy[0].coefficients
+            datay.append(fdobjy[0].coefficients)
+
+            for i in range(1, len(fdobjy)):
+                y = np.c_[y, fdobj[i].coefficients]
+                data.append(fdobjy[i].coefficients)
+            
+            datay = np.array(datay)
+        else:
+            y = fdobjy[0].coefficients
+
+    
+    N = x.shape[0]
+    p = x.shape[1]
+    q = y.shape[0]
+
+    W = wlist['W']
+    ones_row = np.ones((1, N))
+    DATA = fdobj.coefficients.T
+    intermediate_bigDATA = W@(DATA)
+    bigDATA = np.vstack((intermediate_bigDATA, ones_row))
+
     com_ev = None
 
-    d_max = min(n,p,d_max)
+    d_max = min(N,p,d_max)
 
     #classification
-
+    n = N
     if(known is None):
         clas = 0
         kno = None
@@ -740,7 +779,7 @@ def _T_funhddc_main1(fdobj, wlist, K, dfstart, dfupdate, dfconstr, model,
 
     else:
 
-        if len(known) != n:
+        if len(known) != N:
             raise ValueError("Known classifications vector not the same length as the number of samples (see help file)")
         
         #TODO find out how to handle missing values. For now, using numpy NaN
@@ -856,8 +895,8 @@ def _T_funhddc_main1(fdobj, wlist, K, dfstart, dfupdate, dfconstr, model,
             case "mini-em":
                 prms_best = 1
                 for i in range(0, mini_nb[0]):
-                    prms = _T_funhddc_main1(fdobj=fdobj, wlist=wlist, K=K, known=known, dfstart=dfstart,
-                                            dfupdate=dfupdate, dfconstr=dfconstr, model=model,
+                    prms = _T_funhddc_main1(fdobj=fdobj, fdobjy=fdobjy, wlist=wlist, K=K, known=known, dfstart=dfstart,
+                                            dfupdate=dfupdate, dfconstr=dfconstr, model=model, modely=modely,
                                             threshold=threshold, method=method, eps=eps,
                                             itermax=mini_nb[1], init_vector=0, init="random",
                                             mini_nb=mini_nb, min_individuals=min_individuals,
@@ -947,8 +986,6 @@ def _T_funhddc_main1(fdobj, wlist, K, dfstart, dfupdate, dfconstr, model,
 
                     for i in range(0, K):
                         t[np.nonzero(cluster == i)[0], i] = 1.
-
-
     else:
         t = np.ones(shape = (n, 1))
         tw = np.ones(shape = (n, 1))
@@ -960,12 +997,11 @@ def _T_funhddc_main1(fdobj, wlist, K, dfstart, dfupdate, dfconstr, model,
             if kno[i] == 1:
                 t[i, int(known[i])] = 1.
 
-
     #R uses rep.int here: does it matter? (shouldn't)
     nux = np.repeat(dfstart, K)
 
     #call to init function here
-    initx = _T_funhddt_init(fdobj, wlist, K, t, nux, model, threshold, method, noise_ctrl, com_dim, d_max, d_set)
+    #initx = _T_funhddt_init(fdobj, wlist, K, t, nux, model, threshold, method, noise_ctrl, com_dim, d_max, d_set)
     
     #call to twinit function here
     #tw = _T_funhddt_twinit(fdobj, wlist, initx, nux)
@@ -985,23 +1021,21 @@ def _T_funhddc_main1(fdobj, wlist, K, dfstart, dfupdate, dfconstr, model,
             #try numpy any
             #does t have column sums less than min_individuals?
             #if (any(npsum(np.where(t>1/K,t,0), axis=0) < min_individuals))
+            """
             if(np.any(np.sum(t>(1/K), axis=0) < min_individuals)):
                 return "pop<min_individuals"
+            """
         #m_step1 called here
-        m = _T_funhddt_m_step1(fdobj, wlist, K, t, tw, nux, dfupdate, dfconstr, model, threshold, method, noise_ctrl, com_dim, d_max, d_set)
-        nux = m['nux'].copy()
+        m = _T_funhddt_m_step1(fdobj, bigDATA, fdobjy, wlist, N, p, q, K, t, model, modely, threshold, method, noise_ctrl, d_set, com_dim, d_max)
+        #nux = m['nux'].copy()
 
         #e_step1 called here
-        to = _T_funhddt_e_step1(fdobj, wlist, m, clas, known, kno)
-
+        to = _T_funhddt_e_step1(fdobj, bigDATA, fdobjy, wlist, N, p, q, m, clas, known, kno)
+        
         
         L = to['L']
         t = to['t']
-        tw = to['tw']
-
-        
-        
-
+        #tw = to['tw']
         #likely[I] = L in R. Is there a reason why we would need NAs?
         likely.append(L)
 
@@ -1040,14 +1074,14 @@ def _T_funhddc_main1(fdobj, wlist, K, dfstart, dfupdate, dfconstr, model,
     mu = m['mu']
 
     prop = m['prop']
-    nux = m['nux']
+    #nux = m['nux']
 
-    complexity = _T_hdc_getComplexityt(m, p, dfconstr)
+    complexity = _T_hdc_getComplexityt(m, p, q, dfconstr)
 
     cl = np.argmax(t, axis=1)
 
     converged = test < eps
-
+    nux = "NUX"
     params = {'wlist': wlist, 'model':model, 'K':K, 'd':d,
                 'a':a, 'b':b, 'mu':mu, 'prop':prop, 'nux':nux, 'ev': m['ev'],
                 'Q': m['Q'], 'Q1':m['Q1'], 'fpca': m['fpcaobj'], 
@@ -1056,7 +1090,7 @@ def _T_funhddc_main1(fdobj, wlist, K, dfstart, dfupdate, dfconstr, model,
                 'threshold': threshold, 'd_select': method, 
                 'converged': converged, "index": test_index}
 
-    bic_icl = _T_hdclassift_bic(params, p, dfconstr)
+    bic_icl = _T_hdclassift_bic(params, p, q, dfconstr)
     params['BIC'] = bic_icl["bic"]
     params["ICL"] = bic_icl['icl']
 
@@ -1064,7 +1098,6 @@ def _T_funhddc_main1(fdobj, wlist, K, dfstart, dfupdate, dfconstr, model,
         base = fdobj.basis
     except:
         base = fdobj[0].basis
-
     tfunobj = TFunHDDC(Wlist=params['wlist'], model=params['model'], K=params['K'], d=params['d'], 
                         a=params['a'], b=params['b'], mu=params['mu'], prop=params['prop'], nux=params['nux'],
                         ev=params['ev'], Q=params['Q'], Q1=params['Q1'], fpca=params['fpca'],
@@ -1527,7 +1560,7 @@ def _T_funhddt_m_step1(fdobj, bigDATA, fdobjy, Wlist, N, p, q, K, t, model, mode
 
     gami, covyi, icovyi, logi = C_mstep(modely, N, pqp, q, K, prop, bigx, y, t, gami, covyi, icovyi, logi, mtol=1e-10, mmax=10)
     
-    result = {'model':model, 'modely': modely, "K": K, "d":d, "a":ai, "b": bi, "mu":mu, "prop": prop, "ev":ev, "Q":Q, "fpcaobj":fpcaobj, "Q1":Q1, "gam": gami, "covy": covyi, "icovy": icovyi, "logi": logi, "x": x, "y": y, "ev": ev}    
+    result = {'model':model, 'modely': modely, "K": K, "d":d, "a":ai, "b": bi, "mu":mu, "prop": prop, "ev":ev, "Q":Q, "fpcaobj":fpcaobj, "Q1":Q1, "gam": gami, "covy": covyi, "icovy": icovyi, "logi": logi, "x": x, "y": y, "ev": ev, "N": N}    
 
     return result        
 
@@ -1939,9 +1972,10 @@ def _T_hdclassif_dim_choice(ev, n, method, threshold, graph, noise_ctrl, d_set):
         d=np.array([d])
     return d
 
-def _T_hdclassift_bic(par, p, dfconstr):
+def _T_hdclassift_bic(par, p, q, dfconstr='yes'):
     #mux and mu not used, should we get rid of them?
     model = par['model']
+    modely = par['modely']
     K = par['K']
     #d already adjusted for Python indices
     if not isinstance(par['d'], np.ndarray):
@@ -1989,10 +2023,8 @@ def _T_hdclassift_bic(par, p, dfconstr):
     else:
         L = par['loglik']
 
-    if dfconstr == 'no':
-        ro = K*(p+1)+K-1
-    else:
-        ro = K*p+K
+    
+    ro = K*p+K - 1
     tot = np.sum(d*(p-(d+1)/2))
     D = np.sum(d)
     d = d[0]
@@ -2011,17 +2043,52 @@ def _T_hdclassift_bic(par, p, dfconstr):
     elif model == "ABQKDK":
         m = ro + tot + 2
 
+    if modely == 'EII':
+        m += 1
+    elif modely == 'VII':
+        m += K
+    elif modely == 'EEI':
+        m += q
+    elif modely == 'VEI':
+        m += K + q - 1
+    elif modely == 'EVI':
+        m += 1 + K * (q - 1)
+    elif modely == 'VVI':
+        m += K * q
+    elif modely == 'EEE':
+        m += q * (q + 1) // 2
+    elif modely == 'VEE':
+        m += K + q - 1 + q * (q - 1) // 2
+    elif modely == 'EVE':
+        m += 1 + K * (q - 1) + q * (q - 1) // 2
+    elif modely == 'EEV':
+        m += q + K * q * (q - 1) // 2
+    elif modely == 'VVE':
+        m += q * K + q * (q - 1) // 2
+    elif modely == 'VEV':
+        m += K + q - 1 + K * q * (q - 1) // 2
+    elif modely == 'EVV':
+        m += 1 + K * (q - 1) + K * q * (q - 1) // 2
+    elif modely == 'VVV':
+        m += K * q * (q + 1) // 2
+
+    print(L)
+    print(m)
+    print(N)
     bic = - (-2*L + m * np.log(N))
+    print(bic)
 
     t = par['posterior']
-
+    print(t)
     Z = ( (t - np.atleast_2d(np.apply_along_axis(np.max, 1, t)).T) == 0. ) + 0.
     icl = bic - 2*np.sum(Z*np.log(t + 1.e-15))
 
     return {'bic': bic, 'icl': icl}
 
-def _T_hdc_getComplexityt(par, p, dfconstr):
+def _T_hdc_getComplexityt(par, p, q, dfconstr='yes'):
     model = par['model']
+    modely = par['modely']
+
     K = par['K']
     #d should already be adjusted for Python indices
     d = par['d']
@@ -2032,11 +2099,7 @@ def _T_hdc_getComplexityt(par, p, dfconstr):
     #mu = par['mu']
     #prop = par['prop']
 
-    if dfconstr == 'no':
-        ro = K*(p+1)+K - 1
-
-    else:
-        ro = K*p + K
+    ro = K*p + K - 1
 
     tot = np.sum(d*(p-(d+1)/2))
     D = np.sum(d)
@@ -2045,22 +2108,45 @@ def _T_hdc_getComplexityt(par, p, dfconstr):
 
     if model == 'AKJBKQKDK':
         m = ro + tot + D + K
-
     elif model == "AKBKQKDK":
         m = ro + tot + 2*K
-
     elif model == "ABKQKDK":
         m = ro + tot + K + 1
-
     elif model == "AKJBQKDK":
         m = ro + tot + D + 1
-
     elif model == "AKBQKDK":
         m = ro + tot + K + 1
-
     elif model == "ABQKDK":
         m = ro + tot + 2
 
+    if (modely == 'EII'):
+        m += 1
+    elif (modely == 'VII'):
+        m += K
+    elif (modely == 'EEI'):
+        m += q
+    elif (modely == 'VEI'):
+        m += K + q - 1
+    elif (modely == 'EVI'):
+        m += 1 + K*(q - 1)
+    elif (modely == 'VVI'):
+        m += + K*q
+    elif (modely == 'EEE'):
+        m += q*(q + 1)/2
+    elif (modely == 'VEE'):
+        m += K + q - 1 + q*(q - 1)/2
+    elif (modely == 'EVE'):
+        m += 1 + K*(q - 1) + q*(q - 1)/2
+    elif (modely == 'EEV'):
+        m += q + K*q*(q - 1)/2
+    elif (modely == 'VVE'):
+        m += q*K+q*(q - 1)/2
+    elif (modely == 'VEV'):
+        m += K + q - 1 + K*q*(q - 1)/2
+    elif (modely == 'EVV'):
+        m += 1 + K*(q - 1) + K*q*(q - 1)/2
+    elif (modely == 'VVV'):
+        m += K*q
     return m
 
 def _T_hdc_getTheModel(model, all2models = False):
