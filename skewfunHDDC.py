@@ -1021,10 +1021,10 @@ def _T_funhddc_main1(fdobj, fdobjy, wlist, K, dfstart, dfupdate, dfconstr, model
             #try numpy any
             #does t have column sums less than min_individuals?
             #if (any(npsum(np.where(t>1/K,t,0), axis=0) < min_individuals))
-            """
+            
             if(np.any(np.sum(t>(1/K), axis=0) < min_individuals)):
                 return "pop<min_individuals"
-            """
+            
         #m_step1 called here
         m = _T_funhddt_m_step1(fdobj, bigDATA, fdobjy, wlist, N, p, q, K, t, model, modely, threshold, method, noise_ctrl, d_set, com_dim, d_max)
         #nux = m['nux'].copy()
@@ -1075,7 +1075,9 @@ def _T_funhddc_main1(fdobj, fdobjy, wlist, K, dfstart, dfupdate, dfconstr, model
 
     prop = m['prop']
     #nux = m['nux']
-
+    gam = m['gam']
+    covy = m['covy']
+    icovy = m['icovy']
     complexity = _T_hdc_getComplexityt(m, p, q, dfconstr)
 
     cl = np.argmax(t, axis=1)
@@ -1088,7 +1090,7 @@ def _T_funhddc_main1(fdobj, fdobjy, wlist, K, dfstart, dfupdate, dfconstr, model
                 'loglik':likely[-1], 'loglik_all': likely, 'posterior': t,
                 'class': cl, 'com_ev': com_ev, 'N':n, 'complexity':complexity,
                 'threshold': threshold, 'd_select': method, 
-                'converged': converged, "index": test_index}
+                'converged': converged, "index": test_index, 'gam': gam, 'covy': covy, 'icovy': icovy}
 
     bic_icl = _T_hdclassift_bic(params, p, q, dfconstr)
     params['BIC'] = bic_icl["bic"]
@@ -1104,7 +1106,7 @@ def _T_funhddc_main1(fdobj, fdobjy, wlist, K, dfstart, dfupdate, dfconstr, model
                         loglik=params['loglik'], loglik_all=params['loglik_all'], posterior=params['posterior'],
                         cl=params['class'], com_ev=params['com_ev'], N=params['N'], complexity=params['complexity'],
                         threshold=params['threshold'], d_select=params['d_select'], converged=params['converged'], 
-                        index=params['index'], bic=params['BIC'], icl=params['ICL'], basis=base)
+                        index=params['index'], bic=params['BIC'], icl=params['ICL'], basis=base, gam=params['gam'], covy=params['covy'], icovy=params['icovy'])
     return tfunobj
 
 def _T_funhddt_init(fdobj, Wlist, K, t, nux, model, threshold, method, noise_ctrl, com_dim, d_max, d_set):
