@@ -29,7 +29,6 @@ void c_C_mstep(char** modely, int *NN, int *pp, int* qq, int *GG,double *pi, dou
         FreeLibrary(hModule);
         return;
     }
-
     C_mstep(modely, NN, pp, qq, GG, pi, x, y, t, gami, covyi, icovyi, logi, mtol, mmax);
 }
 

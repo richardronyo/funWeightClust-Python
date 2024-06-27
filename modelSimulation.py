@@ -99,3 +99,7 @@ def genModelFD(ncurves=1000, nsplines=35, alpha=[0.9,0.9,0.9], eta=[10,5,15]):
 def plotModelFD(fd):
     fd['data'].plot(group=fd['labels'], group_colors=['red', 'blue', 'green'])
     plt.show()
+
+if __name__ == "__main__":
+    fd = genModelFD()
+    plotModelFD(fd)

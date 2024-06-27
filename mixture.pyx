@@ -7,6 +7,7 @@ cdef extern from "src/mixture_wrapper.h":
     void c_C_rmahalanobis(int *NN, int *pp,int *qq,int *GG, int *gg, double *x,double *y, double *gam, double *cov, double *delta)
 
 def C_mstep(str modely, int NN, int pp, int qq, int GG, pi, x, y, t, gami, covyi, icovyi, logi, float mtol, int mmax):
+    
     cdef int NN_val = NN
     cdef int pp_val = pp
     cdef int qq_val = qq
@@ -30,13 +31,11 @@ def C_mstep(str modely, int NN, int pp, int qq, int GG, pi, x, y, t, gami, covyi
     cdef np.ndarray[np.float64_t, ndim=1] new_logi = np.ascontiguousarray(np.transpose(logi))
 
     cdef double* pi_ptr = <double*>new_pi.data
-
     c_C_mstep(&modely_cstr, &NN_val, &pp_val, &qq_val, &GG_val, pi_ptr, <double*>new_x.data, <double*>new_y.data, <double*>new_t.data, <double*>new_gami.data, <double*>new_covy.data, <double*>new_icovy.data, <double*>new_logi.data, &mtol_val, &mmax_val)
 
     final_gami = new_gami.reshape((GG, qq, pp)).transpose(0, 2, 1)
     final_covyi = new_covy.reshape((GG, qq, qq)).transpose(0, 2, 1)
     final_icovyi = new_icovy.reshape(GG, qq, qq).transpose(0, 2, 1)
-
     return (final_gami, final_covyi, final_icovyi, logi)
 
 def C_rmahalanobis(int NN, int pp, int qq, int GG, int gg, np.ndarray[np.float64_t, ndim=2] x, np.ndarray[np.float64_t, ndim=2] y, np.ndarray[np.float64_t, ndim=2] gam, np.ndarray[np.float64_t, ndim=2] cov, np.ndarray[np.float64_t, ndim=1] delta):

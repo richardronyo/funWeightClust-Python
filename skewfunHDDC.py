@@ -159,11 +159,12 @@ class TFunHDDC:
         set of basis functions that the data was fit on
     '''
 
-    def __init__(self, Wlist, model, K, d, a, b, mu, prop, nux, ev, Q, Q1,
+    def __init__(self, Wlist, model, modely, K, d, a, b, mu, prop, nux, ev, Q, Q1,
                  fpca, loglik, loglik_all, posterior, cl, com_ev, N,
                  complexity, threshold, d_select, converged, index, bic, icl, basis, gam, covy, icovy):
         self.Wlist = Wlist
         self.model = model
+        self.modely = modely
         self.K = K
         self.d = d
         self.a = a
@@ -463,7 +464,6 @@ def tfunHDDC(datax, datay, K=np.arange(1,11), model='AKJBKQKDK', modely = "VVV",
 
     if isinstance(fdobj, skfda.FDataBasis):
         x = fdobj.coefficients
-
         p = x.shape[1]
 
         W = skfda.misc.inner_product_matrix(fdobj.basis, fdobj.basis)
@@ -568,17 +568,10 @@ def tfunHDDC(datax, datay, K=np.arange(1,11), model='AKJBKQKDK', modely = "VVV",
             d_set[i] = int(mkt[f'd{i}'])
 
         try:
-            """
-                _T_funhddc_main1(fdobj, fdobjy, wlist, K, dfstart, dfupdate, dfconstr, model, modely,
-                     itermax, threshold, method, eps, init, init_vector,
-                     mini_nb, min_individuals, noise_ctrl, com_dim,
-                     kmeans_control, d_max, d_set, known)
-            """
             res = _T_funhddc_main1(fdobj=fdobj, fdobjy=fdobjy, wlist=Wlist, K=K, dfstart=dfstart, dfupdate=dfupdate, dfconstr=dfconstr, model=model, modely=modely,
                                     itermax=itermax, threshold=threshold,method=d_select, eps=eps, init=init, init_vector=init_vector,
                                     mini_nb=mini_nb, min_individuals=min_individuals, noise_ctrl=noise_ctrl,com_dim=com_dim, 
                                     kmeans_control=kmeans_control, d_max=d_max, d_set=d_set, known=known)
-            
             if verbose:
                 _T_estimateTime(stage=modelNo, start_time=start_time, totmod=totmod)
 
@@ -693,20 +686,21 @@ def tfunHDDC(datax, datay, K=np.arange(1,11), model='AKJBKQKDK', modely = "VVV",
             print("tfunHDDC: \n")
 
         printModel = np.array([x.rjust(max([len(a) for a in model])) for x in model])
+        printModely = np.array([x.rjust(max([len(a) for a in modely])) for x in modely])
         printK = np.array([str(x).rjust(max([len(str(a)) for a in K])) for x in K])
         printTresh = np.array([str(x).rjust(max([len(str(a)) for a in threshold])) for x in threshold])
-        resout = np.c_[printModel[resOrdering], printK[resOrdering], printTresh[resOrdering], _T_addCommas((np.array(bestCritRes.complexity_all)[resOrdering])[:,1].astype(float)), _T_addCommas(np.array(CRIT)[resOrdering])]
+        resout = np.c_[printModel[resOrdering], printModely[resOrdering], printK[resOrdering], printTresh[resOrdering], _T_addCommas((np.array(bestCritRes.complexity_all)[resOrdering])[:,1].astype(float)), _T_addCommas(np.array(CRIT)[resOrdering])]
         resout = np.c_[np.arange(1,len(mkt_expand)+1), resout]
 
         resout = np.where(resout != "-inf", resout, 'NA')
         if np.any(np.nonzero(comment_all != '')[0]): 
             resout = np.c_[resout, comment_all[resOrdering]]
-            resPrint = pd.DataFrame(data = resout[:,1:], columns=['Model', 'K', 'Threshold', 'Complexity', criterion.upper(), 'Comment'], index=resout[:, 0])
+            resPrint = pd.DataFrame(data = resout[:,1:], columns=['Model', 'ModelY', 'K', 'Threshold', 'Complexity', criterion.upper(), 'Comment'], index=resout[:, 0])
         else:
-            resPrint = pd.DataFrame(data = resout[:,1:], columns=['Model', 'K', 'Threshold', 'Complexity', criterion.upper()], index=resout[:, 0])
+            resPrint = pd.DataFrame(data = resout[:,1:], columns=['Model', 'ModelY', 'K', 'Threshold', 'Complexity', criterion.upper()], index=resout[:, 0])
 
         print(resPrint)
-        print(f'\nSelected model {bestCritRes.model} with {bestCritRes.K} clusters')
+        print(f'\nSelected model {bestCritRes.model}-{bestCritRes.modely} with {bestCritRes.K} clusters')
         print(f'\nSelection Criterion: {criterion}\n')
 
     allCriteria = resPrint
@@ -770,16 +764,15 @@ def _T_funhddc_main1(fdobj, fdobjy, wlist, K, dfstart, dfupdate, dfconstr, model
 
             for i in range(1, len(fdobjy)):
                 y = np.c_[y, fdobj[i].coefficients]
-                data.append(fdobjy[i].coefficients)
+                datay.append(fdobjy[i].coefficients)
             
             datay = np.array(datay)
         else:
             y = fdobjy[0].coefficients
 
-    
     N = x.shape[0]
     p = x.shape[1]
-    q = y.shape[0]
+    q = y.shape[1]
 
     W = wlist['W']
     ones_row = np.ones((1, N))
@@ -877,7 +870,6 @@ def _T_funhddc_main1(fdobj, fdobjy, wlist, K, dfstart, dfupdate, dfconstr, model
 
             case "kmeans":
                 kmc = kmeans_control
-
                 km = clust.KMeans(n_clusters = K, max_iter = kmeans_control['max_iter'], n_init = kmeans_control['n_init'], algorithm=kmeans_control['algorithm'])
                 cluster = km.fit_predict(data)
 
@@ -1023,7 +1015,6 @@ def _T_funhddc_main1(fdobj, fdobjy, wlist, K, dfstart, dfupdate, dfconstr, model
 
     #R uses rep.int here: does it matter? (shouldn't)
     nux = np.repeat(dfstart, K)
-
     #call to init function here
     #initx = _T_funhddt_init(fdobj, wlist, K, t, nux, model, threshold, method, noise_ctrl, com_dim, d_max, d_set)
     
@@ -1047,8 +1038,8 @@ def _T_funhddc_main1(fdobj, fdobjy, wlist, K, dfstart, dfupdate, dfconstr, model
             #if (any(npsum(np.where(t>1/K,t,0), axis=0) < min_individuals))
             if(np.any(np.sum(t>(1/K), axis=0) < min_individuals)):
                 return "pop<min_individuals"
-            
         #m_step1 called here
+        #   _T_funhddt_m_step1(fdobj, bigDATA, fdobjy, Wlist, N, p, q, K, t, model, modely, threshold, method, noise_ctrl, d_set, com_dim=101, d_max=100)
         m = _T_funhddt_m_step1(fdobj, bigDATA, fdobjy, wlist, N, p, q, K, t, model, str(modely), threshold, method, noise_ctrl, d_set, com_dim, d_max)
         #nux = m['nux'].copy()
 
@@ -1123,7 +1114,7 @@ def _T_funhddc_main1(fdobj, fdobjy, wlist, K, dfstart, dfupdate, dfconstr, model
         base = fdobj.basis
     except:
         base = fdobj[0].basis
-    tfunobj = TFunHDDC(Wlist=params['wlist'], model=params['model'], K=params['K'], d=params['d'], 
+    tfunobj = TFunHDDC(Wlist=params['wlist'], model=params['model'], modely=params['modely'], K=params['K'], d=params['d'], 
                         a=params['a'], b=params['b'], mu=params['mu'], prop=params['prop'], nux=params['nux'],
                         ev=params['ev'], Q=params['Q'], Q1=params['Q1'], fpca=params['fpca'],
                         loglik=params['loglik'], loglik_all=params['loglik_all'], posterior=params['posterior'],
@@ -1406,7 +1397,6 @@ def _T_funhddt_m_step1(fdobj, bigDATA, fdobjy, Wlist, N, p, q, K, t, model, mode
         threshold -> float
         method -> str
     """
-    
     #'list' in R means len(fdobj) > 1 -> MULTI = True
     t = (np.reshape(t, (N, K)))
 
@@ -1584,9 +1574,7 @@ def _T_funhddt_m_step1(fdobj, bigDATA, fdobjy, Wlist, N, p, q, K, t, model, mode
     pqp = p+1
 
     gami, covyi, icovyi, logi = C_mstep(modely, N, pqp, q, K, prop, bigx, y, t, gami, covyi, icovyi, logi, mtol=1e-10, mmax=10)
-    
     result = {'model':model, 'modely': modely, "K": K, "d":d, "a":ai, "b": bi, "mu":mu, "prop": prop, "ev":ev, "Q":Q, "fpcaobj":fpcaobj, "Q1":Q1, "gam": gami, "covy": covyi, "icovy": icovyi, "logi": logi, "x": x, "y": y, "ev": ev, "N": N}    
-
     return result        
 
 
@@ -2097,14 +2085,10 @@ def _T_hdclassift_bic(par, p, q, dfconstr='yes'):
     elif modely == 'VVV':
         m += K * q * (q + 1) // 2
 
-    print(L)
-    print(m)
-    print(N)
+
     bic = - (-2*L + m * np.log(N))
-    print(bic)
 
     t = par['posterior']
-    print(t)
     Z = ( (t - np.atleast_2d(np.apply_along_axis(np.max, 1, t)).T) == 0. ) + 0.
     icl = bic - 2*np.sum(Z*np.log(t + 1.e-15))
 

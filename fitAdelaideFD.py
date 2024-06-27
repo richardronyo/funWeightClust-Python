@@ -5,35 +5,47 @@ from skfda.preprocessing.smoothing import BasisSmoother
 from skfda.representation.grid import FDataGrid
 from matplotlib import pyplot as plt
 import skewfunHDDC as tfun
+from sklearn import metrics as met
+
 
 
 def fitAdelaideFD():
     demand = pd.read_csv("de_combined.csv")
-    ans = demand.values[:, :48]
-    ans = ans.astype(float)
+    full = demand.values[:, :48]
+    full = full.astype(float)
+    x = full[:508, :]
+    y = full[508:, :]
+
+    ncurves = full.shape[0]
+    nsplines = full.shape[1]
 
     cls = demand.values[:, 48]
-    bbasis_x = BSplineBasis([1, 12], n_basis=6)
-    bbasis_y = BSplineBasis([13, 24], n_basis=6)
-    bbasis_fullx = BSplineBasis([1, 24], n_basis=6)
 
-    argvals_x = np.linspace(1, 12, 24)
-    argvals_y = np.linspace(13, 24, 24)
-    argvals_fullx = np.concatenate((argvals_x, argvals_y))
+    bbasis_x = BSplineBasis(n_basis=nsplines, domain_range=(0, 24))
+    bbasis_y = BSplineBasis(n_basis=nsplines, domain_range=(0, 24))
+    bbasis_fullx = BSplineBasis(n_basis=nsplines, domain_range=(0, 24))
 
-    smoother_x = BasisSmoother(bbasis_x)
-    smoother_y = BasisSmoother(bbasis_y)
-    smoother_fullx = BasisSmoother(bbasis_fullx)
+    argvals = np.linspace(0, 24, 48)
 
-    fd_demand_x = smoother_x.fit_transform(FDataGrid(ans[:, :24], argvals_x))
-    fd_demand_y = smoother_y.fit_transform(FDataGrid(ans[:, 24:48], argvals_y))
-    fd_demand_fullx = smoother_fullx.fit_transform(FDataGrid(ans, argvals_fullx))
+
+    evalx = bbasis_x.evaluate(argvals)[:,:,0]
+    evaly = bbasis_y.evaluate(argvals)[:,:,0]
+    evalfull = bbasis_fullx.evaluate(argvals)[:,:,0]
+
+    final_x = x @ evalx
+    final_y = y @ evaly
+    final_full = full @ evalfull
+
+
+    fdx = FDataGrid(final_x, argvals)
+    fdy = FDataGrid(final_y, argvals)
+    fdfull = FDataGrid(final_full, argvals)
 
     return {
-        'fdx': fd_demand_x.to_basis(bbasis_x),
-        'fdy': fd_demand_y.to_basis(bbasis_y),
-        'fdfull': fd_demand_fullx.to_basis(bbasis_fullx),
-        'groupd': cls
+        'fdx': fdx.to_basis(bbasis_x),
+        'fdy': fdy.to_basis(bbasis_y),
+        'fdfull': fdfull.to_basis(bbasis_fullx),
+        'groupd': cls,
     }
 
 def plotAdelaideFD(fd):
@@ -44,6 +56,11 @@ def plotAdelaideFD(fd):
 
 if __name__ == "__main__":
     ans = fitAdelaideFD()
+    labels = ans['groupd']
+
     plotAdelaideFD(ans)
 
-    tfun.tfunHDDC(ans['fdx'], ans['fdy'], K=2)
+    models = ["AKJBKQKDK","AKJBQKDK", "AKBKQKDK", "ABKQKDK", "AKBQKDK", "ABQKDK"]
+    modelsys = ["EII", "VII", "EEI", "VEI"]
+
+    res = tfun.tfunHDDC(ans['fdx'], ans['fdy'], K=2, model=models, modely=modelsys, init="kmeans", nb_rep=1, threshold=0.1)
