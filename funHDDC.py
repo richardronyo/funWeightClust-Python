@@ -670,7 +670,6 @@ def _funhddc_main1(fdobj, wlist, K, model,
 
     #R uses rep.int here: does it matter? (shouldn't)
     
-
     #call to init function here
     
 

@@ -2,6 +2,7 @@
 import skfda
 import numpy as np
 import modelSimulation as sim
+import skewfunHDDC as tfun
 from sklearn import metrics as met
 from skewfunHDDC import _T_funhddt_m_step1, _T_funhddt_e_step1, _T_hdc_getComplexityt, _T_hdclassift_bic, _T_funhddc_main1
 from scipy import linalg as scil
@@ -144,3 +145,5 @@ if __name__ == "__main__":
     known = None
     ans = _T_funhddc_main1(fdobj, fdobjy, Wlist, K, dfstart, dfupdate, dfconstr, model, modely, itermax, threshold, method, eps, init, init_vector,mini_nb, min_individuals, noise_ctrl, com_dim,kmeans_control, d_max, d_set, known)
     print(ans)
+    print("-----------------------------------------------------------------------------------------------------")
+    res = tfun.tfunHDDC(fdobj, fdobjy, model='all', modely='all', K=1)

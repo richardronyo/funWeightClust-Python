@@ -161,7 +161,7 @@ class TFunHDDC:
 
     def __init__(self, Wlist, model, K, d, a, b, mu, prop, nux, ev, Q, Q1,
                  fpca, loglik, loglik_all, posterior, cl, com_ev, N,
-                 complexity, threshold, d_select, converged, index, bic, icl, basis):
+                 complexity, threshold, d_select, converged, index, bic, icl, basis, gam, covy, icovy):
         self.Wlist = Wlist
         self.model = model
         self.K = K
@@ -193,6 +193,9 @@ class TFunHDDC:
         self.allCriteria = None
         self.allRes = None
         self.basis = basis
+        self.gam = gam
+        self.covy = covy
+        self.icovy = icovy
 
     def predict(self, data):
         '''
@@ -334,13 +337,12 @@ class TFunHDDC:
         return None
     '''
 
-def tfunHDDC(data, K=np.arange(1,11), model='AKJBKQKDK', known=None, dfstart=50., 
-             dfupdate='approx', dfconstr='no', threshold=0.1, itermax=200, 
-             eps=1.e-6, init='random', criterion='bic', d_select='cattell', 
-             init_vector=None, show=True, mini_nb=[5,10], min_individuals=4,
-             mc_cores=1, nb_rep=2, keepAllRes=False, 
-             kmeans_control={'n_init':1, 'max_iter':10, 'algorithm':'lloyd'}, 
-             d_max=100, d_range=2, verbose=True, Numba=True):
+def tfunHDDC(datax, datay, K=np.arange(1,11), model='AKJBKQKDK', modely = "VVV", known=None, threshold=0.1, itermax=200, dfstart=50., eps=1.e-6,init='random',
+            criterion='bic', d_select='cattell', init_vector=None, 
+            show=True, mini_nb=[5,10], min_individuals=4, mc_cores=1, nb_rep=2,
+            keepAllRes=False,kmeans_control={'n_init':1, 'max_iter':10, 'algorithm':'lloyd'},  d_max=100, d_range=2, cmtol=1.e-10, cmmax=10, verbose=True,
+            dfupdate='approx', dfconstr='no',   
+            Numba=True):
     '''
     Description
     -----------
@@ -438,12 +440,15 @@ def tfunHDDC(data, K=np.arange(1,11), model='AKJBKQKDK', known=None, dfstart=50.
     com_dim = None
     noise_ctrl = 1.e-8
 
-    if not isinstance(data, skfda.FDataBasis):
+    if not isinstance(datax, skfda.FDataBasis):
         MULTI = True
-
+    
+    data = datax.copy()
     _T_hddc_control(locals())
 
     model = _T_hdc_getTheModel(model, all2models=True)
+    modely = _T_hdc_getTheModely(modely, all2models=True)
+
     if init == "random" and nb_rep < 20:
         nb_rep = 20
 
@@ -453,10 +458,12 @@ def tfunHDDC(data, K=np.arange(1,11), model='AKJBKQKDK', known=None, dfstart=50.
     BIC = []
     ICL = []
 
-    fdobj = data.copy()
+    fdobj = datax.copy()
+    fdobjy= datay.copy()
 
     if isinstance(fdobj, skfda.FDataBasis):
         x = fdobj.coefficients
+
         p = x.shape[1]
 
         W = skfda.misc.inner_product_matrix(fdobj.basis, fdobj.basis)
@@ -474,23 +481,23 @@ def tfunHDDC(data, K=np.arange(1,11), model='AKJBKQKDK', known=None, dfstart=50.
         p = x.shape[1]
 
         W_fdobj = []
-        for i in range(len(data)):
-            W_fdobj.append(skfda.misc.inner_product_matrix(data[i].basis, data[i].basis))
+        for i in range(len(datax)):
+            W_fdobj.append(skfda.misc.inner_product_matrix(datax[i].basis, datax[i].basis))
 
         prow = W_fdobj[-1].shape[0]
-        pcol = len(data)*prow
+        pcol = len(datax)*prow
         W1 = np.c_[W_fdobj[-1], np.zeros((prow, pcol-W_fdobj[-1].shape[1]))]
         W_list = {}
 
-        for i in range(1, len(data)):
+        for i in range(1, len(datax)):
             W2 = np.c_[np.zeros((prow, (i)*W_fdobj[-1].shape[1])),
                     W_fdobj[i],
                     np.zeros((prow, pcol - (i+1) * W_fdobj[-1].shape[1]))]
             W_list[f'{i-1}'] = W2
 
         W_tot = np.concatenate((W1,W_list[f'{0}']))
-        if len(data) > 2:
-            for i in range(1, len(data)-1):
+        if len(datax) > 2:
+            for i in range(1, len(datax)-1):
                 W_tot = np.concatenate((W_tot, W_list[f'{i}']))
 
         W_tot[W_tot < 1.e-15] = 0
@@ -516,14 +523,14 @@ def tfunHDDC(data, K=np.arange(1,11), model='AKJBKQKDK', known=None, dfstart=50.
         #take first element of K since it is a list/array
         for i in range(K[0]):
             mkt_list[f'd{i}'] = [str(d_range)]
-        mkt_list.update({'model':model, 'K':[str(a) for a in K], 'threshold':[str(a) for a in threshold]})
+        mkt_list.update({'model':model, 'modely': modely, 'K':[str(a) for a in K], 'threshold':[str(a) for a in threshold]})
 
         
 
     else:
         for i in range(np.max(K)):
             mkt_list[f'd{i}'] = ['2']
-        mkt_list.update({'model':model, 'K':[str(a) for a in K], 'threshold':[str(a) for a in threshold]})
+        mkt_list.update({'model':model, 'modely': modely, 'K':[str(a) for a in K], 'threshold':[str(a) for a in threshold]})
 
         
     
@@ -534,6 +541,8 @@ def tfunHDDC(data, K=np.arange(1,11), model='AKJBKQKDK', known=None, dfstart=50.
         mkt_expand = np.concatenate((mkt_expand, repeat))
     
     model = [a['model'] for a in mkt_expand]
+    modely = [a['modely'] for a in mkt_expand]
+
     K = [int(a['K']) for a in mkt_expand]
     d = {}
 
@@ -550,6 +559,7 @@ def tfunHDDC(data, K=np.arange(1,11), model='AKJBKQKDK', known=None, dfstart=50.
             modelNo = mkt[1]
             mkt = mkt[0]
         model = mkt['model']
+        modely = mkt['modely']
         K = int(mkt['K'])
         threshold = float(mkt['threshold'])
 
@@ -558,11 +568,16 @@ def tfunHDDC(data, K=np.arange(1,11), model='AKJBKQKDK', known=None, dfstart=50.
             d_set[i] = int(mkt[f'd{i}'])
 
         try:
-            res = _T_funhddc_main1(fdobj=fdobj, wlist=Wlist, K=K, dfstart=dfstart, dfupdate=dfupdate, dfconstr=dfconstr,
-                                    itermax=itermax, model=model, threshold=threshold,
-                                    method=d_select, eps=eps, init=init, init_vector=init_vector,
-                                    mini_nb=mini_nb, min_individuals=min_individuals, noise_ctrl=noise_ctrl,
-                                    com_dim=com_dim, kmeans_control=kmeans_control, d_max=d_max, d_set=d_set, known=known)
+            """
+                _T_funhddc_main1(fdobj, fdobjy, wlist, K, dfstart, dfupdate, dfconstr, model, modely,
+                     itermax, threshold, method, eps, init, init_vector,
+                     mini_nb, min_individuals, noise_ctrl, com_dim,
+                     kmeans_control, d_max, d_set, known)
+            """
+            res = _T_funhddc_main1(fdobj=fdobj, fdobjy=fdobjy, wlist=Wlist, K=K, dfstart=dfstart, dfupdate=dfupdate, dfconstr=dfconstr, model=model, modely=modely,
+                                    itermax=itermax, threshold=threshold,method=d_select, eps=eps, init=init, init_vector=init_vector,
+                                    mini_nb=mini_nb, min_individuals=min_individuals, noise_ctrl=noise_ctrl,com_dim=com_dim, 
+                                    kmeans_control=kmeans_control, d_max=d_max, d_set=d_set, known=known)
             
             if verbose:
                 _T_estimateTime(stage=modelNo, start_time=start_time, totmod=totmod)
@@ -600,6 +615,7 @@ def tfunHDDC(data, K=np.arange(1,11), model='AKJBKQKDK', known=None, dfstart=50.
                 res = p.starmap_async(dec, params).get()
             '''
             models = [mkt['model'] for mkt in mkt_expand]
+            modelys = [mkt['modely'] for mkt in mkt_expand]
             Ks = [int(mkt['K']) for mkt in mkt_expand]
             thresholds = [float(mkt['threshold']) for mkt in mkt_expand]
             d_sets = []
@@ -609,8 +625,11 @@ def tfunHDDC(data, K=np.arange(1,11), model='AKJBKQKDK', known=None, dfstart=50.
                     d_temp.append(int(mkt_expand[i][f'd{j}']))
                 d_sets.append(d_temp)
             
-            with p:
-                params = [(fdobj, Wlist, Ks[i], dfstart, dfupdate, dfconstr, models[i], itermax, thresholds[i], d_select, eps, init, init_vector, mini_nb, min_individuals, noise_ctrl, com_dim, kmeans_control, d_max, d_sets[i], known) for i in range(len(models))]
+            with p:            
+                """
+                (fdobj, fdobjy, wlist, K, dfstart, dfupdate, dfconstr, model, modely,itermax, threshold, method, eps, init, init_vector,mini_nb, min_individuals, noise_ctrl, com_dim, kmeans_control, d_max, d_set, known)
+            """
+                params = [(fdobj, fdobjy, Wlist, Ks[i], dfstart, dfupdate, dfconstr, models[i], modelys[i], itermax, thresholds[i], d_select, eps, init, init_vector, mini_nb, min_individuals, noise_ctrl, com_dim, kmeans_control, d_max, d_sets[i], known) for i in range(len(models))]
                 res = p.starmap_async(_T_funhddc_main1, params).get()
 
         except Exception as e:
@@ -623,7 +642,6 @@ def tfunHDDC(data, K=np.arange(1,11), model='AKJBKQKDK', known=None, dfstart=50.
     comment_all = np.array(["" if isinstance(x, TFunHDDC) else x for x in res])
 
     threshold = np.array([float(x['threshold']) for x in mkt_expand])
-
     if np.all(np.invert(np.isfinite(loglik_all))):
         warnings.warn("All models diverged")
 
@@ -655,6 +673,7 @@ def tfunHDDC(data, K=np.arange(1,11), model='AKJBKQKDK', known=None, dfstart=50.
     icl = [res.icl if isinstance(res, TFunHDDC) else -np.Inf for res in chosenRes]
     allComplex = [res.complexity if isinstance(res, TFunHDDC) else -np.Inf for res in chosenRes]
     model = np.array(model)[modelKeep]
+    modely = np.array(modely)[modelKeep]
     threshold = np.array(threshold)[modelKeep]
     K = np.array(K)[modelKeep]
     d_keep = {}
@@ -717,6 +736,7 @@ def _T_funhddc_main1(fdobj, fdobjy, wlist, K, dfstart, dfupdate, dfconstr, model
     if(type(fdobj) == skfda.FDataBasis):
        MULTI = False
        x = fdobj.coefficients
+       data = x
 
     else:
         #Multivariate
@@ -738,6 +758,7 @@ def _T_funhddc_main1(fdobj, fdobjy, wlist, K, dfstart, dfupdate, dfconstr, model
     if(type(fdobjy) == skfda.FDataBasis):
         MULTI = False
         y = fdobjy.coefficients
+        datay = y
 
     else:
 
@@ -769,7 +790,7 @@ def _T_funhddc_main1(fdobj, fdobjy, wlist, K, dfstart, dfupdate, dfconstr, model
     com_ev = None
 
     d_max = min(N,p,d_max)
-
+    
     #classification
     n = N
     if(known is None):
@@ -856,6 +877,7 @@ def _T_funhddc_main1(fdobj, fdobjy, wlist, K, dfstart, dfupdate, dfconstr, model
 
             case "kmeans":
                 kmc = kmeans_control
+
                 km = clust.KMeans(n_clusters = K, max_iter = kmeans_control['max_iter'], n_init = kmeans_control['n_init'], algorithm=kmeans_control['algorithm'])
                 cluster = km.fit_predict(data)
 
@@ -986,6 +1008,8 @@ def _T_funhddc_main1(fdobj, fdobjy, wlist, K, dfstart, dfupdate, dfconstr, model
 
                     for i in range(0, K):
                         t[np.nonzero(cluster == i)[0], i] = 1.
+
+                    
     else:
         t = np.ones(shape = (n, 1))
         tw = np.ones(shape = (n, 1))
@@ -1021,12 +1045,11 @@ def _T_funhddc_main1(fdobj, fdobjy, wlist, K, dfstart, dfupdate, dfconstr, model
             #try numpy any
             #does t have column sums less than min_individuals?
             #if (any(npsum(np.where(t>1/K,t,0), axis=0) < min_individuals))
-            
             if(np.any(np.sum(t>(1/K), axis=0) < min_individuals)):
                 return "pop<min_individuals"
             
         #m_step1 called here
-        m = _T_funhddt_m_step1(fdobj, bigDATA, fdobjy, wlist, N, p, q, K, t, model, modely, threshold, method, noise_ctrl, d_set, com_dim, d_max)
+        m = _T_funhddt_m_step1(fdobj, bigDATA, fdobjy, wlist, N, p, q, K, t, model, str(modely), threshold, method, noise_ctrl, d_set, com_dim, d_max)
         #nux = m['nux'].copy()
 
         #e_step1 called here
@@ -1084,7 +1107,7 @@ def _T_funhddc_main1(fdobj, fdobjy, wlist, K, dfstart, dfupdate, dfconstr, model
 
     converged = test < eps
     nux = "NUX"
-    params = {'wlist': wlist, 'model':model, 'K':K, 'd':d,
+    params = {'wlist': wlist, 'model':model, 'modely': modely, 'K':K, 'd':d,
                 'a':a, 'b':b, 'mu':mu, 'prop':prop, 'nux':nux, 'ev': m['ev'],
                 'Q': m['Q'], 'Q1':m['Q1'], 'fpca': m['fpcaobj'], 
                 'loglik':likely[-1], 'loglik_all': likely, 'posterior': t,
@@ -2220,6 +2243,78 @@ def _T_hdc_getTheModel(model, all2models = False):
     new_model = ModelNames[mod_num]
 
     return new_model
+
+
+def _T_hdc_getTheModely(model, all2models = False):
+    model_in = model
+    #is the model a list or array?
+    try:
+        if type(model) == np.ndarray or type(model) == list:
+            new_model = np.array(model,dtype='<U9')
+            model = np.array(model)
+        else:
+            new_model = np.array([model],dtype='<U9')
+            model = np.array([model])
+    except:
+        raise ValueError("Model needs to be an array or list")
+
+    #one-dimensional please
+    if(model.ndim > 1):
+        raise ValueError("The argument 'model' must be 1-dimensional")
+    #check for invalid values
+    if type(model[0]) != np.str_:
+        if np.any(np.apply_along_axis(np.isnan, 0, model)):
+            raise ValueError("The argument 'model' cannot contain any Nan")
+
+    #List of model names accepted
+    ModelNames = np.array(["EII", "VII", "EEI", "VEI", "EVI", "VVI", "EEE", "VEE", "EVE", "EEV", "VVE", "VEV","EVV","VVV"])
+    #numbers between 0 and 5 inclusive are accepted, so check if numbers are
+    #sent in as a string before capitalizing
+    if type(model[0]) == np.str_:
+        if model[0].isnumeric():
+            model = model.astype(np.int_)
+            
+        else:
+            new_model = [np.char.upper(m) for m in model]
+
+    #shortcut for all the models
+    if len(model) == 1 and new_model[0] == "ALL":
+        if all2models:
+            new_model = np.zeros(6, dtype='<U9')
+            model = np.arange(0,6)
+        else:
+            return "ALL"
+        
+    #are the models numbers?
+    if type(model[0]) == np.int_:
+        qui = np.nonzero(np.isin(model, np.arange(0, 6)))[0]
+        if len(qui) > 0:
+            new_model[qui] = ModelNames[model[qui]]
+            new_model = new_model[qui]
+
+    #find model names that are incorrect    
+    qui = np.nonzero( np.invert(np.isin(new_model, ModelNames)))[0]
+    if len(qui) > 0:
+        if len(qui) == 1:
+            msg = f'(e.g. {model_in[qui[0]]} is incorrect.)'
+
+        else:
+            msg = f'(e.g. {model_in[qui[0]]} or {model_in[qui[1]]} are incorrect.)'
+
+        raise ValueError("Invalid model name " + msg)
+    
+    #Warn user that the models *should* be unique
+    if np.max(np.unique(model, return_counts=True)[1]) > 1:
+        warnings.warn("Values in 'model' argument should be unique.", UserWarning)
+
+    mod_num = []
+    for i in range(len(new_model)):
+        mod_num.append(np.nonzero(new_model[i] == ModelNames)[0])
+    mod_num = np.sort(np.unique(mod_num))
+    new_model = ModelNames[mod_num]
+
+    return new_model
+
 
 def _T_addCommas(x):
     vfunc = np.vectorize(_T_addCommas_single)
