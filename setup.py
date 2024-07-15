@@ -8,14 +8,14 @@ extensions = [
         "py_mixture",
         sources=["mixture.pyx", "src/mixture_wrapper.c"],
         include_dirs=[np.get_include()],
-        libraries=["src/funclustweight"],
+        libraries=["funclustweight"],
         library_dirs=["src"]
     ),
     Extension(
         "imahalanobis",
         sources=["imahalanobis.pyx", "src/imahalanobis_wrapper.c"],
         include_dirs=[np.get_include()],
-        libraries=["src/TFunHDDC"],
+        libraries=["TFunHDDC"],
         library_dirs=["src"]
     )
 ]

@@ -197,7 +197,7 @@ class TFunHDDC:
         self.gam = gam
         self.covy = covy
         self.icovy = icovy
-
+    from imahalanobis import C_imahalanobis
     def predict(self, data):
         '''
         predict takes a FDataBasis fit on the same number of basis functions as
@@ -244,7 +244,7 @@ class TFunHDDC:
                     aki = np.sqrt(np.diag(np.concatenate((diag1, diag2))))
                     muki = mu[i]
 
-                    mah_pen[:, i] = _T_imahalanobis(x, muki, wki, Qk, aki)
+                    mah_pen[:, i] = C_imahalanobis(x, muki, wki, Qk, aki)
 
                     #scipy logamma vs math lgamma?
                     K_pen[:, i] = np.log(prop[i]) + loggamma( (nux[i] + p) / 2) - (1/2) * (s[i] + (p-d[i]) * np.log(b[i]) - np.log(self.Wlist['dety'])) - ( ( p/2)*(np.log(np.pi) + np.log(nux[i])) + loggamma(nux[i] /2) + ( (nux[i] + p) / 2) * (np.log(1 + mah_pen[:, i] / nux[i])))
@@ -258,7 +258,7 @@ class TFunHDDC:
                     aki = np.sqrt(np.diag(np.concatenate((diag1, diag2))))
                     muki = mu[i]
                     
-                    mah_pen[:, i] = _T_imahalanobis(x, muki, wki, Qk, aki)
+                    mah_pen[:, i] = C_imahalanobis(x, muki, wki, Qk, aki)
 
                     #Copied from previous case with b[i] changed to b[1]
                     #scipy logamma vs math lgamma?
@@ -273,7 +273,7 @@ class TFunHDDC:
                     aki = np.sqrt(np.diag(np.concatenate((diag1, diag2))))
                     muki = mu[i]
 
-                    mah_pen[:, i] = _T_imahalanobis(x, muki, wki, Qk, aki)
+                    mah_pen[:, i] = C_imahalanobis(x, muki, wki, Qk, aki)
 
                     #copied from AKJBKQKDK
                     K_pen[:, i] = np.log(prop[i]) + loggamma( (nux[i] + p) / 2) - (1/2) * (s[i] + (p-d[i]) * np.log(b[i]) - np.log(self.Wlist['dety'])) - ( ( p/2)*(np.log(np.pi) + np.log(nux[i])) + loggamma(nux[i] /2) + ( (nux[i] + p) / 2) * (np.log(1 + mah_pen[:, i] / nux[i])))
@@ -288,7 +288,7 @@ class TFunHDDC:
                     aki = np.sqrt(np.diag(np.concatenate((diag1, diag2))))
                     muki = mu[i]
 
-                    mah_pen[:, i] = _T_imahalanobis(x, muki, wki, Qk, aki)
+                    mah_pen[:, i] = C_imahalanobis(x, muki, wki, Qk, aki)
 
                     #copied from AKJBKQKDK
                     K_pen[:, i] = np.log(prop[i]) + loggamma( (nux[i] + p) / 2) - (1/2) * (s[i] + (p-d[i]) * np.log(b[i]) - np.log(self.Wlist['dety'])) - ( ( p/2)*(np.log(np.pi) + np.log(nux[i])) + loggamma(nux[i] /2) + ( (nux[i] + p) / 2) * (np.log(1 + mah_pen[:, i] / nux[i])))
@@ -302,7 +302,7 @@ class TFunHDDC:
                     aki = np.sqrt(np.diag(np.concatenate((diag1, diag2))))
                     muki = mu[i]
 
-                    mah_pen[:, i] = _T_imahalanobis(x, muki, wki, Qk, aki)
+                    mah_pen[:, i] = C_imahalanobis(x, muki, wki, Qk, aki)
 
                     #copied from AKJBKQKDK
                     K_pen[:, i] = np.log(prop[i]) + loggamma( (nux[i] + p) / 2) - (1/2) * (s[i] + (p-d[i]) * np.log(b[0]) - np.log(self.Wlist['dety'])) - ( ( p/2)*(np.log(np.pi) + np.log(nux[i])) + loggamma(nux[i] /2) + ( (nux[i] + p) / 2) * (np.log(1 + mah_pen[:, i] / nux[i])))
@@ -316,7 +316,7 @@ class TFunHDDC:
                     aki = np.sqrt(np.diag(np.concatenate((diag1, diag2))))
                     muki = mu[i]
 
-                    mah_pen[:, i] = _T_imahalanobis(x, muki, wki, Qk, aki)
+                    mah_pen[:, i] = C_imahalanobis(x, muki, wki, Qk, aki)
 
                     #copied from AKJBKQKDK
                     K_pen[:, i] = np.log(prop[i]) + loggamma( (nux[i] + p) / 2) - (1/2) * (s[i] + (p-d[i]) * np.log(b[0]) - np.log(self.Wlist['dety'])) - ( ( p/2)*(np.log(np.pi) + np.log(nux[i])) + loggamma(nux[i] /2) + ( (nux[i] + p) / 2) * (np.log(1 + mah_pen[:, i] / nux[i])))
@@ -328,15 +328,7 @@ class TFunHDDC:
 
         cl = np.argmax(t, axis=1)
         return {'t': t, 'class': cl}
-    '''
-    #Try returning models + diverged?
-    def __str__(self):
-        return None 
-    
-    #Try printing params?
-    def __repr__(self):
-        return None
-    '''
+
 
 def tfunHDDC(datax, datay, K=np.arange(1,11), model='AKJBKQKDK', modely = "VVV", known=None, threshold=0.1, itermax=200, dfstart=50., eps=1.e-6,init='random',
             criterion='bic', d_select='cattell', init_vector=None, 
@@ -577,6 +569,7 @@ def tfunHDDC(datax, datay, K=np.arange(1,11), model='AKJBKQKDK', modely = "VVV",
 
         except Exception as e:
             raise e
+        
         return res
     
 
@@ -602,11 +595,7 @@ def tfunHDDC(datax, datay, K=np.arange(1,11), model='AKJBKQKDK', modely = "VVV",
     else:
         try:
             p = multi.Pool(mc_cores)
-            '''
-            params = [(x, verbose, start_time, len(mkt_expand)) for x in mkt_expand]
-            with p:
-                res = p.starmap_async(dec, params).get()
-            '''
+
             models = [mkt['model'] for mkt in mkt_expand]
             modelys = [mkt['modely'] for mkt in mkt_expand]
             Ks = [int(mkt['K']) for mkt in mkt_expand]
@@ -619,9 +608,6 @@ def tfunHDDC(datax, datay, K=np.arange(1,11), model='AKJBKQKDK', modely = "VVV",
                 d_sets.append(d_temp)
             
             with p:            
-                """
-                (fdobj, fdobjy, wlist, K, dfstart, dfupdate, dfconstr, model, modely,itermax, threshold, method, eps, init, init_vector,mini_nb, min_individuals, noise_ctrl, com_dim, kmeans_control, d_max, d_set, known)
-            """
                 params = [(fdobj, fdobjy, Wlist, Ks[i], dfstart, dfupdate, dfconstr, models[i], modelys[i], itermax, thresholds[i], d_select, eps, init, init_vector, mini_nb, min_individuals, noise_ctrl, com_dim, kmeans_control, d_max, d_sets[i], known) for i in range(len(models))]
                 res = p.starmap_async(_T_funhddc_main1, params).get()
 
@@ -720,11 +706,93 @@ def _T_funhddc_main1(fdobj, fdobjy, wlist, K, dfstart, dfupdate, dfconstr, model
                      mini_nb, min_individuals, noise_ctrl, com_dim,
                      kmeans_control, d_max, d_set, known):
     
-    np.seterr(all='ignore')
-    modelNames = ["AKJBKQKDK", "AKBKQKDK", "ABKQKDK", "AKJBQKDK", "AKBQKDK", 
-                  "ABQKDK"]
-    modelNamesy = ["VVV"]
+    """
+    Description
+    -----------
+        _T_funhddc_main1 completes the EM algorithm loop corresponding to model and modely, and returns the designated values
 
+    Parameters
+    ----------
+    fdobj: `FDataBasis` or `list` of `FDataBasis`
+        a `FDataBasis` object that contains functional data fit to a set of
+        basis functions, or a list of these
+    fdobjy: `FDataBasis` or `list` of `FDataBasis`
+        a `FDataBasis` object that contains functional data fit to a set of
+        basis functions, or a list of these
+    Wlist: dict {W, W_m, dety}
+        a dictionary that contains:
+            W: (N, N) or (p, p)
+            W_m: (N, N) or (p, p)
+                The Cholesky of W
+            dety: (float)
+                the Determinant of W
+    K: `int` or `list` of `int`, default=np.arange(1,11)
+        number of clusters to run the algorithm with. If given as a `list` or
+        list-like, the algorithm will run with each unique number of clusters.
+    dfstart: `int`, default=50
+        the degrees of freedom given as an `int` used to initialize the 
+        t-distribution.
+    dfupdate: {'approx', 'numeric'}, default='approx'
+        given as either `'numeric'` or `'approx'`. Approx is the default and results
+        in using a closed form approximation. Numeric makes use of the `scipy` 
+        function `brentq`.
+    dfcontr: {'yes', 'no'}, default='yes'
+        given as either `'yes'` or `'no'`. When yes, the degrees of freedom
+        between clusters remains the same. If no, they can be different.
+    model: `str` or `list` of `str`, default='AKJBKQKDK'
+        the type of model to be used. `tfunHDDC` supports the following
+        model names: `'AKJBKQKDK'`, `'AKJBQKDK'`, `'AKBKQKDK'`, `'AKBQKDK'`, 
+        `'ABKQKDK'`, `'ABQKDK'`. Can be given with any capitilization.
+    modely: `str` or `list` of `str`, default='AKJBKQKDK'
+        the type of model to be used. `tfunHDDC` supports the following
+        model names: `'AKJBKQKDK'`, `'AKJBQKDK'`, `'AKBKQKDK'`, `'AKBQKDK'`, 
+        `'ABKQKDK'`, `'ABQKDK'`. Can be given with any capitilization.
+    itermax: `int`, default=200
+        the number of iterations that the algorithm is allowed to perform
+        before returning that it diverged.
+    threshold : `float` or `list` of `floats`, default=0.1
+        the threshold of the Cattell scree-test used for selecting the
+        group specific intrinsic dimensions
+    method: 'str'
+        Either 'bic,' 'cattell,' or 'grid'
+    eps: `float`, default=1.e^-6
+        threshold for convergence of the algorithm
+    init: {'kmeans', 'random', 'mini-em', 'vector'}, default='kmeans'
+        the method of initializing the clusters. Options are: `'kmeans'`,
+        `'random'`, `'mini-em'` and `'vector'`.
+    init_vector: `list` of `ints`, default=None
+        vector containing user-supplied cluster initialization. Used
+        only when `init='vector'`
+    mini_nb: `list` of `ints`, default=[5,10]
+        list-like object of `ints` of length 2 used only when
+        `init='mini-em'`. First value gives the number of times the algorithm is
+        repeated, while the second gives the maximum iterations. This will give the
+        initialization that maximizes the log-likelihood.
+    min_individuals: `int`, default=4
+        sets the minimum allowed population of a class. If a
+        class contains less than the value of min_indivudals, then that run of the
+        algorithm is terminated and the string `"pop<min_indiv"` is returned as the
+        result of that combination of parameters.
+    noise_ctrl: 'bool'
+    com_dim: 'int'
+    kmeans_control: `dict`, default={'n_init':1, 'max_iter':10, 'algorithm':'lloyd'}
+        parameters to be used with init='kmeans'. Must specify
+        `'n_init'`, `'max_iter'`, and `'algorithm'`. Uses `scikit-learn's` 
+        `kmeans` function.
+    d_max: `float`, default=100
+        maximum number of intrinsic dimensions that can be computed. May
+        speed up algorithm if intrinsic dimensions are signifcantly large.
+    d_set: `int` or `list` of `ints`, default=2
+        list of values to be used for the intrinsic dimension of each group when `d_select='grid'`.
+    known: `list` of `ints` or `np.NaNs`, default=None
+        a vector given known clustering of data. Values that are not known should be given as `np.NaN`. When not None, TFunHDDC will perform classification. If all values are given in known, then TFunHDDC will perform parameter estimation.
+    
+    Return
+    ------
+    tfun: TFunHDDC object
+    """
+    
+    np.seterr(all='ignore')
 
     
     if(type(fdobj) == skfda.FDataBasis):
@@ -1088,14 +1156,11 @@ def _T_funhddc_main1(fdobj, fdobjy, wlist, K, dfstart, dfupdate, dfconstr, model
     mu = m['mu']
 
     prop = m['prop']
-    #nux = m['nux']
     gam = m['gam']
     covy = m['covy']
     icovy = m['icovy']
     complexity = _T_hdc_getComplexityt(m, p, q, dfconstr)
-
     cl = np.argmax(t, axis=1)
-
     converged = test < eps
     nux = "NUX"
     params = {'wlist': wlist, 'model':model, 'modely': modely, 'K':K, 'd':d,
@@ -1123,113 +1188,54 @@ def _T_funhddc_main1(fdobj, fdobjy, wlist, K, dfstart, dfupdate, dfconstr, model
                         index=params['index'], bic=params['BIC'], icl=params['ICL'], basis=base, gam=params['gam'], covy=params['covy'], icovy=params['icovy'])
     return tfunobj
 
-def _T_funhddt_init(fdobj, Wlist, K, t, nux, model, threshold, method, noise_ctrl, com_dim, d_max, d_set):
-
-    #univariate case
-    if(type(fdobj) == skfda.FDataBasis):
-        x = fdobj.coefficients
-
-    
-    else:
-        #Multivariate
-        if len(fdobj) > 1:
-            x = fdobj[0].coefficients.copy()
-            for i in range(1, len(fdobj)):
-                x = np.c_[x, fdobj[i].coefficients.copy()]
-
-        else:
-            x = fdobj[0].coefficients
-
-    N = x.shape[0]
-    p = x.shape[1]
-    n = np.sum(t, axis=0)
-
-    prop = n/N
-
-    mu = np.repeat(0., K*p).reshape((K, p))
-    #ind = np.apply_along_axis(np.where, 1, t>0)
-    #n_bis = np.repeat(0., K)
-
-    #for i in range(K):
-        #n_bis[i] = len(ind[i][0])
-
-    traceVect = np.repeat(0., K)
-    ev = np.repeat(0., K*p).reshape((K, p))
-    Q = {}
-    fpcaobj = {}
-
-    for i in range(K):
-        donnees = _T_initmypca_fd1(fdobj, Wlist, t[:,i])
-
-        mu[i] = donnees['mux']
-        traceVect[i] = np.sum(np.diag(donnees['valeurs_propres']))
-        ev[i] = donnees["valeurs_propres"]
-        Q[f'{i}'] = donnees["U"]
-        fpcaobj[f"{i}"] = donnees
-
-    
-    #Intrinsic dimension selection
-    d = _T_hdclassif_dim_choice(ev, n, method, threshold, False, noise_ctrl, d_set)
-    #adjust for Python indices
-    d+=1
-    #Set up Qi matrices
-    Q1 = Q.copy()
-    for i in range(K):
-        Q[f'{i}'] = Q[f'{i}'][:, 0:d[i]]
-
-    #a parameter
-    ai = np.repeat(np.NaN, K*(np.max(d))).reshape((K, np.max(d)))
-    if np.isin(model, np.array(['AKJBKQKDK', 'AKJBQKDK'])):
-        for i in range(K):
-            ai[i, 0:d[i]] = ev[i, 0:d[i]]
-
-    elif np.isin(model, np.array(['AKBKQKDK', 'AKBQKDK'])):
-        for i in range(K):
-            ai[i] = np.repeat(np.sum(ev[i, 0:d[i]])/d[i], np.max(d))
-
-    else:
-        a = 0
-        eps = np.sum(prop*(d))
-
-        for i in range(K):
-            a += (np.sum(ev[i, 0:d[i]])*prop[i])
-        
-        ai = np.full((K, np.max(d)), a/eps)
-
-
-    
-    #b parameter
-
-    bi = np.zeros(K)
-  
-    if np.isin(model, np.array(['AKJBKQKDK', 'AKBKQKDK', 'ABKQKDK'])):
-        for i in range(K):
-            remainEV = traceVect[i] - np.sum(ev[i, 0:d[i]])
-
-            bi[i] = remainEV/(p-d[i])
-
-    else:
-        b = 0
-        eps = np.sum(prop*(d))
-
-        for i in range(K):
-            remainEV = traceVect[i] - np.sum(ev[i, 0:d[i]])
-
-            b += (remainEV*prop[i])
-
-        bi[0:K] = b/(min(N, p) - eps)
-
-    return {'model': model, "K": K, 'd':d, 'a':ai, 'b':bi, 'mu':mu, 'prop':prop,
-            'nux':nux, 'ev':ev, 'Q':Q, 'fpcaobj': fpcaobj, 'Q1':Q1}
-
 
 
 # In R, this function doesn't return anything?
 from py_mixture import C_rmahalanobis
 from imahalanobis import C_imahalanobis
 def _T_funhddt_e_step1(fdobj, bigDATA, fdobjy, Wlist, N, p, q, par, clas=0, known=None, kno=None):
+    """
+    Description
+    -----------
+    This function completes the expectation section of the EM algorithm
 
-
+    Parameters
+    ----------
+    fdobj: `FDataBasis` or `list` of `FDataBasis`
+        a `FDataBasis` object that contains functional data fit to a set of
+        basis functions, or a list of these
+    bigDATA: np.ndarray((p+1, N), dtype=np.float64)
+        a product of the matrix W found in Wlist, and the coefficient matrix found in fdobj with a row of ones at the bottom
+    fdobjy: `FDataBasis` or `list` of `FDataBasis`
+        a `FDataBasis` object that contains functional data fit to a set of
+        basis functions, or a list of these
+    Wlist: dict {W, W_m, dety}
+        a dictionary that contains:
+            W: (N, N) or (p, p)
+            W_m: (N, N) or (p, p)
+                The Cholesky of W
+            dety: (float)
+                the Determinant of W
+    N: 'int'
+        Number of rows in the coefficient matrix in fdobj
+    p: 'int'
+        Number of columns in the coefficient matrix in fdobj
+    q: 'int'
+        Number of columns in the coefficient matrix in fdobjy
+    par: 'dict'
+        Output from the M step
+    
+    Returns
+    -------
+    ans: dict {t, mah_pen, mah_pen1, K_pen}
+        t: np.ndarray[np.float64_t, ndim=2], (N, K)
+            Matrix that contains the probabilities of a curve belonging to one of K groups
+        mah_pen: np.ndarray[np.float64_t, ndim=2], (N, p)
+            Matrix that contains imahalanobis distances
+        mah_pen1: np.ndarray[np.float64_t, ndim=2], (N, p)
+            Matrix that contains rmahalanobis distances
+        K_pen: np.ndarray[np.float64_t, ndim=2], (p, N)
+    """
 
     if(type(fdobj) == skfda.FDataBasis):
        MULTI = False
@@ -1303,6 +1309,7 @@ def _T_funhddt_e_step1(fdobj, bigDATA, fdobjy, Wlist, N, p, q, par, clas=0, know
     for i in range(0,K):
         s[i] = np.sum(np.log(a[i, 0:int(d[i])]))
         Qk = Q1[f"{i}"]
+        
         aki = np.sqrt(np.diag(np.concatenate((1/a[i, 0:int(d[i])],np.repeat(1/b[i], p-int(d[i])) ))))
         muki = mu[i]
         Wki = Wlist["W_m"]
@@ -1310,17 +1317,6 @@ def _T_funhddt_e_step1(fdobj, bigDATA, fdobjy, Wlist, N, p, q, par, clas=0, know
         pp = x.shape[1]
         pN = x.shape[0]
         pdi = aki.shape[1]
-        """
-        print("x shape: ", x.shape)
-        print("muki shape: ", muki.shape)
-        print("Wki shape: ", Wki.shape)
-        print("Qk shape: ", Qk.shape)
-        print("aki shape", aki.shape)
-
-        print("pp: ", pp)
-        print("pN: ", pN)
-        print("pdi: ", pdi)
-        """
         new_x = x.copy()
         ans = C_imahalanobis(new_x, muki, Wki, Qk, aki, pp, pN, pdi, np.zeros(N))
         mah_pen[i, :] = ans
@@ -1330,8 +1326,6 @@ def _T_funhddt_e_step1(fdobj, bigDATA, fdobjy, Wlist, N, p, q, par, clas=0, know
         mah_pen1[i, :] = C_rmahalanobis(N, pqp, q, K, i, bigx, y, gam[i, :, :], icovy[i, :, :], delta)
         pi = math.pi
         K_pen[:, i] = (-2 * np.log(prop[i])) + (p + q) * np.log(2 * pi) + s[i] - np.log(dety) + (p - d[i]) * np.log(b[i]) + mah_pen[i, :]
-        
-    
 
     
     A = (-1/2)*K_pen
@@ -1348,54 +1342,61 @@ def _T_funhddt_e_step1(fdobj, bigDATA, fdobjy, Wlist, N, p, q, par, clas=0, know
         for i in range(N):
             if kno[i] == 1:
                 t[i, known[i]] = 1
-    
     return {'t': t, 'L': L, 'mah_pen': mah_pen.T, 'mah_pen1': mah_pen1.T, 'K_pen':K_pen}
 
 
-    """
-    ft = np.exp(K_pen)
-    ft_den = np.sum(ft, axis=1)
-    kcon = - np.apply_along_axis(np.max, 1, K_pen)
-   
-    K_pen = K_pen + np.atleast_2d(kcon).T
-    num = np.exp(K_pen)
-    t = num / np.atleast_2d(np.sum(num, axis=1)).T
-    #TODO might speed up a bit if we use num variable here
-    L1 = np.sum(np.log(ft_den))
-    L = np.sum(np.log(np.sum(np.exp(K_pen), axis=1)) - kcon)
-    trow = np.sum(t, axis=1)
-    tcol = np.sum(t, axis=0)
-
-    if(np.any(tcol<p)):
-        t = (t + 0.0000001) / np.atleast_2d(trow + (K*0.0000001)).T
-    if (clas > 0):
-        t = unkno*t
-
-        for i in range(0,N):
-            if (kno[i] == 1):
-                t[i, int(known[i])] = 1
-    """
-
-    #Nothing is returned here in R
-    # Return this for testing purposes
 
 from py_mixture import C_mstep
 def _T_funhddt_m_step1(fdobj, bigDATA, fdobjy, Wlist, N, p, q, K, t, model, modely, threshold, method, noise_ctrl, d_set, com_dim=101, d_max=100):
     """
-    Parameters:
-        fdobj -> functional data object that contains the coefficient matrix for the first variable in functional data. np.ndarray((1, N), dtype=np.float64) -> np.ndarray((N, p), dtype=np.float64)
-        bigDATA -> np.ndarray((p+1, N), dtype=np.float64)
-        fdobjy -> functional data object that contains the coefficient matrix fo the second variable in functional data. np.ndarray((1, N), dtype=np.float64) -> np.ndarray((N, p), dtype=np.float64)
-        Wlist -> a dictionary containing symmetric matrix W, the Cholesky decomposition of W, and the determinant of W. {'W': np.ndarray((p, p), dtype=np.float64), 'W_m': np.ndarray((p, p), dtype=np.float64), 'dety': float}
-        N -> number of curves
-        p -> Number of points per curve of variable 1
-        q -> Number of points per curve of variable 2
-        K -> number of clusters
-        t -> (Maybe a matrix that contains the probability of each curve belonging to one of the K clusters). np.ndarray((N, k), dtype=np.float64)
-        model -> str
-        modely -> str
-        threshold -> float
-        method -> str
+    Description
+    -----------
+    This function completes the maximization section of the EM algorithm
+
+    Parameters
+    ----------
+        fdobj: `FDataBasis` or `list` of `FDataBasis`
+            a `FDataBasis` object that contains functional data fit to a set of
+            basis functions, or a list of these
+        bigDATA: np.ndarray((p+1, N), dtype=np.float64)
+            a product of the matrix W found in Wlist, and the coefficient matrix found in fdobj with a row of ones at the bottom
+        fdobjy: `FDataBasis` or `list` of `FDataBasis`
+            a `FDataBasis` object that contains functional data fit to a set of
+            basis functions, or a list of these
+        Wlist: dict {W, W_m, dety}
+            a dictionary that contains:
+                W: (N, N) or (p, p)
+                W_m: (N, N) or (p, p)
+                    The Cholesky of W
+                dety: (float)
+                    the Determinant of W
+        N: 'int'
+            Number of rows in the coefficient matrix in fdobj
+        p: 'int'
+            Number of columns in the coefficient matrix in fdobj
+        q: 'int'
+            Number of columns in the coefficient matrix in fdobjy
+        K: 'int'
+          number of clusters
+        t: np.ndarray[np.float64_t, ndim=2], (N, K)
+            Matrix that contains the probabilities of a curve belonging to one of K groups
+        model: `str` or `list` of `str`, default='AKJBKQKDK'
+            the type of model to be used. `tfunHDDC` supports the following
+            model names: `'AKJBKQKDK'`, `'AKJBQKDK'`, `'AKBKQKDK'`, `'AKBQKDK'`, 
+            `'ABKQKDK'`, `'ABQKDK'`. Can be given with any capitilization.
+        modely: `str` or `list` of `str`, default='AKJBKQKDK'
+            the type of model to be used. `tfunHDDC` supports the following
+            model names: `'AKJBKQKDK'`, `'AKJBQKDK'`, `'AKBKQKDK'`, `'AKBQKDK'`, 
+            `'ABKQKDK'`, `'ABQKDK'`. Can be given with any capitilization.
+        threshold : `float` or `list` of `floats`, default=0.1
+            the threshold of the Cattell scree-test used for selecting the
+            group specific intrinsic dimensions
+        method: 'str'
+            Either 'bic,' 'cattell,' or 'grid'
+
+    Returns
+    -------
+    result: dict
     """
     #'list' in R means len(fdobj) > 1 -> MULTI = True
     t = (np.reshape(t, (N, K)))
@@ -1491,6 +1492,7 @@ def _T_funhddt_m_step1(fdobj, bigDATA, fdobjy, Wlist, N, p, q, K, t, model, mode
         Q[f'{i}'] = U
         fpcaobj[f'{i}'] = {'valeurs_propres': valeurs_propres, 'cov': cov, 'U':U}
 
+
     #Intrinsic dimensions selection
     #TODO try refactoring this for numba
     d = _T_hdclassif_dim_choice(ev, n, method, threshold, False, noise_ctrl, d_set)
@@ -1579,154 +1581,32 @@ def _T_funhddt_m_step1(fdobj, bigDATA, fdobjy, Wlist, N, p, q, K, t, model, mode
 
 
 
-
-@nb.njit
-def _mypcat_fd1_Uni(data, W_m, Ti):
-    
-    #Univariate case
-    coefmean = np.zeros(data.shape)
-    n = data.shape[0]
-    ones_matrix = np.ones((1, n))
-    Ti_matrix = Ti[:, np.newaxis]
-    product = np.dot(Ti_matrix, ones_matrix) * data.T
-    coefmean = np.sum(product, axis=0) / np.sum(Ti)
-    # Update fdobj_coefs using sweep equivalent
-    data1 = data - coefmean[:, np.newaxis]
-    n = data.shape[1]
-    v = np.sqrt(Ti)
-    M = np.repeat(1., n).reshape((n, 1))@(v)
-    rep = (M * data1.T).T
-    mat_cov = (rep.T@rep) / np.sum(Ti)
-    cov = (W_m@ mat_cov)@(W_m.T)
-    if not np.all(np.abs(cov-cov.T) < 1.e-12):
-        ind = np.nonzero(cov - cov.T > 1.e-12)
-        for i in ind:
-            cov[i] = cov.T[i]
-
-    valeurs_propres, vecteurs_propres = np.linalg.eig(cov.astype(complex128))
-    for i in range(len(valeurs_propres)):
-        if np.imag(i) > 0:
-            valeurs_propres[i] = 0
-    bj = np.linalg.solve(W_m, np.eye(W_m.shape[0]))@np.ascontiguousarray(np.real(vecteurs_propres))
-
-    return np.real(valeurs_propres), cov, bj
-
-@nb.njit
-def _mypcat_fd1_Multi(data, W_m, Ti):
-
-    #Multivariate here
-    # coefficients = np.zeros((data.shape[1], data.shape[-1]*data.shape[0]))
-    # for i in range(0,len(data)):
-    #     coefficients[:, i*data.shape[-1]] = data[i]
-    coefficients = data.reshape(data.shape[1], data.shape[-1]*data.shape[0])
-
-    coefmean = np.zeros((coefficients.shape))
-
-    for i in range(len(data)):
-        for j in range(data[i].shape[-1]):
-
-            coefmean[:, j] = np.sum(((np.ascontiguousarray(Ti.T)@np.atleast_2d(np.repeat(1., data[i].shape[-1]))).T * data[i].T)[:, i])/np.sum(Ti)
-
-    n = coefficients.shape[1]
-    v = np.sqrt(Ti)
-    M = np.repeat(1., n).reshape((n, 1))@(v)
-    rep = (M * coefficients.T).T
-    mat_cov = (rep.T@rep) / np.sum(Ti)
-    cov = (W_m@ mat_cov)@(W_m.T)
-    if not np.all(np.abs(cov-cov.T) < 1.e-12):
-        ind = np.nonzero(cov - cov.T > 1.e-12)
-        for i in ind:
-            cov[i] = cov.T[i]
-
-    valeurs_propres, vecteurs_propres = np.linalg.eig(cov.astype(complex128))
-    for i in range(len(valeurs_propres)):
-        if np.imag(i) > 0:
-            valeurs_propres[i] = 0
-    bj = np.linalg.solve(W_m, np.eye(W_m.shape[0]))@np.ascontiguousarray(np.real(vecteurs_propres))
-
-    return np.real(valeurs_propres), cov, bj
-
-
-    '''
-    #Univariate here
-    if type(fdobj) == skfda.FDataBasis:
-        temp = fdobj.copy()
-
-        mean_fd = fdobj.copy()
-        #Check this element-wise multiplication
-        coefmean = np.apply_along_axis(np.sum, axis=1, arr=np.atleast_2d(np.atleast_2d(np.atleast_2d(corI).T@np.atleast_2d(np.repeat(1, fdobj.coefficients.shape[1]))).T * temp.coefficients.T)) / np.sum(corI)
-        temp.coefficients = np.apply_along_axis(lambda row: row - coefmean, axis=1, arr=temp.coefficients)
-        mean_fd.coefficients = coefmean
-        coef = temp.coefficients.copy().T
-        rep = (_T_repmat(np.sqrt(corI), n=coef.shape[0], p=1) * coef).T
-        mat_cov = (rep.T@rep) / np.sum(Ti)
-        cov = (Wlist['W_m']@ mat_cov)@(Wlist['W_m'].T)
-        if not check_symmetric(cov, 1.e-12):
-            ind = np.nonzero(cov - cov.T > 1.e-12)
-            cov[ind] = cov.T[ind]
-
-
-        valeurs_propres, vecteurs_propres = scil.eig(cov)
-        #indices = valeurs_propres.argsort()
-        #valeurs_propres = valeurs_propres[indices[::-1]]
-        #vecteurs_propres = vecteurs_propres[indices[::-1]]
-
-        fonctionspropres = fdobj.copy()
-        bj = scil.solve(Wlist['W_m'], np.eye(Wlist['W_m'].shape[0]))@np.real(vecteurs_propres)
-        fonctionspropres.coefficients = bj
-
-        #scores = skfda.misc.inner_product_matrix(temp.basis, fonctionspropres.basis)
-        varprop = valeurs_propres / np.sum(valeurs_propres)
-        pcafd = {'valeurs_propres': np.real(valeurs_propres), 'harmonic': fonctionspropres, 'covariance': cov, 'U':bj, 'meanfd': mean_fd}
-
-    #Multivariate here
-    else:
-        mean_fd = {}
-        temp = fdobj.copy()
-        for i in range(len(fdobj)):
-            #TODO should we start indexing multivariate at 0? or at 1?
-            mean_fd[f'{i}'] = temp[f'{i}'].copy()
-
-
-        for i in range(len(fdobj)):
-            #Check this element-wise multiplication
-            coefmean = np.apply_along_axis(np.sum, axis=1, arr=np.atleast_2d(np.atleast_2d(np.atleast_2d(corI).T@np.atleast_2d(np.repeat(1, fdobj[f'{i}'].coefficients.shape[1]))).T * temp[f'{i}'].coefficients.T)) / np.sum(corI)
-            temp[f'{i}'].coefficients = np.apply_along_axis(lambda row: row - coefmean, axis=1, arr=temp[f'{i}'].coefficients)
-            mean_fd[f'{i}'].coefficients = coefmean
-        
-        #R transposes here
-        coef = temp['0'].coefficients.copy()
-
-        for i in range(1, len(fdobj)):
-            coef = np.c_[coef, temp[f'{i}'].coefficients.copy()]
-
-        rep = (_T_repmat(np.sqrt(corI), n=coef.shape[1], p=1) * coef).T
-        mat_cov = (rep.T@rep) / np.sum(Ti)
-        cov = (Wlist['W_m']@ mat_cov)@(Wlist['W_m'].T)
-
-        valeurs_propres, vecteurs_propres = scil.eig(cov)
-        # indices = valeurs_propres.argsort()
-        # valeurs_propres = valeurs_propres[indices[::-1]]
-        # vecteurs_propres = vecteurs_propres[indices[::-1]]
-
-        bj = scil.solve(Wlist['W_m'], np.eye(Wlist['W_m'].shape[0]))@np.real(vecteurs_propres)
-        
-        fonctionspropres = fdobj['0']
-        fonctionspropres.coefficients = bj
-        scores = (coef@Wlist['W_m'])@bj
-
-        varprop = valeurs_propres/np.sum(valeurs_propres)
-
-        pcafd = {'valeurs_propres': np.real(valeurs_propres), 'harmonic': fonctionspropres, 'scores': scores,
-                 'covariance': cov, 'U':bj, 'varprop': varprop, 'meanfd': mean_fd}
-    '''
-    return pcafd
-
 def _T_mypcat_fd1_Uni(fdobj_coefficients, W_m, Ti):
     """
-    Parameters: fdobj_coefficients -> np.array(())
-    """
+    Description
+    -----------
+    This function completes Principal Component Analysis on Univariate Functional Data
 
+    Parameters
+    ----------
+        fdobj_coefficients: (N, p)
+            a `FDataBasis` object that contains functional data fit to a set of
+            basis functions
+        W_m: (N, N) or (p, p)
+            The Cholesky of W
+        Ti: (N, 1)
+            A column of the probability matrix t
+
+    Returns
+    -------
+        valeurs_propres: (p, 1)
+            Array containing the eigenvalues
+        cov: (p, p)
+            Covariance Matrix
+        bj: (p, p)
+            Principal Component Scores
+
+    """
     Ti = np.atleast_2d(Ti)
 
     coefmean = np.sum(np.transpose(Ti) @ (np.ones((1, fdobj_coefficients.shape[1]))) * fdobj_coefficients, axis=0) / np.sum(Ti)
@@ -1758,6 +1638,33 @@ def _T_mypcat_fd1_Uni(fdobj_coefficients, W_m, Ti):
 
 @nb.njit
 def _T_mypcat_fd1_Multi(data, W_m, Ti, corI):
+    """
+    Description
+    -----------
+    This function completes Principal Component Analysis on Multivariate Functional Data
+
+    Parameters
+    ----------
+        data: list of 'FDataBasis objects' (N, p)
+            a list of`FDataBasis` object that contains functional data fit to a set of
+            basis functions
+        W_m: (N, N) or (p, p)
+            The Cholesky of W
+        Ti: (N, 1)
+            A column of the probability matrix t
+
+    Returns
+    -------
+        valeurs_propres: (p, 1)
+            Array containing the eigenvalues
+        cov: (p, p)
+            Covariance Matrix
+        bj: (p, p)
+            Principal Component Scores
+
+    This function is not included in the R code, thus I could not describe corI
+    """
+
 
     #Multivariate here
 
@@ -1800,97 +1707,32 @@ def _T_mypcat_fd1_Multi(data, W_m, Ti, corI):
     return np.real(valeurs_propres), cov, bj
 
 
-    '''
-    #Univariate here
-    if type(fdobj) == skfda.FDataBasis:
-        temp = fdobj.copy()
-
-        mean_fd = fdobj.copy()
-        #Check this element-wise multiplication
-        coefmean = np.apply_along_axis(np.sum, axis=1, arr=np.atleast_2d(np.atleast_2d(np.atleast_2d(corI).T@np.atleast_2d(np.repeat(1, fdobj.coefficients.shape[1]))).T * temp.coefficients.T)) / np.sum(corI)
-        temp.coefficients = np.apply_along_axis(lambda row: row - coefmean, axis=1, arr=temp.coefficients)
-        mean_fd.coefficients = coefmean
-        coef = temp.coefficients.copy().T
-        rep = (_T_repmat(np.sqrt(corI), n=coef.shape[0], p=1) * coef).T
-        mat_cov = (rep.T@rep) / np.sum(Ti)
-        cov = (Wlist['W_m']@ mat_cov)@(Wlist['W_m'].T)
-        if not check_symmetric(cov, 1.e-12):
-            ind = np.nonzero(cov - cov.T > 1.e-12)
-            cov[ind] = cov.T[ind]
-
-
-        valeurs_propres, vecteurs_propres = scil.eig(cov)
-        #indices = valeurs_propres.argsort()
-        #valeurs_propres = valeurs_propres[indices[::-1]]
-        #vecteurs_propres = vecteurs_propres[indices[::-1]]
-
-        fonctionspropres = fdobj.copy()
-        bj = scil.solve(Wlist['W_m'], np.eye(Wlist['W_m'].shape[0]))@np.real(vecteurs_propres)
-        fonctionspropres.coefficients = bj
-
-        #scores = skfda.misc.inner_product_matrix(temp.basis, fonctionspropres.basis)
-        varprop = valeurs_propres / np.sum(valeurs_propres)
-        pcafd = {'valeurs_propres': np.real(valeurs_propres), 'harmonic': fonctionspropres, 'covariance': cov, 'U':bj, 'meanfd': mean_fd}
-
-    #Multivariate here
-    else:
-        mean_fd = {}
-        temp = fdobj.copy()
-        for i in range(len(fdobj)):
-            #TODO should we start indexing multivariate at 0? or at 1?
-            mean_fd[f'{i}'] = temp[f'{i}'].copy()
-
-
-        for i in range(len(fdobj)):
-            #Check this element-wise multiplication
-            coefmean = np.apply_along_axis(np.sum, axis=1, arr=np.atleast_2d(np.atleast_2d(np.atleast_2d(corI).T@np.atleast_2d(np.repeat(1, fdobj[f'{i}'].coefficients.shape[1]))).T * temp[f'{i}'].coefficients.T)) / np.sum(corI)
-            temp[f'{i}'].coefficients = np.apply_along_axis(lambda row: row - coefmean, axis=1, arr=temp[f'{i}'].coefficients)
-            mean_fd[f'{i}'].coefficients = coefmean
-        
-        #R transposes here
-        coef = temp['0'].coefficients.copy()
-
-        for i in range(1, len(fdobj)):
-            coef = np.c_[coef, temp[f'{i}'].coefficients.copy()]
-
-        rep = (_T_repmat(np.sqrt(corI), n=coef.shape[1], p=1) * coef).T
-        mat_cov = (rep.T@rep) / np.sum(Ti)
-        cov = (Wlist['W_m']@ mat_cov)@(Wlist['W_m'].T)
-
-        valeurs_propres, vecteurs_propres = scil.eig(cov)
-        # indices = valeurs_propres.argsort()
-        # valeurs_propres = valeurs_propres[indices[::-1]]
-        # vecteurs_propres = vecteurs_propres[indices[::-1]]
-
-        bj = scil.solve(Wlist['W_m'], np.eye(Wlist['W_m'].shape[0]))@np.real(vecteurs_propres)
-        
-        fonctionspropres = fdobj['0']
-        fonctionspropres.coefficients = bj
-        scores = (coef@Wlist['W_m'])@bj
-
-        varprop = valeurs_propres/np.sum(valeurs_propres)
-
-        pcafd = {'valeurs_propres': np.real(valeurs_propres), 'harmonic': fonctionspropres, 'scores': scores,
-                 'covariance': cov, 'U':bj, 'varprop': varprop, 'meanfd': mean_fd}
-    '''
-
-def _T_hddc_ari(x, y):
-    if type(x) != np.ndarray:
-        x = np.array(x)
-
-    if type(y) != np.ndarray:
-        y = np.array(y)
-
-    tab = pd.crosstab(x, y).values
-    if np.all(tab.shape == (1,1)): return 1
-    a = np.sum(binom(tab, 2))
-    b = np.sum(binom(np.sum(tab, axis=1), 2)) - a
-    c = np.sum(binom(np.sum(tab, axis=0), 2)) - a
-    d = binom(np.sum(tab), 2) - a - b - c
-    ari = (a - (a + b) * (a + c)/(a+b+c+d))/((a+b+a+c)/2 - (a+b) * (a + c)/(a+b+c+d))
-    return ari
-
 def _T_hdclassif_dim_choice(ev, n, method, threshold, graph, noise_ctrl, d_set):
+    """
+    Description
+    -----------
+    This function determines the optimal amount of dimensions for the model
+
+    Parameters
+    ----------
+    ev: (K, p)
+        A matrix containing the eigenvalues from Principal Component Analysis for each cluster
+    n: (p, p)
+        A column sum of the t matrix
+    method: 'str'
+        Either 'bic,' 'cattell,' or 'grid'
+    threshold : `float` or `list` of `floats`, default=0.1
+        the threshold of the Cattell scree-test used for selecting the group specific intrinsic dimensions
+    graph: True or False
+    noise_ctrl: 'bool'
+    d_set: `int` or `list` of `ints`, default=2
+        list of values to be used for the intrinsic dimension of each group when `d_select='grid'`.
+
+    Returns
+    -------
+    d: (1, K)
+        Matrix containing the dimensions per cluster (?)
+    """
     
     N = np.sum(n)
     prop = n/N
@@ -1986,6 +1828,44 @@ def _T_hdclassif_dim_choice(ev, n, method, threshold, graph, noise_ctrl, d_set):
     return d
 
 def _T_hdclassift_bic(par, p, q, dfconstr='yes'):
+    """
+    Description
+    -----------
+    This function calculates the Bayesian Information Criterion (BIC) and Integrated Completed Likelihood (ICL)
+    for a given statistical model. These criteria are used to evaluate the goodness of fit of the model while
+    penalizing for model complexity.
+
+    Parameters
+    ----------
+    par: `dict`
+        Dictionary containing parameters of the model:
+            - 'model': The model type for clustering.
+            - 'modely': The model type for the Y variable.
+            - 'K': Number of clusters.
+            - 'd': Array of dimensions.
+            - 'b': Array of values for b.
+            - 'a': Array of values for a.
+            - 'N': Number of data points.
+            - 'prop': Proportion of data points in each cluster.
+            - 'ev': Eigenvalues.
+            - 'loglik': Log-likelihood of the model.
+            - 'posterior': Posterior probabilities.
+    p: `int`
+        Number of dimensions for the X variable.
+    q: `int`
+        Number of dimensions for the Y variable.
+    dfconstr: `str`, default='yes'
+        Degrees of freedom constraint.
+
+    Returns
+    -------
+    result: `dict`
+        Dictionary containing:
+            - 'bic': `float`
+                Bayesian Information Criterion value.
+            - 'icl': `float`
+                Integrated Completed Likelihood value.
+    """
     #mux and mu not used, should we get rid of them?
     model = par['model']
     modely = par['modely']
@@ -2045,49 +1925,49 @@ def _T_hdclassift_bic(par, p, q, dfconstr='yes'):
 
     if model == 'AKJBKQKDK':
         m = ro + tot + D + K
-    elif model == "AKBKQKDK":
-        m = ro + tot + 2*K
-    elif model == "ABKQKDK":
-        m = ro + tot + K + 1
-    elif model == "AKJBQKDK":
-        m = ro + tot + D + 1
-    elif model == "AKBQKDK":
-        m = ro + tot + K + 1
-    elif model == "ABQKDK":
-        m = ro + tot + 2
+    else:
+        if model == "AKBKQKDK":
+            m = ro + tot + 2*K
+        elif model == "ABKQKDK":
+            m = ro + tot + K + 1
+        elif model == "AKJBQKDK":
+            m = ro + tot + D + 1
+        elif model == "AKBQKDK":
+            m = ro + tot + K + 1
+        elif model == "ABQKDK":
+            m = ro + tot + 2
 
     if modely == 'EII':
         m += 1
-    elif modely == 'VII':
-        m += K
-    elif modely == 'EEI':
-        m += q
-    elif modely == 'VEI':
-        m += K + q - 1
-    elif modely == 'EVI':
-        m += 1 + K * (q - 1)
-    elif modely == 'VVI':
-        m += K * q
-    elif modely == 'EEE':
-        m += q * (q + 1) // 2
-    elif modely == 'VEE':
-        m += K + q - 1 + q * (q - 1) // 2
-    elif modely == 'EVE':
-        m += 1 + K * (q - 1) + q * (q - 1) // 2
-    elif modely == 'EEV':
-        m += q + K * q * (q - 1) // 2
-    elif modely == 'VVE':
-        m += q * K + q * (q - 1) // 2
-    elif modely == 'VEV':
-        m += K + q - 1 + K * q * (q - 1) // 2
-    elif modely == 'EVV':
-        m += 1 + K * (q - 1) + K * q * (q - 1) // 2
-    elif modely == 'VVV':
-        m += K * q * (q + 1) // 2
-
+    else:
+        if modely == 'VII':
+            m += K
+        elif modely == 'EEI':
+            m += q
+        elif modely == 'VEI':
+            m += K + q - 1
+        elif modely == 'EVI':
+            m += 1 + K * (q - 1)
+        elif modely == 'VVI':
+            m += K * q
+        elif modely == 'EEE':
+            m += q * (q + 1) / 2
+        elif modely == 'VEE':
+            m += K + q - 1 + q * (q - 1) / 2
+        elif modely == 'EVE':
+            m += 1 + K * (q - 1) + q * (q - 1) / 2
+        elif modely == 'EEV':
+            m += q + K * q * (q - 1) / 2
+        elif modely == 'VVE':
+            m += q * K + q * (q - 1) / 2
+        elif modely == 'VEV':
+            m += K + q - 1 + K * q * (q - 1) / 2
+        elif modely == 'EVV':
+            m += 1 + K * (q - 1) + K * q * (q - 1) / 2
+        elif modely == 'VVV':
+            m += K * q * (q + 1) / 2
 
     bic = - (-2*L + m * np.log(N))
-
     t = par['posterior']
     Z = ( (t - np.atleast_2d(np.apply_along_axis(np.max, 1, t)).T) == 0. ) + 0.
     icl = bic - 2*np.sum(Z*np.log(t + 1.e-15))
@@ -2101,15 +1981,14 @@ def _T_hdc_getComplexityt(par, p, q, dfconstr='yes'):
     K = par['K']
     #d should already be adjusted for Python indices
     d = par['d']
-
     #These don't get used
     #b = par['b']
     #a = par['a']
     #mu = par['mu']
     #prop = par['prop']
 
-    ro = K*p + K - 1
 
+    ro = K*p + K - 1
     tot = np.sum(d*(p-(d+1)/2))
     D = np.sum(d)
     d = d[0] + 1
@@ -2159,6 +2038,24 @@ def _T_hdc_getComplexityt(par, p, q, dfconstr='yes'):
     return m
 
 def _T_hdc_getTheModel(model, all2models = False):
+    """
+    Description
+    -----------
+    This function processes the input model parameter to validate, standardize, and map it to predefined model names.
+    It ensures that the input is valid, converts it to the appropriate format, and returns the corresponding model names.
+
+    Parameters
+    ----------
+    model: `list`, `array`, or `str`
+        The input model(s) to be processed. Can be a list or array of model names or numbers, or a single model name or number.
+    all2models: `bool`, default=False
+        If True, and the input model is 'ALL', returns an array of all model names. Otherwise, returns 'ALL'.
+
+    Returns
+    -------
+    new_model: `ndarray`
+        An array of validated and standardized model names.
+    """
     model_in = model
     #is the model a list or array?
     try:
@@ -2230,6 +2127,24 @@ def _T_hdc_getTheModel(model, all2models = False):
 
 
 def _T_hdc_getTheModely(model, all2models = False):
+    """
+    Description
+    -----------
+    This function processes the input model parameter to validate, standardize, and map it to predefined model names for modely.
+    It ensures that the input is valid, converts it to the appropriate format, and returns the corresponding modely names.
+
+    Parameters
+    ----------
+    model: `list`, `array`, or `str`
+        The input modely(s) to be processed. Can be a list or array of modely names or numbers, or a single modely name or number.
+    all2models: `bool`, default=False
+        If True, and the input modely is 'ALL', returns an array of all modely names. Otherwise, returns 'ALL'.
+
+    Returns
+    -------
+    new_model: `ndarray`
+        An array of validated and standardized modely names.
+    """
     model_in = model
     #is the model a list or array?
     try:
@@ -2330,69 +2245,6 @@ def _T_addCommas_single(x):
     '''
     return "{:,.2f}".format(x)
 
-def _T_repmat(v, n, p):
-    M = np.c_[np.repeat(1, n)]@np.atleast_2d(v)
-    M = np.tile(M, p)
-
-    return M
-
-def _T_diago(v):
-    if len(v) == 1:
-        res = v
-    else:
-        res = np.diag(v)
-
-    return res
-"""
-from imahalanobis import py_imahalanobis
-def _T_imahalanobis(x, muk, wk, Qk, aki):
-    res = py_imahalanobis(x, muk, wk, Qk, aki)
-    return res
-"""
-
-
-
-from scipy.linalg.blas import dgemm
-def _T_imahalanobis_lapack(x, muk, wk, Qk, aki):
-    X = x - muk
-    Qi = dgemm(alpha=1, a = wk, b = Qk)
-    XQi = dgemm(alpha=1, a = X, b = Qi)
-    print(XQi.shape)
-    print(aki.shape)
-    proj = dgemm(alpha=1, a = XQi.T, b = aki)
-    res = np.sum(proj **2, axis=1)
-    
-    return res
-"""
-import timeit
-def time_mahalanobis(x, muk, wk, Qk, aki):
-    numpy_time = timeit.timeit('_T_imahalanobis_py(x, muk, wk, Qk, aki)', globals=globals(), number=100000)
-    c_time = timeit.timeit('_T_imahalanobis(x, muk, wk, Qk, aki)', globals=globals(), number=100000)
-    lapack_time = timeit.timeit('_T_imahalanobis_lapack(x, muk, wk, Qk, aki)', globals=globals(), number=100000)
-
-    print(f"NumPy: {numpy_time}\nCython: {c_time}\nSciPy LAPACK: {lapack_time}")
-"""
-@nb.njit
-def _T_imahalanobis_py(x, muk, wk, Qk, aki):
-    
-    #C code not working for now, try compiling dll on current machine?
-    #so_file = "./src/TFunHDDC.so"
-    #c_lib = ctypes.CDLL(so_file)
-
-    p = x.shape[1]
-    N = x.shape[0]
-    
-    X = x - muk
-
-    Qi = wk@Qk
-
-    #xQu = np.matmul(X, Qi)
-
-    proj = (X@Qi)@aki
-
-    res = np.sum(proj ** 2, axis=1)
-
-    return res
 
 def _T_estimateTime(stage, start_time=0, totmod=0):
     curwidth = get_terminal_size()[0]

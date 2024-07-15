@@ -6,7 +6,40 @@ cdef extern from "src/imahalanobis_wrapper.h":
     void c_C_imahalanobis(double * x, double * muk, double * wk, double * Qk, double * aki, int * pp, int * pN, int * pdi, double *res);
 
 def C_imahalanobis(np.ndarray[np.float64_t, ndim=2]x, np.ndarray[np.float64_t, ndim=1]muk, np.ndarray[np.float64_t, ndim=2]wk, np.ndarray[np.float64_t, ndim=2]Qk, np.ndarray[np.float64_t, ndim=2]aki, int pp, int pN, int pdi, np.ndarray[np.float64_t, ndim=1]res):
-    
+    """
+    Description
+    -----------
+    The C_imahalanobis function is a Cython wrapper for the c_C_imahalanobis function found in src/mixture_wrapper.h, which loads a .dll file that calls the C_imahalanobis function found in the R API.
+
+    Parameters
+    ----------
+        x: np.ndarray[np.float64_t, ndim=2], (pN, pp)
+            Coefficient matrix
+        mu: np.ndarray[np.float64_t, ndim=1], (pp)
+
+        wk: [np.float64_t, ndim=2], (pN, pN) or (pp, pp)
+
+        Qk: np.ndarray[np.float64_t, ndim=2], (pp, pp)
+            Coefficient matrix of all eigenfunctions
+        
+        aki: [np.float64_t, ndim=2], (pp, pdi)
+        
+        pp: (int)
+            Number of columns in coefficient matrix x. Also the number of points per curves
+        
+        pN: (int)
+            Number of rows in coefficient matrix x. Also the number of curves
+
+        pdi: (int)
+            Number of columns in aki
+
+        res: np.ndarray[np.float64_t, ndim=1], (N)
+
+    Returns
+    -------
+        res: np.ndarray[np.float64_t, ndim=1], (N)
+
+    """
     cdef int pp_val = pp
     cdef int pN_val = pN
     cdef int pdi_val = pdi

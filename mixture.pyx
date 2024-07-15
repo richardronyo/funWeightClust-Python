@@ -7,7 +7,43 @@ cdef extern from "src/mixture_wrapper.h":
     void c_C_rmahalanobis(int *NN, int *pp,int *qq,int *GG, int *gg, double *x,double *y, double *gam, double *cov, double *delta)
 
 def C_mstep(str modely, int NN, int pp, int qq, int GG, pi, x, y, t, gami, covyi, icovyi, logi, float mtol, int mmax):
-    
+    """
+    Description
+    -----------
+        The C_mstep function is a Cython wrapper for the C function c_C_mstep found in src/mixture_wrapper.h, which loads a .dll file that calls the C_mstep function found in the R API.
+
+    Parameters
+    -----------
+        modely: (str)
+            String that determines which y-model the code is supposed to use
+        NN: (int)
+            Number of rows in coefficient matrix x. Also the number of curves
+        pp: (int)
+            Number of columns in coefficient matrix x. Also the number of points per curves
+        qq: (int)
+            Number of columns in matrix y_ptr
+        GG: (int)
+            Number of clusters
+        x: np.ndarray[np.float64_t, ndim=2], (N, p)
+            Coefficient matrix
+        y: np.ndarray[np.float64_t, ndim=2], (N, q)
+            Coefficient matrix
+        t: np.ndarray[np.float64_t, ndim=2], (N, K)
+            Matrix that contains the probabilities of a curve belonging to one of K groups
+        
+        gami: np.ndarray[np.float64_t, ndim=2], (K, q*(p+1))
+        covyi: np.ndarray[np.float64_t, ndim=2], (K, q*q)
+        icovyi: np.ndarray[np.float64_t, ndim=2], (K, q*q)
+        logi: np.ndarray[np.float64_t, ndim=1], (K)
+
+    Returns
+    -------
+        gami: np.ndarray[np.float64_t, ndim=2], (K, q*(p+1))
+        covyi: np.ndarray[np.float64_t, ndim=2], (K, q*q)
+        icovyi: np.ndarray[np.float64_t, ndim=2], (K, q*q)
+        logi: np.ndarray[np.float64_t, ndim=1], (K)
+
+    """
     cdef int NN_val = NN
     cdef int pp_val = pp
     cdef int qq_val = qq
@@ -39,6 +75,33 @@ def C_mstep(str modely, int NN, int pp, int qq, int GG, pi, x, y, t, gami, covyi
     return (final_gami, final_covyi, final_icovyi, logi)
 
 def C_rmahalanobis(int NN, int pp, int qq, int GG, int gg, np.ndarray[np.float64_t, ndim=2] x, np.ndarray[np.float64_t, ndim=2] y, np.ndarray[np.float64_t, ndim=2] gam, np.ndarray[np.float64_t, ndim=2] cov, np.ndarray[np.float64_t, ndim=1] delta):
+    """
+    Description
+    -----------
+    The C_rmahalanobis function is a Cython wrapper for the c_C_rmahalanobis function found in src/mixture_wrapper.h, which loads a .dll file that calls the C_rmahalanobis function found in the R API.
+
+    Parameters
+    ----------
+        NN: (int)
+            Number of rows in coefficient matrix x. Also the number of curves
+        pp: (int)
+            Number of columns in coefficient matrix x. Also the number of points per curves
+        qq: (int)
+            Number of columns in matrix y_ptr
+        GG: (int)
+            Number of clusters
+        x: np.ndarray[np.float64_t, ndim=2], (N, p)
+            Coefficient matrix
+        y: np.ndarray[np.float64_t, ndim=2], (N, q)
+            Coefficient matrix
+        t: np.ndarray[np.float64_t, ndim=2], (N, K)
+            Matrix that contains the probabilities of a curve belonging to one of K groups
+
+        gam: np.ndarray[np.float64_t, ndim=2] (K, q*(p+1))
+        cov: np.ndarray[np.float64_t, ndim=2] (K, q*q)
+        delta: (double)
+            The mahalanobis distance between x and y.
+    """
     # Ensure arrays are C-contiguous
     cdef np.ndarray[np.float64_t, ndim=2] new_x = np.ascontiguousarray(np.transpose(x))
     cdef np.ndarray[np.float64_t, ndim=2] new_y = np.ascontiguousarray(np.transpose(y))
