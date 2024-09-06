@@ -1,4 +1,14 @@
 #include "imahalanobis.h"
+void print_mat(const char *name, double *matrix, int rows, int cols) {
+    printf("%s:\n", name);
+    for (int i = 0; i < rows; i++) {
+        for (int j = 0; j < cols; j++) {
+            printf("%10.4f ", matrix[i * cols + j]);
+        }
+        printf("\n");
+    }
+    printf("\n");
+}
 
 void C_imahalanobis(double * x, double * muk, double * wk,
                     double * Qk, double * aki,
@@ -28,19 +38,17 @@ void C_imahalanobis(double * x, double * muk, double * wk,
 
   // Qi <- wk %*% Qk
   matrix_mult(wk, Qk, p, p, di, Qi);
+  
   // Rprintf("Calculated Qi %f\n", Qi[0]);
-
   // proj <- (X %*% Qi) %*% aki
   matrix_mult(x, Qi, N, p, di, xQi);
   // Rprintf("Calculated xQi %f\n", xQi[0]);
   matrix_mult(xQi, aki, N, di, di, proj);
   // Rprintf("Calculated proj %f\n", proj[0]);
-
   // res_old <- rowSums(proj ^ 2)
   for(i = 0; i < N*di; i++) proj[i] = proj[i]*proj[i];
   row_sums(proj, N, di, res);
   // Rprintf("Calculated row sums\n");
-
   // free allocated memory
   free(Qi);
   free(xQi);

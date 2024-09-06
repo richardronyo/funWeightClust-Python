@@ -2,14 +2,11 @@ from libc.stdlib cimport malloc, free
 cimport numpy as np
 import numpy as np
 
-cdef extern from "src/imahalanobis_wrapper.h":
-    void c_C_imahalanobis(double * x, double * muk, double * wk, double * Qk, double * aki, int * pp, int * pN, int * pdi, double *res);
+cdef extern from "src/imahalanobis.h":
+    void C_imahalanobis(double * x, double * muk, double * wk, double * Qk, double * aki, int * pp, int * pN, int * pdi, double *res);
 
-def C_imahalanobis(np.ndarray[np.float64_t, ndim=2]x, np.ndarray[np.float64_t, ndim=1]muk, np.ndarray[np.float64_t, ndim=2]wk, np.ndarray[np.float64_t, ndim=2]Qk, np.ndarray[np.float64_t, ndim=2]aki, int pp, int pN, int pdi, np.ndarray[np.float64_t, ndim=1]res):
-    """
-    Description
-    -----------
-    The C_imahalanobis function is a Cython wrapper for the c_C_imahalanobis function found in src/mixture_wrapper.h, which loads a .dll file that calls the C_imahalanobis function found in the R API.
+def imahalanobis(np.ndarray[np.float64_t, ndim=2]x, np.ndarray[np.float64_t, ndim=1]muk, np.ndarray[np.float64_t, ndim=2]wk, np.ndarray[np.float64_t, ndim=2]Qk, np.ndarray[np.float64_t, ndim=2]aki, int pp, int pN, int pdi, np.ndarray[np.float64_t, ndim=1]res):
+    """The C_imahalanobis function is a Cython wrapper for the c_C_imahalanobis function found in src/mixture_wrapper.h, which loads a .dll file that calls the C_imahalanobis function found in the R API.
 
     Parameters
     ----------
@@ -38,7 +35,6 @@ def C_imahalanobis(np.ndarray[np.float64_t, ndim=2]x, np.ndarray[np.float64_t, n
     Returns
     -------
         res: np.ndarray[np.float64_t, ndim=1], (N)
-
     """
     cdef int pp_val = pp
     cdef int pN_val = pN
@@ -51,7 +47,7 @@ def C_imahalanobis(np.ndarray[np.float64_t, ndim=2]x, np.ndarray[np.float64_t, n
     cdef np.ndarray[np.float64_t, ndim=2] new_aki = np.ascontiguousarray(np.transpose(aki))
     cdef np.ndarray[np.float64_t, ndim=1] new_res = np.ascontiguousarray(np.transpose(res))
 
-    c_C_imahalanobis(<double*>new_x.data, <double*>new_muk.data, <double*>new_wk.data, <double*>new_Qk.data, <double*>new_aki.data, &pp_val, &pN_val, &pdi_val, <double*>new_res.data)
+    C_imahalanobis(<double*>new_x.data, <double*>new_muk.data, <double*>new_wk.data, <double*>new_Qk.data, <double*>new_aki.data, &pp_val, &pN_val, &pdi_val, <double*>new_res.data)
 
     return new_res
     

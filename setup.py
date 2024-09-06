@@ -13,10 +13,8 @@ extensions = [
     ),
     Extension(
         "imahalanobis",
-        sources=["imahalanobis.pyx", "src/imahalanobis_wrapper.c"],
+        sources=["imahalanobis.pyx", "src/imahalanobis.c", "src/TFunHDDC.c"],
         include_dirs=[np.get_include()],
-        libraries=["TFunHDDC"],
-        library_dirs=["src"]
     )
 ]
 

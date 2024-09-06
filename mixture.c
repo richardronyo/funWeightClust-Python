@@ -4,18 +4,18 @@
 {
     "distutils": {
         "depends": [
-            "C:\\Users\\RoNyo\\Desktop\\Research\\funWeightClust-Python\\venv\\Lib\\site-packages\\numpy\\core\\include\\numpy\\arrayobject.h",
-            "C:\\Users\\RoNyo\\Desktop\\Research\\funWeightClust-Python\\venv\\Lib\\site-packages\\numpy\\core\\include\\numpy\\arrayscalars.h",
-            "C:\\Users\\RoNyo\\Desktop\\Research\\funWeightClust-Python\\venv\\Lib\\site-packages\\numpy\\core\\include\\numpy\\ndarrayobject.h",
-            "C:\\Users\\RoNyo\\Desktop\\Research\\funWeightClust-Python\\venv\\Lib\\site-packages\\numpy\\core\\include\\numpy\\ndarraytypes.h",
-            "C:\\Users\\RoNyo\\Desktop\\Research\\funWeightClust-Python\\venv\\Lib\\site-packages\\numpy\\core\\include\\numpy\\ufuncobject.h",
+            "C:\\Users\\RoNyo\\Desktop\\Research\\skewFunHDDC\\venv\\Lib\\site-packages\\numpy\\core\\include\\numpy\\arrayobject.h",
+            "C:\\Users\\RoNyo\\Desktop\\Research\\skewFunHDDC\\venv\\Lib\\site-packages\\numpy\\core\\include\\numpy\\arrayscalars.h",
+            "C:\\Users\\RoNyo\\Desktop\\Research\\skewFunHDDC\\venv\\Lib\\site-packages\\numpy\\core\\include\\numpy\\ndarrayobject.h",
+            "C:\\Users\\RoNyo\\Desktop\\Research\\skewFunHDDC\\venv\\Lib\\site-packages\\numpy\\core\\include\\numpy\\ndarraytypes.h",
+            "C:\\Users\\RoNyo\\Desktop\\Research\\skewFunHDDC\\venv\\Lib\\site-packages\\numpy\\core\\include\\numpy\\ufuncobject.h",
             "src\\mixture_wrapper.h"
         ],
         "include_dirs": [
-            "C:\\Users\\RoNyo\\Desktop\\Research\\funWeightClust-Python\\venv\\Lib\\site-packages\\numpy\\core\\include"
+            "C:\\Users\\RoNyo\\Desktop\\Research\\skewFunHDDC\\venv\\Lib\\site-packages\\numpy\\core\\include"
         ],
         "libraries": [
-            "src/funclustweight"
+            "funclustweight"
         ],
         "library_dirs": [
             "src"

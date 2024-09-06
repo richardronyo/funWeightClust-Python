@@ -4,26 +4,21 @@
 {
     "distutils": {
         "depends": [
-            "C:\\Users\\RoNyo\\Desktop\\Research\\funWeightClust-Python\\venv\\Lib\\site-packages\\numpy\\core\\include\\numpy\\arrayobject.h",
-            "C:\\Users\\RoNyo\\Desktop\\Research\\funWeightClust-Python\\venv\\Lib\\site-packages\\numpy\\core\\include\\numpy\\arrayscalars.h",
-            "C:\\Users\\RoNyo\\Desktop\\Research\\funWeightClust-Python\\venv\\Lib\\site-packages\\numpy\\core\\include\\numpy\\ndarrayobject.h",
-            "C:\\Users\\RoNyo\\Desktop\\Research\\funWeightClust-Python\\venv\\Lib\\site-packages\\numpy\\core\\include\\numpy\\ndarraytypes.h",
-            "C:\\Users\\RoNyo\\Desktop\\Research\\funWeightClust-Python\\venv\\Lib\\site-packages\\numpy\\core\\include\\numpy\\ufuncobject.h",
-            "src\\imahalanobis_wrapper.h"
+            "C:\\Users\\RoNyo\\Desktop\\Research\\skewFunHDDC\\venv\\Lib\\site-packages\\numpy\\core\\include\\numpy\\arrayobject.h",
+            "C:\\Users\\RoNyo\\Desktop\\Research\\skewFunHDDC\\venv\\Lib\\site-packages\\numpy\\core\\include\\numpy\\arrayscalars.h",
+            "C:\\Users\\RoNyo\\Desktop\\Research\\skewFunHDDC\\venv\\Lib\\site-packages\\numpy\\core\\include\\numpy\\ndarrayobject.h",
+            "C:\\Users\\RoNyo\\Desktop\\Research\\skewFunHDDC\\venv\\Lib\\site-packages\\numpy\\core\\include\\numpy\\ndarraytypes.h",
+            "C:\\Users\\RoNyo\\Desktop\\Research\\skewFunHDDC\\venv\\Lib\\site-packages\\numpy\\core\\include\\numpy\\ufuncobject.h",
+            "src\\imahalanobis.h"
         ],
         "include_dirs": [
-            "C:\\Users\\RoNyo\\Desktop\\Research\\funWeightClust-Python\\venv\\Lib\\site-packages\\numpy\\core\\include"
-        ],
-        "libraries": [
-            "src/TFunHDDC"
-        ],
-        "library_dirs": [
-            "src"
+            "C:\\Users\\RoNyo\\Desktop\\Research\\skewFunHDDC\\venv\\Lib\\site-packages\\numpy\\core\\include"
         ],
         "name": "imahalanobis",
         "sources": [
             "imahalanobis.pyx",
-            "src/imahalanobis_wrapper.c"
+            "src/imahalanobis.c",
+            "src/TFunHDDC.c"
         ]
     },
     "module_name": "imahalanobis"
@@ -1249,7 +1244,7 @@ static CYTHON_INLINE float __PYX_NAN() {
 #define __PYX_HAVE__imahalanobis
 #define __PYX_HAVE_API__imahalanobis
 /* Early includes */
-#include "src/imahalanobis_wrapper.h"
+#include "src/imahalanobis.h"
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -2639,7 +2634,6 @@ static const char __pyx_k_ImportError[] = "ImportError";
 static const char __pyx_k_imahalanobis[] = "imahalanobis";
 static const char __pyx_k_initializing[] = "_initializing";
 static const char __pyx_k_is_coroutine[] = "_is_coroutine";
-static const char __pyx_k_C_imahalanobis[] = "C_imahalanobis";
 static const char __pyx_k_imahalanobis_pyx[] = "imahalanobis.pyx";
 static const char __pyx_k_ascontiguousarray[] = "ascontiguousarray";
 static const char __pyx_k_asyncio_coroutines[] = "asyncio.coroutines";
@@ -2647,7 +2641,7 @@ static const char __pyx_k_cline_in_traceback[] = "cline_in_traceback";
 static const char __pyx_k_numpy_core_multiarray_failed_to[] = "numpy.core.multiarray failed to import";
 static const char __pyx_k_numpy_core_umath_failed_to_impor[] = "numpy.core.umath failed to import";
 /* #### Code section: decls ### */
-static PyObject *__pyx_pf_12imahalanobis_C_imahalanobis(CYTHON_UNUSED PyObject *__pyx_self, PyArrayObject *__pyx_v_x, PyArrayObject *__pyx_v_muk, PyArrayObject *__pyx_v_wk, PyArrayObject *__pyx_v_Qk, PyArrayObject *__pyx_v_aki, int __pyx_v_pp, int __pyx_v_pN, int __pyx_v_pdi, PyArrayObject *__pyx_v_res); /* proto */
+static PyObject *__pyx_pf_12imahalanobis_imahalanobis(CYTHON_UNUSED PyObject *__pyx_self, PyArrayObject *__pyx_v_x, PyArrayObject *__pyx_v_muk, PyArrayObject *__pyx_v_wk, PyArrayObject *__pyx_v_Qk, PyArrayObject *__pyx_v_aki, int __pyx_v_pp, int __pyx_v_pN, int __pyx_v_pdi, PyArrayObject *__pyx_v_res); /* proto */
 /* #### Code section: late_includes ### */
 /* #### Code section: module_state ### */
 typedef struct {
@@ -2713,7 +2707,6 @@ typedef struct {
   PyTypeObject *__pyx_ptype_5numpy_ufunc;
   #if CYTHON_USE_MODULE_STATE
   #endif
-  PyObject *__pyx_n_s_C_imahalanobis;
   PyObject *__pyx_n_s_ImportError;
   PyObject *__pyx_n_s_Qk;
   PyObject *__pyx_n_s__3;
@@ -2814,7 +2807,6 @@ static int __pyx_m_clear(PyObject *m) {
   Py_CLEAR(clear_module_state->__pyx_ptype_5numpy_flexible);
   Py_CLEAR(clear_module_state->__pyx_ptype_5numpy_character);
   Py_CLEAR(clear_module_state->__pyx_ptype_5numpy_ufunc);
-  Py_CLEAR(clear_module_state->__pyx_n_s_C_imahalanobis);
   Py_CLEAR(clear_module_state->__pyx_n_s_ImportError);
   Py_CLEAR(clear_module_state->__pyx_n_s_Qk);
   Py_CLEAR(clear_module_state->__pyx_n_s__3);
@@ -2893,7 +2885,6 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
   Py_VISIT(traverse_module_state->__pyx_ptype_5numpy_flexible);
   Py_VISIT(traverse_module_state->__pyx_ptype_5numpy_character);
   Py_VISIT(traverse_module_state->__pyx_ptype_5numpy_ufunc);
-  Py_VISIT(traverse_module_state->__pyx_n_s_C_imahalanobis);
   Py_VISIT(traverse_module_state->__pyx_n_s_ImportError);
   Py_VISIT(traverse_module_state->__pyx_n_s_Qk);
   Py_VISIT(traverse_module_state->__pyx_n_s__3);
@@ -3002,7 +2993,6 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
 #define __pyx_ptype_5numpy_ufunc __pyx_mstate_global->__pyx_ptype_5numpy_ufunc
 #if CYTHON_USE_MODULE_STATE
 #endif
-#define __pyx_n_s_C_imahalanobis __pyx_mstate_global->__pyx_n_s_C_imahalanobis
 #define __pyx_n_s_ImportError __pyx_mstate_global->__pyx_n_s_ImportError
 #define __pyx_n_s_Qk __pyx_mstate_global->__pyx_n_s_Qk
 #define __pyx_n_s__3 __pyx_mstate_global->__pyx_n_s__3
@@ -4310,24 +4300,24 @@ static CYTHON_INLINE NPY_DATETIMEUNIT __pyx_f_5numpy_get_datetime64_unit(PyObjec
 }
 
 /* "imahalanobis.pyx":8
- *     void c_C_imahalanobis(double * x, double * muk, double * wk, double * Qk, double * aki, int * pp, int * pN, int * pdi, double *res);
+ *     void C_imahalanobis(double * x, double * muk, double * wk, double * Qk, double * aki, int * pp, int * pN, int * pdi, double *res);
  * 
- * def C_imahalanobis(np.ndarray[np.float64_t, ndim=2]x, np.ndarray[np.float64_t, ndim=1]muk, np.ndarray[np.float64_t, ndim=2]wk, np.ndarray[np.float64_t, ndim=2]Qk, np.ndarray[np.float64_t, ndim=2]aki, int pp, int pN, int pdi, np.ndarray[np.float64_t, ndim=1]res):             # <<<<<<<<<<<<<<
- *     """
- *     Description
+ * def imahalanobis(np.ndarray[np.float64_t, ndim=2]x, np.ndarray[np.float64_t, ndim=1]muk, np.ndarray[np.float64_t, ndim=2]wk, np.ndarray[np.float64_t, ndim=2]Qk, np.ndarray[np.float64_t, ndim=2]aki, int pp, int pN, int pdi, np.ndarray[np.float64_t, ndim=1]res):             # <<<<<<<<<<<<<<
+ *     """The C_imahalanobis function is a Cython wrapper for the c_C_imahalanobis function found in src/mixture_wrapper.h, which loads a .dll file that calls the C_imahalanobis function found in the R API.
+ * 
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_12imahalanobis_1C_imahalanobis(PyObject *__pyx_self, 
+static PyObject *__pyx_pw_12imahalanobis_1imahalanobis(PyObject *__pyx_self, 
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
 PyObject *__pyx_args, PyObject *__pyx_kwds
 #endif
 ); /*proto*/
-PyDoc_STRVAR(__pyx_doc_12imahalanobis_C_imahalanobis, "\n    Description\n    -----------\n    The C_imahalanobis function is a Cython wrapper for the c_C_imahalanobis function found in src/mixture_wrapper.h, which loads a .dll file that calls the C_imahalanobis function found in the R API.\n\n    Parameters\n    ----------\n        x: np.ndarray[np.float64_t, ndim=2], (pN, pp)\n            Coefficient matrix\n        mu: np.ndarray[np.float64_t, ndim=1], (pp)\n\n        wk: [np.float64_t, ndim=2], (pN, pN) or (pp, pp)\n\n        Qk: np.ndarray[np.float64_t, ndim=2], (pp, pp)\n            Coefficient matrix of all eigenfunctions\n        \n        aki: [np.float64_t, ndim=2], (pp, pdi)\n        \n        pp: (int)\n            Number of columns in coefficient matrix x. Also the number of points per curves\n        \n        pN: (int)\n            Number of rows in coefficient matrix x. Also the number of curves\n\n        pdi: (int)\n            Number of columns in aki\n\n        res: np.ndarray[np.float64_t, ndim=1], (N)\n\n    Returns\n    -------\n        res: np.ndarray[np.float64_t, ndim=1], (N)\n\n    ");
-static PyMethodDef __pyx_mdef_12imahalanobis_1C_imahalanobis = {"C_imahalanobis", (PyCFunction)(void*)(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_12imahalanobis_1C_imahalanobis, __Pyx_METH_FASTCALL|METH_KEYWORDS, __pyx_doc_12imahalanobis_C_imahalanobis};
-static PyObject *__pyx_pw_12imahalanobis_1C_imahalanobis(PyObject *__pyx_self, 
+PyDoc_STRVAR(__pyx_doc_12imahalanobis_imahalanobis, "The C_imahalanobis function is a Cython wrapper for the c_C_imahalanobis function found in src/mixture_wrapper.h, which loads a .dll file that calls the C_imahalanobis function found in the R API.\n\n    Parameters\n    ----------\n        x: np.ndarray[np.float64_t, ndim=2], (pN, pp)\n            Coefficient matrix\n        mu: np.ndarray[np.float64_t, ndim=1], (pp)\n\n        wk: [np.float64_t, ndim=2], (pN, pN) or (pp, pp)\n\n        Qk: np.ndarray[np.float64_t, ndim=2], (pp, pp)\n            Coefficient matrix of all eigenfunctions\n        \n        aki: [np.float64_t, ndim=2], (pp, pdi)\n        \n        pp: (int)\n            Number of columns in coefficient matrix x. Also the number of points per curves\n        \n        pN: (int)\n            Number of rows in coefficient matrix x. Also the number of curves\n\n        pdi: (int)\n            Number of columns in aki\n\n        res: np.ndarray[np.float64_t, ndim=1], (N)\n\n    Returns\n    -------\n        res: np.ndarray[np.float64_t, ndim=1], (N)\n    ");
+static PyMethodDef __pyx_mdef_12imahalanobis_1imahalanobis = {"imahalanobis", (PyCFunction)(void*)(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_12imahalanobis_1imahalanobis, __Pyx_METH_FASTCALL|METH_KEYWORDS, __pyx_doc_12imahalanobis_imahalanobis};
+static PyObject *__pyx_pw_12imahalanobis_1imahalanobis(PyObject *__pyx_self, 
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
@@ -4353,7 +4343,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   int __pyx_clineno = 0;
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
-  __Pyx_RefNannySetupContext("C_imahalanobis (wrapper)", 0);
+  __Pyx_RefNannySetupContext("imahalanobis (wrapper)", 0);
   #if !CYTHON_METH_FASTCALL
   #if CYTHON_ASSUME_SAFE_MACROS
   __pyx_nargs = PyTuple_GET_SIZE(__pyx_args);
@@ -4405,7 +4395,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
         }
         else if (unlikely(PyErr_Occurred())) __PYX_ERR(1, 8, __pyx_L3_error)
         else {
-          __Pyx_RaiseArgtupleInvalid("C_imahalanobis", 1, 9, 9, 1); __PYX_ERR(1, 8, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("imahalanobis", 1, 9, 9, 1); __PYX_ERR(1, 8, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  2:
@@ -4415,7 +4405,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
         }
         else if (unlikely(PyErr_Occurred())) __PYX_ERR(1, 8, __pyx_L3_error)
         else {
-          __Pyx_RaiseArgtupleInvalid("C_imahalanobis", 1, 9, 9, 2); __PYX_ERR(1, 8, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("imahalanobis", 1, 9, 9, 2); __PYX_ERR(1, 8, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  3:
@@ -4425,7 +4415,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
         }
         else if (unlikely(PyErr_Occurred())) __PYX_ERR(1, 8, __pyx_L3_error)
         else {
-          __Pyx_RaiseArgtupleInvalid("C_imahalanobis", 1, 9, 9, 3); __PYX_ERR(1, 8, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("imahalanobis", 1, 9, 9, 3); __PYX_ERR(1, 8, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  4:
@@ -4435,7 +4425,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
         }
         else if (unlikely(PyErr_Occurred())) __PYX_ERR(1, 8, __pyx_L3_error)
         else {
-          __Pyx_RaiseArgtupleInvalid("C_imahalanobis", 1, 9, 9, 4); __PYX_ERR(1, 8, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("imahalanobis", 1, 9, 9, 4); __PYX_ERR(1, 8, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  5:
@@ -4445,7 +4435,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
         }
         else if (unlikely(PyErr_Occurred())) __PYX_ERR(1, 8, __pyx_L3_error)
         else {
-          __Pyx_RaiseArgtupleInvalid("C_imahalanobis", 1, 9, 9, 5); __PYX_ERR(1, 8, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("imahalanobis", 1, 9, 9, 5); __PYX_ERR(1, 8, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  6:
@@ -4455,7 +4445,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
         }
         else if (unlikely(PyErr_Occurred())) __PYX_ERR(1, 8, __pyx_L3_error)
         else {
-          __Pyx_RaiseArgtupleInvalid("C_imahalanobis", 1, 9, 9, 6); __PYX_ERR(1, 8, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("imahalanobis", 1, 9, 9, 6); __PYX_ERR(1, 8, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  7:
@@ -4465,7 +4455,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
         }
         else if (unlikely(PyErr_Occurred())) __PYX_ERR(1, 8, __pyx_L3_error)
         else {
-          __Pyx_RaiseArgtupleInvalid("C_imahalanobis", 1, 9, 9, 7); __PYX_ERR(1, 8, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("imahalanobis", 1, 9, 9, 7); __PYX_ERR(1, 8, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  8:
@@ -4475,12 +4465,12 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
         }
         else if (unlikely(PyErr_Occurred())) __PYX_ERR(1, 8, __pyx_L3_error)
         else {
-          __Pyx_RaiseArgtupleInvalid("C_imahalanobis", 1, 9, 9, 8); __PYX_ERR(1, 8, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("imahalanobis", 1, 9, 9, 8); __PYX_ERR(1, 8, __pyx_L3_error)
         }
       }
       if (unlikely(kw_args > 0)) {
         const Py_ssize_t kwd_pos_args = __pyx_nargs;
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values + 0, kwd_pos_args, "C_imahalanobis") < 0)) __PYX_ERR(1, 8, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values + 0, kwd_pos_args, "imahalanobis") < 0)) __PYX_ERR(1, 8, __pyx_L3_error)
       }
     } else if (unlikely(__pyx_nargs != 9)) {
       goto __pyx_L5_argtuple_error;
@@ -4507,7 +4497,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   }
   goto __pyx_L6_skip;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("C_imahalanobis", 1, 9, 9, __pyx_nargs); __PYX_ERR(1, 8, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("imahalanobis", 1, 9, 9, __pyx_nargs); __PYX_ERR(1, 8, __pyx_L3_error)
   __pyx_L6_skip:;
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L3_error:;
@@ -4517,7 +4507,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
       __Pyx_Arg_XDECREF_FASTCALL(values[__pyx_temp]);
     }
   }
-  __Pyx_AddTraceback("imahalanobis.C_imahalanobis", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("imahalanobis.imahalanobis", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
@@ -4527,7 +4517,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_Qk), __pyx_ptype_5numpy_ndarray, 1, "Qk", 0))) __PYX_ERR(1, 8, __pyx_L1_error)
   if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_aki), __pyx_ptype_5numpy_ndarray, 1, "aki", 0))) __PYX_ERR(1, 8, __pyx_L1_error)
   if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_res), __pyx_ptype_5numpy_ndarray, 1, "res", 0))) __PYX_ERR(1, 8, __pyx_L1_error)
-  __pyx_r = __pyx_pf_12imahalanobis_C_imahalanobis(__pyx_self, __pyx_v_x, __pyx_v_muk, __pyx_v_wk, __pyx_v_Qk, __pyx_v_aki, __pyx_v_pp, __pyx_v_pN, __pyx_v_pdi, __pyx_v_res);
+  __pyx_r = __pyx_pf_12imahalanobis_imahalanobis(__pyx_self, __pyx_v_x, __pyx_v_muk, __pyx_v_wk, __pyx_v_Qk, __pyx_v_aki, __pyx_v_pp, __pyx_v_pN, __pyx_v_pdi, __pyx_v_res);
 
   /* function exit code */
   goto __pyx_L0;
@@ -4544,7 +4534,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_12imahalanobis_C_imahalanobis(CYTHON_UNUSED PyObject *__pyx_self, PyArrayObject *__pyx_v_x, PyArrayObject *__pyx_v_muk, PyArrayObject *__pyx_v_wk, PyArrayObject *__pyx_v_Qk, PyArrayObject *__pyx_v_aki, int __pyx_v_pp, int __pyx_v_pN, int __pyx_v_pdi, PyArrayObject *__pyx_v_res) {
+static PyObject *__pyx_pf_12imahalanobis_imahalanobis(CYTHON_UNUSED PyObject *__pyx_self, PyArrayObject *__pyx_v_x, PyArrayObject *__pyx_v_muk, PyArrayObject *__pyx_v_wk, PyArrayObject *__pyx_v_Qk, PyArrayObject *__pyx_v_aki, int __pyx_v_pp, int __pyx_v_pN, int __pyx_v_pdi, PyArrayObject *__pyx_v_res) {
   int __pyx_v_pp_val;
   int __pyx_v_pN_val;
   int __pyx_v_pdi_val;
@@ -4601,7 +4591,7 @@ static PyObject *__pyx_pf_12imahalanobis_C_imahalanobis(CYTHON_UNUSED PyObject *
   int __pyx_lineno = 0;
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
-  __Pyx_RefNannySetupContext("C_imahalanobis", 1);
+  __Pyx_RefNannySetupContext("imahalanobis", 1);
   __pyx_pybuffer_new_x.pybuffer.buf = NULL;
   __pyx_pybuffer_new_x.refcount = 0;
   __pyx_pybuffernd_new_x.data = NULL;
@@ -4681,8 +4671,8 @@ static PyObject *__pyx_pf_12imahalanobis_C_imahalanobis(CYTHON_UNUSED PyObject *
   }
   __pyx_pybuffernd_res.diminfo[0].strides = __pyx_pybuffernd_res.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_res.diminfo[0].shape = __pyx_pybuffernd_res.rcbuffer->pybuffer.shape[0];
 
-  /* "imahalanobis.pyx":43
- * 
+  /* "imahalanobis.pyx":39
+ *         res: np.ndarray[np.float64_t, ndim=1], (N)
  *     """
  *     cdef int pp_val = pp             # <<<<<<<<<<<<<<
  *     cdef int pN_val = pN
@@ -4690,7 +4680,7 @@ static PyObject *__pyx_pf_12imahalanobis_C_imahalanobis(CYTHON_UNUSED PyObject *
  */
   __pyx_v_pp_val = __pyx_v_pp;
 
-  /* "imahalanobis.pyx":44
+  /* "imahalanobis.pyx":40
  *     """
  *     cdef int pp_val = pp
  *     cdef int pN_val = pN             # <<<<<<<<<<<<<<
@@ -4699,7 +4689,7 @@ static PyObject *__pyx_pf_12imahalanobis_C_imahalanobis(CYTHON_UNUSED PyObject *
  */
   __pyx_v_pN_val = __pyx_v_pN;
 
-  /* "imahalanobis.pyx":45
+  /* "imahalanobis.pyx":41
  *     cdef int pp_val = pp
  *     cdef int pN_val = pN
  *     cdef int pdi_val = pdi             # <<<<<<<<<<<<<<
@@ -4708,12 +4698,316 @@ static PyObject *__pyx_pf_12imahalanobis_C_imahalanobis(CYTHON_UNUSED PyObject *
  */
   __pyx_v_pdi_val = __pyx_v_pdi;
 
-  /* "imahalanobis.pyx":47
+  /* "imahalanobis.pyx":43
  *     cdef int pdi_val = pdi
  * 
  *     cdef np.ndarray[np.float64_t, ndim=2] new_x = np.ascontiguousarray(np.transpose(x))             # <<<<<<<<<<<<<<
  *     cdef np.ndarray[np.float64_t, ndim=1] new_muk = np.ascontiguousarray(np.transpose(muk))
  *     cdef np.ndarray[np.float64_t, ndim=2] new_wk = np.ascontiguousarray(np.transpose(wk))
+ */
+  __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_np); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 43, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_ascontiguousarray); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 43, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_3);
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  __Pyx_GetModuleGlobalName(__pyx_t_4, __pyx_n_s_np); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 43, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_4);
+  __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_transpose); if (unlikely(!__pyx_t_5)) __PYX_ERR(1, 43, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_5);
+  __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+  __pyx_t_4 = NULL;
+  __pyx_t_6 = 0;
+  #if CYTHON_UNPACK_METHODS
+  if (unlikely(PyMethod_Check(__pyx_t_5))) {
+    __pyx_t_4 = PyMethod_GET_SELF(__pyx_t_5);
+    if (likely(__pyx_t_4)) {
+      PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_5);
+      __Pyx_INCREF(__pyx_t_4);
+      __Pyx_INCREF(function);
+      __Pyx_DECREF_SET(__pyx_t_5, function);
+      __pyx_t_6 = 1;
+    }
+  }
+  #endif
+  {
+    PyObject *__pyx_callargs[2] = {__pyx_t_4, ((PyObject *)__pyx_v_x)};
+    __pyx_t_2 = __Pyx_PyObject_FastCall(__pyx_t_5, __pyx_callargs+1-__pyx_t_6, 1+__pyx_t_6);
+    __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
+    if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 43, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_2);
+    __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
+  }
+  __pyx_t_5 = NULL;
+  __pyx_t_6 = 0;
+  #if CYTHON_UNPACK_METHODS
+  if (unlikely(PyMethod_Check(__pyx_t_3))) {
+    __pyx_t_5 = PyMethod_GET_SELF(__pyx_t_3);
+    if (likely(__pyx_t_5)) {
+      PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_3);
+      __Pyx_INCREF(__pyx_t_5);
+      __Pyx_INCREF(function);
+      __Pyx_DECREF_SET(__pyx_t_3, function);
+      __pyx_t_6 = 1;
+    }
+  }
+  #endif
+  {
+    PyObject *__pyx_callargs[2] = {__pyx_t_5, __pyx_t_2};
+    __pyx_t_1 = __Pyx_PyObject_FastCall(__pyx_t_3, __pyx_callargs+1-__pyx_t_6, 1+__pyx_t_6);
+    __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
+    __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+    if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 43, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_1);
+    __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+  }
+  if (!(likely(((__pyx_t_1) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_1, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(1, 43, __pyx_L1_error)
+  __pyx_t_7 = ((PyArrayObject *)__pyx_t_1);
+  {
+    __Pyx_BufFmt_StackElem __pyx_stack[1];
+    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_new_x.rcbuffer->pybuffer, (PyObject*)__pyx_t_7, &__Pyx_TypeInfo_nn___pyx_t_5numpy_float64_t, PyBUF_FORMAT| PyBUF_STRIDES, 2, 0, __pyx_stack) == -1)) {
+      __pyx_v_new_x = ((PyArrayObject *)Py_None); __Pyx_INCREF(Py_None); __pyx_pybuffernd_new_x.rcbuffer->pybuffer.buf = NULL;
+      __PYX_ERR(1, 43, __pyx_L1_error)
+    } else {__pyx_pybuffernd_new_x.diminfo[0].strides = __pyx_pybuffernd_new_x.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_new_x.diminfo[0].shape = __pyx_pybuffernd_new_x.rcbuffer->pybuffer.shape[0]; __pyx_pybuffernd_new_x.diminfo[1].strides = __pyx_pybuffernd_new_x.rcbuffer->pybuffer.strides[1]; __pyx_pybuffernd_new_x.diminfo[1].shape = __pyx_pybuffernd_new_x.rcbuffer->pybuffer.shape[1];
+    }
+  }
+  __pyx_t_7 = 0;
+  __pyx_v_new_x = ((PyArrayObject *)__pyx_t_1);
+  __pyx_t_1 = 0;
+
+  /* "imahalanobis.pyx":44
+ * 
+ *     cdef np.ndarray[np.float64_t, ndim=2] new_x = np.ascontiguousarray(np.transpose(x))
+ *     cdef np.ndarray[np.float64_t, ndim=1] new_muk = np.ascontiguousarray(np.transpose(muk))             # <<<<<<<<<<<<<<
+ *     cdef np.ndarray[np.float64_t, ndim=2] new_wk = np.ascontiguousarray(np.transpose(wk))
+ *     cdef np.ndarray[np.float64_t, ndim=2] new_Qk = np.ascontiguousarray(np.transpose(Qk))
+ */
+  __Pyx_GetModuleGlobalName(__pyx_t_3, __pyx_n_s_np); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 44, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_3);
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_ascontiguousarray); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 44, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+  __Pyx_GetModuleGlobalName(__pyx_t_5, __pyx_n_s_np); if (unlikely(!__pyx_t_5)) __PYX_ERR(1, 44, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_5);
+  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_5, __pyx_n_s_transpose); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 44, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_4);
+  __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
+  __pyx_t_5 = NULL;
+  __pyx_t_6 = 0;
+  #if CYTHON_UNPACK_METHODS
+  if (unlikely(PyMethod_Check(__pyx_t_4))) {
+    __pyx_t_5 = PyMethod_GET_SELF(__pyx_t_4);
+    if (likely(__pyx_t_5)) {
+      PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_4);
+      __Pyx_INCREF(__pyx_t_5);
+      __Pyx_INCREF(function);
+      __Pyx_DECREF_SET(__pyx_t_4, function);
+      __pyx_t_6 = 1;
+    }
+  }
+  #endif
+  {
+    PyObject *__pyx_callargs[2] = {__pyx_t_5, ((PyObject *)__pyx_v_muk)};
+    __pyx_t_3 = __Pyx_PyObject_FastCall(__pyx_t_4, __pyx_callargs+1-__pyx_t_6, 1+__pyx_t_6);
+    __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
+    if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 44, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_3);
+    __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+  }
+  __pyx_t_4 = NULL;
+  __pyx_t_6 = 0;
+  #if CYTHON_UNPACK_METHODS
+  if (unlikely(PyMethod_Check(__pyx_t_2))) {
+    __pyx_t_4 = PyMethod_GET_SELF(__pyx_t_2);
+    if (likely(__pyx_t_4)) {
+      PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_2);
+      __Pyx_INCREF(__pyx_t_4);
+      __Pyx_INCREF(function);
+      __Pyx_DECREF_SET(__pyx_t_2, function);
+      __pyx_t_6 = 1;
+    }
+  }
+  #endif
+  {
+    PyObject *__pyx_callargs[2] = {__pyx_t_4, __pyx_t_3};
+    __pyx_t_1 = __Pyx_PyObject_FastCall(__pyx_t_2, __pyx_callargs+1-__pyx_t_6, 1+__pyx_t_6);
+    __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
+    __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+    if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 44, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_1);
+    __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  }
+  if (!(likely(((__pyx_t_1) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_1, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(1, 44, __pyx_L1_error)
+  __pyx_t_8 = ((PyArrayObject *)__pyx_t_1);
+  {
+    __Pyx_BufFmt_StackElem __pyx_stack[1];
+    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_new_muk.rcbuffer->pybuffer, (PyObject*)__pyx_t_8, &__Pyx_TypeInfo_nn___pyx_t_5numpy_float64_t, PyBUF_FORMAT| PyBUF_STRIDES, 1, 0, __pyx_stack) == -1)) {
+      __pyx_v_new_muk = ((PyArrayObject *)Py_None); __Pyx_INCREF(Py_None); __pyx_pybuffernd_new_muk.rcbuffer->pybuffer.buf = NULL;
+      __PYX_ERR(1, 44, __pyx_L1_error)
+    } else {__pyx_pybuffernd_new_muk.diminfo[0].strides = __pyx_pybuffernd_new_muk.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_new_muk.diminfo[0].shape = __pyx_pybuffernd_new_muk.rcbuffer->pybuffer.shape[0];
+    }
+  }
+  __pyx_t_8 = 0;
+  __pyx_v_new_muk = ((PyArrayObject *)__pyx_t_1);
+  __pyx_t_1 = 0;
+
+  /* "imahalanobis.pyx":45
+ *     cdef np.ndarray[np.float64_t, ndim=2] new_x = np.ascontiguousarray(np.transpose(x))
+ *     cdef np.ndarray[np.float64_t, ndim=1] new_muk = np.ascontiguousarray(np.transpose(muk))
+ *     cdef np.ndarray[np.float64_t, ndim=2] new_wk = np.ascontiguousarray(np.transpose(wk))             # <<<<<<<<<<<<<<
+ *     cdef np.ndarray[np.float64_t, ndim=2] new_Qk = np.ascontiguousarray(np.transpose(Qk))
+ *     cdef np.ndarray[np.float64_t, ndim=2] new_aki = np.ascontiguousarray(np.transpose(aki))
+ */
+  __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_np); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 45, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_ascontiguousarray); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 45, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_3);
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  __Pyx_GetModuleGlobalName(__pyx_t_4, __pyx_n_s_np); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 45, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_4);
+  __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_transpose); if (unlikely(!__pyx_t_5)) __PYX_ERR(1, 45, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_5);
+  __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+  __pyx_t_4 = NULL;
+  __pyx_t_6 = 0;
+  #if CYTHON_UNPACK_METHODS
+  if (unlikely(PyMethod_Check(__pyx_t_5))) {
+    __pyx_t_4 = PyMethod_GET_SELF(__pyx_t_5);
+    if (likely(__pyx_t_4)) {
+      PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_5);
+      __Pyx_INCREF(__pyx_t_4);
+      __Pyx_INCREF(function);
+      __Pyx_DECREF_SET(__pyx_t_5, function);
+      __pyx_t_6 = 1;
+    }
+  }
+  #endif
+  {
+    PyObject *__pyx_callargs[2] = {__pyx_t_4, ((PyObject *)__pyx_v_wk)};
+    __pyx_t_2 = __Pyx_PyObject_FastCall(__pyx_t_5, __pyx_callargs+1-__pyx_t_6, 1+__pyx_t_6);
+    __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
+    if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 45, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_2);
+    __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
+  }
+  __pyx_t_5 = NULL;
+  __pyx_t_6 = 0;
+  #if CYTHON_UNPACK_METHODS
+  if (unlikely(PyMethod_Check(__pyx_t_3))) {
+    __pyx_t_5 = PyMethod_GET_SELF(__pyx_t_3);
+    if (likely(__pyx_t_5)) {
+      PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_3);
+      __Pyx_INCREF(__pyx_t_5);
+      __Pyx_INCREF(function);
+      __Pyx_DECREF_SET(__pyx_t_3, function);
+      __pyx_t_6 = 1;
+    }
+  }
+  #endif
+  {
+    PyObject *__pyx_callargs[2] = {__pyx_t_5, __pyx_t_2};
+    __pyx_t_1 = __Pyx_PyObject_FastCall(__pyx_t_3, __pyx_callargs+1-__pyx_t_6, 1+__pyx_t_6);
+    __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
+    __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+    if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 45, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_1);
+    __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+  }
+  if (!(likely(((__pyx_t_1) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_1, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(1, 45, __pyx_L1_error)
+  __pyx_t_9 = ((PyArrayObject *)__pyx_t_1);
+  {
+    __Pyx_BufFmt_StackElem __pyx_stack[1];
+    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_new_wk.rcbuffer->pybuffer, (PyObject*)__pyx_t_9, &__Pyx_TypeInfo_nn___pyx_t_5numpy_float64_t, PyBUF_FORMAT| PyBUF_STRIDES, 2, 0, __pyx_stack) == -1)) {
+      __pyx_v_new_wk = ((PyArrayObject *)Py_None); __Pyx_INCREF(Py_None); __pyx_pybuffernd_new_wk.rcbuffer->pybuffer.buf = NULL;
+      __PYX_ERR(1, 45, __pyx_L1_error)
+    } else {__pyx_pybuffernd_new_wk.diminfo[0].strides = __pyx_pybuffernd_new_wk.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_new_wk.diminfo[0].shape = __pyx_pybuffernd_new_wk.rcbuffer->pybuffer.shape[0]; __pyx_pybuffernd_new_wk.diminfo[1].strides = __pyx_pybuffernd_new_wk.rcbuffer->pybuffer.strides[1]; __pyx_pybuffernd_new_wk.diminfo[1].shape = __pyx_pybuffernd_new_wk.rcbuffer->pybuffer.shape[1];
+    }
+  }
+  __pyx_t_9 = 0;
+  __pyx_v_new_wk = ((PyArrayObject *)__pyx_t_1);
+  __pyx_t_1 = 0;
+
+  /* "imahalanobis.pyx":46
+ *     cdef np.ndarray[np.float64_t, ndim=1] new_muk = np.ascontiguousarray(np.transpose(muk))
+ *     cdef np.ndarray[np.float64_t, ndim=2] new_wk = np.ascontiguousarray(np.transpose(wk))
+ *     cdef np.ndarray[np.float64_t, ndim=2] new_Qk = np.ascontiguousarray(np.transpose(Qk))             # <<<<<<<<<<<<<<
+ *     cdef np.ndarray[np.float64_t, ndim=2] new_aki = np.ascontiguousarray(np.transpose(aki))
+ *     cdef np.ndarray[np.float64_t, ndim=1] new_res = np.ascontiguousarray(np.transpose(res))
+ */
+  __Pyx_GetModuleGlobalName(__pyx_t_3, __pyx_n_s_np); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 46, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_3);
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_ascontiguousarray); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 46, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+  __Pyx_GetModuleGlobalName(__pyx_t_5, __pyx_n_s_np); if (unlikely(!__pyx_t_5)) __PYX_ERR(1, 46, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_5);
+  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_5, __pyx_n_s_transpose); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 46, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_4);
+  __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
+  __pyx_t_5 = NULL;
+  __pyx_t_6 = 0;
+  #if CYTHON_UNPACK_METHODS
+  if (unlikely(PyMethod_Check(__pyx_t_4))) {
+    __pyx_t_5 = PyMethod_GET_SELF(__pyx_t_4);
+    if (likely(__pyx_t_5)) {
+      PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_4);
+      __Pyx_INCREF(__pyx_t_5);
+      __Pyx_INCREF(function);
+      __Pyx_DECREF_SET(__pyx_t_4, function);
+      __pyx_t_6 = 1;
+    }
+  }
+  #endif
+  {
+    PyObject *__pyx_callargs[2] = {__pyx_t_5, ((PyObject *)__pyx_v_Qk)};
+    __pyx_t_3 = __Pyx_PyObject_FastCall(__pyx_t_4, __pyx_callargs+1-__pyx_t_6, 1+__pyx_t_6);
+    __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
+    if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 46, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_3);
+    __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+  }
+  __pyx_t_4 = NULL;
+  __pyx_t_6 = 0;
+  #if CYTHON_UNPACK_METHODS
+  if (unlikely(PyMethod_Check(__pyx_t_2))) {
+    __pyx_t_4 = PyMethod_GET_SELF(__pyx_t_2);
+    if (likely(__pyx_t_4)) {
+      PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_2);
+      __Pyx_INCREF(__pyx_t_4);
+      __Pyx_INCREF(function);
+      __Pyx_DECREF_SET(__pyx_t_2, function);
+      __pyx_t_6 = 1;
+    }
+  }
+  #endif
+  {
+    PyObject *__pyx_callargs[2] = {__pyx_t_4, __pyx_t_3};
+    __pyx_t_1 = __Pyx_PyObject_FastCall(__pyx_t_2, __pyx_callargs+1-__pyx_t_6, 1+__pyx_t_6);
+    __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
+    __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+    if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 46, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_1);
+    __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  }
+  if (!(likely(((__pyx_t_1) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_1, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(1, 46, __pyx_L1_error)
+  __pyx_t_10 = ((PyArrayObject *)__pyx_t_1);
+  {
+    __Pyx_BufFmt_StackElem __pyx_stack[1];
+    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_new_Qk.rcbuffer->pybuffer, (PyObject*)__pyx_t_10, &__Pyx_TypeInfo_nn___pyx_t_5numpy_float64_t, PyBUF_FORMAT| PyBUF_STRIDES, 2, 0, __pyx_stack) == -1)) {
+      __pyx_v_new_Qk = ((PyArrayObject *)Py_None); __Pyx_INCREF(Py_None); __pyx_pybuffernd_new_Qk.rcbuffer->pybuffer.buf = NULL;
+      __PYX_ERR(1, 46, __pyx_L1_error)
+    } else {__pyx_pybuffernd_new_Qk.diminfo[0].strides = __pyx_pybuffernd_new_Qk.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_new_Qk.diminfo[0].shape = __pyx_pybuffernd_new_Qk.rcbuffer->pybuffer.shape[0]; __pyx_pybuffernd_new_Qk.diminfo[1].strides = __pyx_pybuffernd_new_Qk.rcbuffer->pybuffer.strides[1]; __pyx_pybuffernd_new_Qk.diminfo[1].shape = __pyx_pybuffernd_new_Qk.rcbuffer->pybuffer.shape[1];
+    }
+  }
+  __pyx_t_10 = 0;
+  __pyx_v_new_Qk = ((PyArrayObject *)__pyx_t_1);
+  __pyx_t_1 = 0;
+
+  /* "imahalanobis.pyx":47
+ *     cdef np.ndarray[np.float64_t, ndim=2] new_wk = np.ascontiguousarray(np.transpose(wk))
+ *     cdef np.ndarray[np.float64_t, ndim=2] new_Qk = np.ascontiguousarray(np.transpose(Qk))
+ *     cdef np.ndarray[np.float64_t, ndim=2] new_aki = np.ascontiguousarray(np.transpose(aki))             # <<<<<<<<<<<<<<
+ *     cdef np.ndarray[np.float64_t, ndim=1] new_res = np.ascontiguousarray(np.transpose(res))
+ * 
  */
   __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_np); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 47, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
@@ -4740,7 +5034,7 @@ static PyObject *__pyx_pf_12imahalanobis_C_imahalanobis(CYTHON_UNUSED PyObject *
   }
   #endif
   {
-    PyObject *__pyx_callargs[2] = {__pyx_t_4, ((PyObject *)__pyx_v_x)};
+    PyObject *__pyx_callargs[2] = {__pyx_t_4, ((PyObject *)__pyx_v_aki)};
     __pyx_t_2 = __Pyx_PyObject_FastCall(__pyx_t_5, __pyx_callargs+1-__pyx_t_6, 1+__pyx_t_6);
     __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
     if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 47, __pyx_L1_error)
@@ -4771,25 +5065,25 @@ static PyObject *__pyx_pf_12imahalanobis_C_imahalanobis(CYTHON_UNUSED PyObject *
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   }
   if (!(likely(((__pyx_t_1) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_1, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(1, 47, __pyx_L1_error)
-  __pyx_t_7 = ((PyArrayObject *)__pyx_t_1);
+  __pyx_t_11 = ((PyArrayObject *)__pyx_t_1);
   {
     __Pyx_BufFmt_StackElem __pyx_stack[1];
-    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_new_x.rcbuffer->pybuffer, (PyObject*)__pyx_t_7, &__Pyx_TypeInfo_nn___pyx_t_5numpy_float64_t, PyBUF_FORMAT| PyBUF_STRIDES, 2, 0, __pyx_stack) == -1)) {
-      __pyx_v_new_x = ((PyArrayObject *)Py_None); __Pyx_INCREF(Py_None); __pyx_pybuffernd_new_x.rcbuffer->pybuffer.buf = NULL;
+    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_new_aki.rcbuffer->pybuffer, (PyObject*)__pyx_t_11, &__Pyx_TypeInfo_nn___pyx_t_5numpy_float64_t, PyBUF_FORMAT| PyBUF_STRIDES, 2, 0, __pyx_stack) == -1)) {
+      __pyx_v_new_aki = ((PyArrayObject *)Py_None); __Pyx_INCREF(Py_None); __pyx_pybuffernd_new_aki.rcbuffer->pybuffer.buf = NULL;
       __PYX_ERR(1, 47, __pyx_L1_error)
-    } else {__pyx_pybuffernd_new_x.diminfo[0].strides = __pyx_pybuffernd_new_x.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_new_x.diminfo[0].shape = __pyx_pybuffernd_new_x.rcbuffer->pybuffer.shape[0]; __pyx_pybuffernd_new_x.diminfo[1].strides = __pyx_pybuffernd_new_x.rcbuffer->pybuffer.strides[1]; __pyx_pybuffernd_new_x.diminfo[1].shape = __pyx_pybuffernd_new_x.rcbuffer->pybuffer.shape[1];
+    } else {__pyx_pybuffernd_new_aki.diminfo[0].strides = __pyx_pybuffernd_new_aki.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_new_aki.diminfo[0].shape = __pyx_pybuffernd_new_aki.rcbuffer->pybuffer.shape[0]; __pyx_pybuffernd_new_aki.diminfo[1].strides = __pyx_pybuffernd_new_aki.rcbuffer->pybuffer.strides[1]; __pyx_pybuffernd_new_aki.diminfo[1].shape = __pyx_pybuffernd_new_aki.rcbuffer->pybuffer.shape[1];
     }
   }
-  __pyx_t_7 = 0;
-  __pyx_v_new_x = ((PyArrayObject *)__pyx_t_1);
+  __pyx_t_11 = 0;
+  __pyx_v_new_aki = ((PyArrayObject *)__pyx_t_1);
   __pyx_t_1 = 0;
 
   /* "imahalanobis.pyx":48
- * 
- *     cdef np.ndarray[np.float64_t, ndim=2] new_x = np.ascontiguousarray(np.transpose(x))
- *     cdef np.ndarray[np.float64_t, ndim=1] new_muk = np.ascontiguousarray(np.transpose(muk))             # <<<<<<<<<<<<<<
- *     cdef np.ndarray[np.float64_t, ndim=2] new_wk = np.ascontiguousarray(np.transpose(wk))
  *     cdef np.ndarray[np.float64_t, ndim=2] new_Qk = np.ascontiguousarray(np.transpose(Qk))
+ *     cdef np.ndarray[np.float64_t, ndim=2] new_aki = np.ascontiguousarray(np.transpose(aki))
+ *     cdef np.ndarray[np.float64_t, ndim=1] new_res = np.ascontiguousarray(np.transpose(res))             # <<<<<<<<<<<<<<
+ * 
+ *     C_imahalanobis(<double*>new_x.data, <double*>new_muk.data, <double*>new_wk.data, <double*>new_Qk.data, <double*>new_aki.data, &pp_val, &pN_val, &pdi_val, <double*>new_res.data)
  */
   __Pyx_GetModuleGlobalName(__pyx_t_3, __pyx_n_s_np); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 48, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
@@ -4816,7 +5110,7 @@ static PyObject *__pyx_pf_12imahalanobis_C_imahalanobis(CYTHON_UNUSED PyObject *
   }
   #endif
   {
-    PyObject *__pyx_callargs[2] = {__pyx_t_5, ((PyObject *)__pyx_v_muk)};
+    PyObject *__pyx_callargs[2] = {__pyx_t_5, ((PyObject *)__pyx_v_res)};
     __pyx_t_3 = __Pyx_PyObject_FastCall(__pyx_t_4, __pyx_callargs+1-__pyx_t_6, 1+__pyx_t_6);
     __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
     if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 48, __pyx_L1_error)
@@ -4847,316 +5141,12 @@ static PyObject *__pyx_pf_12imahalanobis_C_imahalanobis(CYTHON_UNUSED PyObject *
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   }
   if (!(likely(((__pyx_t_1) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_1, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(1, 48, __pyx_L1_error)
-  __pyx_t_8 = ((PyArrayObject *)__pyx_t_1);
-  {
-    __Pyx_BufFmt_StackElem __pyx_stack[1];
-    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_new_muk.rcbuffer->pybuffer, (PyObject*)__pyx_t_8, &__Pyx_TypeInfo_nn___pyx_t_5numpy_float64_t, PyBUF_FORMAT| PyBUF_STRIDES, 1, 0, __pyx_stack) == -1)) {
-      __pyx_v_new_muk = ((PyArrayObject *)Py_None); __Pyx_INCREF(Py_None); __pyx_pybuffernd_new_muk.rcbuffer->pybuffer.buf = NULL;
-      __PYX_ERR(1, 48, __pyx_L1_error)
-    } else {__pyx_pybuffernd_new_muk.diminfo[0].strides = __pyx_pybuffernd_new_muk.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_new_muk.diminfo[0].shape = __pyx_pybuffernd_new_muk.rcbuffer->pybuffer.shape[0];
-    }
-  }
-  __pyx_t_8 = 0;
-  __pyx_v_new_muk = ((PyArrayObject *)__pyx_t_1);
-  __pyx_t_1 = 0;
-
-  /* "imahalanobis.pyx":49
- *     cdef np.ndarray[np.float64_t, ndim=2] new_x = np.ascontiguousarray(np.transpose(x))
- *     cdef np.ndarray[np.float64_t, ndim=1] new_muk = np.ascontiguousarray(np.transpose(muk))
- *     cdef np.ndarray[np.float64_t, ndim=2] new_wk = np.ascontiguousarray(np.transpose(wk))             # <<<<<<<<<<<<<<
- *     cdef np.ndarray[np.float64_t, ndim=2] new_Qk = np.ascontiguousarray(np.transpose(Qk))
- *     cdef np.ndarray[np.float64_t, ndim=2] new_aki = np.ascontiguousarray(np.transpose(aki))
- */
-  __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_np); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 49, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_ascontiguousarray); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 49, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_3);
-  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __Pyx_GetModuleGlobalName(__pyx_t_4, __pyx_n_s_np); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 49, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_transpose); if (unlikely(!__pyx_t_5)) __PYX_ERR(1, 49, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_5);
-  __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __pyx_t_4 = NULL;
-  __pyx_t_6 = 0;
-  #if CYTHON_UNPACK_METHODS
-  if (unlikely(PyMethod_Check(__pyx_t_5))) {
-    __pyx_t_4 = PyMethod_GET_SELF(__pyx_t_5);
-    if (likely(__pyx_t_4)) {
-      PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_5);
-      __Pyx_INCREF(__pyx_t_4);
-      __Pyx_INCREF(function);
-      __Pyx_DECREF_SET(__pyx_t_5, function);
-      __pyx_t_6 = 1;
-    }
-  }
-  #endif
-  {
-    PyObject *__pyx_callargs[2] = {__pyx_t_4, ((PyObject *)__pyx_v_wk)};
-    __pyx_t_2 = __Pyx_PyObject_FastCall(__pyx_t_5, __pyx_callargs+1-__pyx_t_6, 1+__pyx_t_6);
-    __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
-    if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 49, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_2);
-    __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-  }
-  __pyx_t_5 = NULL;
-  __pyx_t_6 = 0;
-  #if CYTHON_UNPACK_METHODS
-  if (unlikely(PyMethod_Check(__pyx_t_3))) {
-    __pyx_t_5 = PyMethod_GET_SELF(__pyx_t_3);
-    if (likely(__pyx_t_5)) {
-      PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_3);
-      __Pyx_INCREF(__pyx_t_5);
-      __Pyx_INCREF(function);
-      __Pyx_DECREF_SET(__pyx_t_3, function);
-      __pyx_t_6 = 1;
-    }
-  }
-  #endif
-  {
-    PyObject *__pyx_callargs[2] = {__pyx_t_5, __pyx_t_2};
-    __pyx_t_1 = __Pyx_PyObject_FastCall(__pyx_t_3, __pyx_callargs+1-__pyx_t_6, 1+__pyx_t_6);
-    __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
-    __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-    if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 49, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_1);
-    __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  }
-  if (!(likely(((__pyx_t_1) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_1, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(1, 49, __pyx_L1_error)
-  __pyx_t_9 = ((PyArrayObject *)__pyx_t_1);
-  {
-    __Pyx_BufFmt_StackElem __pyx_stack[1];
-    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_new_wk.rcbuffer->pybuffer, (PyObject*)__pyx_t_9, &__Pyx_TypeInfo_nn___pyx_t_5numpy_float64_t, PyBUF_FORMAT| PyBUF_STRIDES, 2, 0, __pyx_stack) == -1)) {
-      __pyx_v_new_wk = ((PyArrayObject *)Py_None); __Pyx_INCREF(Py_None); __pyx_pybuffernd_new_wk.rcbuffer->pybuffer.buf = NULL;
-      __PYX_ERR(1, 49, __pyx_L1_error)
-    } else {__pyx_pybuffernd_new_wk.diminfo[0].strides = __pyx_pybuffernd_new_wk.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_new_wk.diminfo[0].shape = __pyx_pybuffernd_new_wk.rcbuffer->pybuffer.shape[0]; __pyx_pybuffernd_new_wk.diminfo[1].strides = __pyx_pybuffernd_new_wk.rcbuffer->pybuffer.strides[1]; __pyx_pybuffernd_new_wk.diminfo[1].shape = __pyx_pybuffernd_new_wk.rcbuffer->pybuffer.shape[1];
-    }
-  }
-  __pyx_t_9 = 0;
-  __pyx_v_new_wk = ((PyArrayObject *)__pyx_t_1);
-  __pyx_t_1 = 0;
-
-  /* "imahalanobis.pyx":50
- *     cdef np.ndarray[np.float64_t, ndim=1] new_muk = np.ascontiguousarray(np.transpose(muk))
- *     cdef np.ndarray[np.float64_t, ndim=2] new_wk = np.ascontiguousarray(np.transpose(wk))
- *     cdef np.ndarray[np.float64_t, ndim=2] new_Qk = np.ascontiguousarray(np.transpose(Qk))             # <<<<<<<<<<<<<<
- *     cdef np.ndarray[np.float64_t, ndim=2] new_aki = np.ascontiguousarray(np.transpose(aki))
- *     cdef np.ndarray[np.float64_t, ndim=1] new_res = np.ascontiguousarray(np.transpose(res))
- */
-  __Pyx_GetModuleGlobalName(__pyx_t_3, __pyx_n_s_np); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 50, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_ascontiguousarray); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 50, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_2);
-  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __Pyx_GetModuleGlobalName(__pyx_t_5, __pyx_n_s_np); if (unlikely(!__pyx_t_5)) __PYX_ERR(1, 50, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_5);
-  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_5, __pyx_n_s_transpose); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 50, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_4);
-  __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-  __pyx_t_5 = NULL;
-  __pyx_t_6 = 0;
-  #if CYTHON_UNPACK_METHODS
-  if (unlikely(PyMethod_Check(__pyx_t_4))) {
-    __pyx_t_5 = PyMethod_GET_SELF(__pyx_t_4);
-    if (likely(__pyx_t_5)) {
-      PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_4);
-      __Pyx_INCREF(__pyx_t_5);
-      __Pyx_INCREF(function);
-      __Pyx_DECREF_SET(__pyx_t_4, function);
-      __pyx_t_6 = 1;
-    }
-  }
-  #endif
-  {
-    PyObject *__pyx_callargs[2] = {__pyx_t_5, ((PyObject *)__pyx_v_Qk)};
-    __pyx_t_3 = __Pyx_PyObject_FastCall(__pyx_t_4, __pyx_callargs+1-__pyx_t_6, 1+__pyx_t_6);
-    __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
-    if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 50, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_3);
-    __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  }
-  __pyx_t_4 = NULL;
-  __pyx_t_6 = 0;
-  #if CYTHON_UNPACK_METHODS
-  if (unlikely(PyMethod_Check(__pyx_t_2))) {
-    __pyx_t_4 = PyMethod_GET_SELF(__pyx_t_2);
-    if (likely(__pyx_t_4)) {
-      PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_2);
-      __Pyx_INCREF(__pyx_t_4);
-      __Pyx_INCREF(function);
-      __Pyx_DECREF_SET(__pyx_t_2, function);
-      __pyx_t_6 = 1;
-    }
-  }
-  #endif
-  {
-    PyObject *__pyx_callargs[2] = {__pyx_t_4, __pyx_t_3};
-    __pyx_t_1 = __Pyx_PyObject_FastCall(__pyx_t_2, __pyx_callargs+1-__pyx_t_6, 1+__pyx_t_6);
-    __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
-    __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-    if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 50, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_1);
-    __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  }
-  if (!(likely(((__pyx_t_1) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_1, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(1, 50, __pyx_L1_error)
-  __pyx_t_10 = ((PyArrayObject *)__pyx_t_1);
-  {
-    __Pyx_BufFmt_StackElem __pyx_stack[1];
-    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_new_Qk.rcbuffer->pybuffer, (PyObject*)__pyx_t_10, &__Pyx_TypeInfo_nn___pyx_t_5numpy_float64_t, PyBUF_FORMAT| PyBUF_STRIDES, 2, 0, __pyx_stack) == -1)) {
-      __pyx_v_new_Qk = ((PyArrayObject *)Py_None); __Pyx_INCREF(Py_None); __pyx_pybuffernd_new_Qk.rcbuffer->pybuffer.buf = NULL;
-      __PYX_ERR(1, 50, __pyx_L1_error)
-    } else {__pyx_pybuffernd_new_Qk.diminfo[0].strides = __pyx_pybuffernd_new_Qk.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_new_Qk.diminfo[0].shape = __pyx_pybuffernd_new_Qk.rcbuffer->pybuffer.shape[0]; __pyx_pybuffernd_new_Qk.diminfo[1].strides = __pyx_pybuffernd_new_Qk.rcbuffer->pybuffer.strides[1]; __pyx_pybuffernd_new_Qk.diminfo[1].shape = __pyx_pybuffernd_new_Qk.rcbuffer->pybuffer.shape[1];
-    }
-  }
-  __pyx_t_10 = 0;
-  __pyx_v_new_Qk = ((PyArrayObject *)__pyx_t_1);
-  __pyx_t_1 = 0;
-
-  /* "imahalanobis.pyx":51
- *     cdef np.ndarray[np.float64_t, ndim=2] new_wk = np.ascontiguousarray(np.transpose(wk))
- *     cdef np.ndarray[np.float64_t, ndim=2] new_Qk = np.ascontiguousarray(np.transpose(Qk))
- *     cdef np.ndarray[np.float64_t, ndim=2] new_aki = np.ascontiguousarray(np.transpose(aki))             # <<<<<<<<<<<<<<
- *     cdef np.ndarray[np.float64_t, ndim=1] new_res = np.ascontiguousarray(np.transpose(res))
- * 
- */
-  __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_np); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 51, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_ascontiguousarray); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 51, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_3);
-  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __Pyx_GetModuleGlobalName(__pyx_t_4, __pyx_n_s_np); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 51, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_transpose); if (unlikely(!__pyx_t_5)) __PYX_ERR(1, 51, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_5);
-  __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __pyx_t_4 = NULL;
-  __pyx_t_6 = 0;
-  #if CYTHON_UNPACK_METHODS
-  if (unlikely(PyMethod_Check(__pyx_t_5))) {
-    __pyx_t_4 = PyMethod_GET_SELF(__pyx_t_5);
-    if (likely(__pyx_t_4)) {
-      PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_5);
-      __Pyx_INCREF(__pyx_t_4);
-      __Pyx_INCREF(function);
-      __Pyx_DECREF_SET(__pyx_t_5, function);
-      __pyx_t_6 = 1;
-    }
-  }
-  #endif
-  {
-    PyObject *__pyx_callargs[2] = {__pyx_t_4, ((PyObject *)__pyx_v_aki)};
-    __pyx_t_2 = __Pyx_PyObject_FastCall(__pyx_t_5, __pyx_callargs+1-__pyx_t_6, 1+__pyx_t_6);
-    __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
-    if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 51, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_2);
-    __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-  }
-  __pyx_t_5 = NULL;
-  __pyx_t_6 = 0;
-  #if CYTHON_UNPACK_METHODS
-  if (unlikely(PyMethod_Check(__pyx_t_3))) {
-    __pyx_t_5 = PyMethod_GET_SELF(__pyx_t_3);
-    if (likely(__pyx_t_5)) {
-      PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_3);
-      __Pyx_INCREF(__pyx_t_5);
-      __Pyx_INCREF(function);
-      __Pyx_DECREF_SET(__pyx_t_3, function);
-      __pyx_t_6 = 1;
-    }
-  }
-  #endif
-  {
-    PyObject *__pyx_callargs[2] = {__pyx_t_5, __pyx_t_2};
-    __pyx_t_1 = __Pyx_PyObject_FastCall(__pyx_t_3, __pyx_callargs+1-__pyx_t_6, 1+__pyx_t_6);
-    __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
-    __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-    if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 51, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_1);
-    __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  }
-  if (!(likely(((__pyx_t_1) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_1, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(1, 51, __pyx_L1_error)
-  __pyx_t_11 = ((PyArrayObject *)__pyx_t_1);
-  {
-    __Pyx_BufFmt_StackElem __pyx_stack[1];
-    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_new_aki.rcbuffer->pybuffer, (PyObject*)__pyx_t_11, &__Pyx_TypeInfo_nn___pyx_t_5numpy_float64_t, PyBUF_FORMAT| PyBUF_STRIDES, 2, 0, __pyx_stack) == -1)) {
-      __pyx_v_new_aki = ((PyArrayObject *)Py_None); __Pyx_INCREF(Py_None); __pyx_pybuffernd_new_aki.rcbuffer->pybuffer.buf = NULL;
-      __PYX_ERR(1, 51, __pyx_L1_error)
-    } else {__pyx_pybuffernd_new_aki.diminfo[0].strides = __pyx_pybuffernd_new_aki.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_new_aki.diminfo[0].shape = __pyx_pybuffernd_new_aki.rcbuffer->pybuffer.shape[0]; __pyx_pybuffernd_new_aki.diminfo[1].strides = __pyx_pybuffernd_new_aki.rcbuffer->pybuffer.strides[1]; __pyx_pybuffernd_new_aki.diminfo[1].shape = __pyx_pybuffernd_new_aki.rcbuffer->pybuffer.shape[1];
-    }
-  }
-  __pyx_t_11 = 0;
-  __pyx_v_new_aki = ((PyArrayObject *)__pyx_t_1);
-  __pyx_t_1 = 0;
-
-  /* "imahalanobis.pyx":52
- *     cdef np.ndarray[np.float64_t, ndim=2] new_Qk = np.ascontiguousarray(np.transpose(Qk))
- *     cdef np.ndarray[np.float64_t, ndim=2] new_aki = np.ascontiguousarray(np.transpose(aki))
- *     cdef np.ndarray[np.float64_t, ndim=1] new_res = np.ascontiguousarray(np.transpose(res))             # <<<<<<<<<<<<<<
- * 
- *     c_C_imahalanobis(<double*>new_x.data, <double*>new_muk.data, <double*>new_wk.data, <double*>new_Qk.data, <double*>new_aki.data, &pp_val, &pN_val, &pdi_val, <double*>new_res.data)
- */
-  __Pyx_GetModuleGlobalName(__pyx_t_3, __pyx_n_s_np); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 52, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_ascontiguousarray); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 52, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_2);
-  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __Pyx_GetModuleGlobalName(__pyx_t_5, __pyx_n_s_np); if (unlikely(!__pyx_t_5)) __PYX_ERR(1, 52, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_5);
-  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_5, __pyx_n_s_transpose); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 52, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_4);
-  __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-  __pyx_t_5 = NULL;
-  __pyx_t_6 = 0;
-  #if CYTHON_UNPACK_METHODS
-  if (unlikely(PyMethod_Check(__pyx_t_4))) {
-    __pyx_t_5 = PyMethod_GET_SELF(__pyx_t_4);
-    if (likely(__pyx_t_5)) {
-      PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_4);
-      __Pyx_INCREF(__pyx_t_5);
-      __Pyx_INCREF(function);
-      __Pyx_DECREF_SET(__pyx_t_4, function);
-      __pyx_t_6 = 1;
-    }
-  }
-  #endif
-  {
-    PyObject *__pyx_callargs[2] = {__pyx_t_5, ((PyObject *)__pyx_v_res)};
-    __pyx_t_3 = __Pyx_PyObject_FastCall(__pyx_t_4, __pyx_callargs+1-__pyx_t_6, 1+__pyx_t_6);
-    __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
-    if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 52, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_3);
-    __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  }
-  __pyx_t_4 = NULL;
-  __pyx_t_6 = 0;
-  #if CYTHON_UNPACK_METHODS
-  if (unlikely(PyMethod_Check(__pyx_t_2))) {
-    __pyx_t_4 = PyMethod_GET_SELF(__pyx_t_2);
-    if (likely(__pyx_t_4)) {
-      PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_2);
-      __Pyx_INCREF(__pyx_t_4);
-      __Pyx_INCREF(function);
-      __Pyx_DECREF_SET(__pyx_t_2, function);
-      __pyx_t_6 = 1;
-    }
-  }
-  #endif
-  {
-    PyObject *__pyx_callargs[2] = {__pyx_t_4, __pyx_t_3};
-    __pyx_t_1 = __Pyx_PyObject_FastCall(__pyx_t_2, __pyx_callargs+1-__pyx_t_6, 1+__pyx_t_6);
-    __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
-    __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-    if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 52, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_1);
-    __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  }
-  if (!(likely(((__pyx_t_1) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_1, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(1, 52, __pyx_L1_error)
   __pyx_t_12 = ((PyArrayObject *)__pyx_t_1);
   {
     __Pyx_BufFmt_StackElem __pyx_stack[1];
     if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_new_res.rcbuffer->pybuffer, (PyObject*)__pyx_t_12, &__Pyx_TypeInfo_nn___pyx_t_5numpy_float64_t, PyBUF_FORMAT| PyBUF_STRIDES, 1, 0, __pyx_stack) == -1)) {
       __pyx_v_new_res = ((PyArrayObject *)Py_None); __Pyx_INCREF(Py_None); __pyx_pybuffernd_new_res.rcbuffer->pybuffer.buf = NULL;
-      __PYX_ERR(1, 52, __pyx_L1_error)
+      __PYX_ERR(1, 48, __pyx_L1_error)
     } else {__pyx_pybuffernd_new_res.diminfo[0].strides = __pyx_pybuffernd_new_res.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_new_res.diminfo[0].shape = __pyx_pybuffernd_new_res.rcbuffer->pybuffer.shape[0];
     }
   }
@@ -5164,23 +5154,23 @@ static PyObject *__pyx_pf_12imahalanobis_C_imahalanobis(CYTHON_UNUSED PyObject *
   __pyx_v_new_res = ((PyArrayObject *)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "imahalanobis.pyx":54
+  /* "imahalanobis.pyx":50
  *     cdef np.ndarray[np.float64_t, ndim=1] new_res = np.ascontiguousarray(np.transpose(res))
  * 
- *     c_C_imahalanobis(<double*>new_x.data, <double*>new_muk.data, <double*>new_wk.data, <double*>new_Qk.data, <double*>new_aki.data, &pp_val, &pN_val, &pdi_val, <double*>new_res.data)             # <<<<<<<<<<<<<<
+ *     C_imahalanobis(<double*>new_x.data, <double*>new_muk.data, <double*>new_wk.data, <double*>new_Qk.data, <double*>new_aki.data, &pp_val, &pN_val, &pdi_val, <double*>new_res.data)             # <<<<<<<<<<<<<<
  * 
  *     return new_res
  */
-  __pyx_t_13 = __pyx_f_5numpy_7ndarray_4data_data(((PyArrayObject *)__pyx_v_new_x)); if (unlikely(__pyx_t_13 == ((char *)NULL) && PyErr_Occurred())) __PYX_ERR(1, 54, __pyx_L1_error)
-  __pyx_t_14 = __pyx_f_5numpy_7ndarray_4data_data(((PyArrayObject *)__pyx_v_new_muk)); if (unlikely(__pyx_t_14 == ((char *)NULL) && PyErr_Occurred())) __PYX_ERR(1, 54, __pyx_L1_error)
-  __pyx_t_15 = __pyx_f_5numpy_7ndarray_4data_data(((PyArrayObject *)__pyx_v_new_wk)); if (unlikely(__pyx_t_15 == ((char *)NULL) && PyErr_Occurred())) __PYX_ERR(1, 54, __pyx_L1_error)
-  __pyx_t_16 = __pyx_f_5numpy_7ndarray_4data_data(((PyArrayObject *)__pyx_v_new_Qk)); if (unlikely(__pyx_t_16 == ((char *)NULL) && PyErr_Occurred())) __PYX_ERR(1, 54, __pyx_L1_error)
-  __pyx_t_17 = __pyx_f_5numpy_7ndarray_4data_data(((PyArrayObject *)__pyx_v_new_aki)); if (unlikely(__pyx_t_17 == ((char *)NULL) && PyErr_Occurred())) __PYX_ERR(1, 54, __pyx_L1_error)
-  __pyx_t_18 = __pyx_f_5numpy_7ndarray_4data_data(((PyArrayObject *)__pyx_v_new_res)); if (unlikely(__pyx_t_18 == ((char *)NULL) && PyErr_Occurred())) __PYX_ERR(1, 54, __pyx_L1_error)
-  c_C_imahalanobis(((double *)__pyx_t_13), ((double *)__pyx_t_14), ((double *)__pyx_t_15), ((double *)__pyx_t_16), ((double *)__pyx_t_17), (&__pyx_v_pp_val), (&__pyx_v_pN_val), (&__pyx_v_pdi_val), ((double *)__pyx_t_18));
+  __pyx_t_13 = __pyx_f_5numpy_7ndarray_4data_data(((PyArrayObject *)__pyx_v_new_x)); if (unlikely(__pyx_t_13 == ((char *)NULL) && PyErr_Occurred())) __PYX_ERR(1, 50, __pyx_L1_error)
+  __pyx_t_14 = __pyx_f_5numpy_7ndarray_4data_data(((PyArrayObject *)__pyx_v_new_muk)); if (unlikely(__pyx_t_14 == ((char *)NULL) && PyErr_Occurred())) __PYX_ERR(1, 50, __pyx_L1_error)
+  __pyx_t_15 = __pyx_f_5numpy_7ndarray_4data_data(((PyArrayObject *)__pyx_v_new_wk)); if (unlikely(__pyx_t_15 == ((char *)NULL) && PyErr_Occurred())) __PYX_ERR(1, 50, __pyx_L1_error)
+  __pyx_t_16 = __pyx_f_5numpy_7ndarray_4data_data(((PyArrayObject *)__pyx_v_new_Qk)); if (unlikely(__pyx_t_16 == ((char *)NULL) && PyErr_Occurred())) __PYX_ERR(1, 50, __pyx_L1_error)
+  __pyx_t_17 = __pyx_f_5numpy_7ndarray_4data_data(((PyArrayObject *)__pyx_v_new_aki)); if (unlikely(__pyx_t_17 == ((char *)NULL) && PyErr_Occurred())) __PYX_ERR(1, 50, __pyx_L1_error)
+  __pyx_t_18 = __pyx_f_5numpy_7ndarray_4data_data(((PyArrayObject *)__pyx_v_new_res)); if (unlikely(__pyx_t_18 == ((char *)NULL) && PyErr_Occurred())) __PYX_ERR(1, 50, __pyx_L1_error)
+  C_imahalanobis(((double *)__pyx_t_13), ((double *)__pyx_t_14), ((double *)__pyx_t_15), ((double *)__pyx_t_16), ((double *)__pyx_t_17), (&__pyx_v_pp_val), (&__pyx_v_pN_val), (&__pyx_v_pdi_val), ((double *)__pyx_t_18));
 
-  /* "imahalanobis.pyx":56
- *     c_C_imahalanobis(<double*>new_x.data, <double*>new_muk.data, <double*>new_wk.data, <double*>new_Qk.data, <double*>new_aki.data, &pp_val, &pN_val, &pdi_val, <double*>new_res.data)
+  /* "imahalanobis.pyx":52
+ *     C_imahalanobis(<double*>new_x.data, <double*>new_muk.data, <double*>new_wk.data, <double*>new_Qk.data, <double*>new_aki.data, &pp_val, &pN_val, &pdi_val, <double*>new_res.data)
  * 
  *     return new_res             # <<<<<<<<<<<<<<
  * 
@@ -5191,11 +5181,11 @@ static PyObject *__pyx_pf_12imahalanobis_C_imahalanobis(CYTHON_UNUSED PyObject *
   goto __pyx_L0;
 
   /* "imahalanobis.pyx":8
- *     void c_C_imahalanobis(double * x, double * muk, double * wk, double * Qk, double * aki, int * pp, int * pN, int * pdi, double *res);
+ *     void C_imahalanobis(double * x, double * muk, double * wk, double * Qk, double * aki, int * pp, int * pN, int * pdi, double *res);
  * 
- * def C_imahalanobis(np.ndarray[np.float64_t, ndim=2]x, np.ndarray[np.float64_t, ndim=1]muk, np.ndarray[np.float64_t, ndim=2]wk, np.ndarray[np.float64_t, ndim=2]Qk, np.ndarray[np.float64_t, ndim=2]aki, int pp, int pN, int pdi, np.ndarray[np.float64_t, ndim=1]res):             # <<<<<<<<<<<<<<
- *     """
- *     Description
+ * def imahalanobis(np.ndarray[np.float64_t, ndim=2]x, np.ndarray[np.float64_t, ndim=1]muk, np.ndarray[np.float64_t, ndim=2]wk, np.ndarray[np.float64_t, ndim=2]Qk, np.ndarray[np.float64_t, ndim=2]aki, int pp, int pN, int pdi, np.ndarray[np.float64_t, ndim=1]res):             # <<<<<<<<<<<<<<
+ *     """The C_imahalanobis function is a Cython wrapper for the c_C_imahalanobis function found in src/mixture_wrapper.h, which loads a .dll file that calls the C_imahalanobis function found in the R API.
+ * 
  */
 
   /* function exit code */
@@ -5222,7 +5212,7 @@ static PyObject *__pyx_pf_12imahalanobis_C_imahalanobis(CYTHON_UNUSED PyObject *
     __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_wk.rcbuffer->pybuffer);
     __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_x.rcbuffer->pybuffer);
   __Pyx_ErrRestore(__pyx_type, __pyx_value, __pyx_tb);}
-  __Pyx_AddTraceback("imahalanobis.C_imahalanobis", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("imahalanobis.imahalanobis", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   goto __pyx_L2;
   __pyx_L0:;
@@ -5266,7 +5256,6 @@ static PyMethodDef __pyx_methods[] = {
 
 static int __Pyx_CreateStringTabAndInitStrings(void) {
   __Pyx_StringTabEntry __pyx_string_tab[] = {
-    {&__pyx_n_s_C_imahalanobis, __pyx_k_C_imahalanobis, sizeof(__pyx_k_C_imahalanobis), 0, 0, 1, 1},
     {&__pyx_n_s_ImportError, __pyx_k_ImportError, sizeof(__pyx_k_ImportError), 0, 0, 1, 1},
     {&__pyx_n_s_Qk, __pyx_k_Qk, sizeof(__pyx_k_Qk), 0, 0, 1, 1},
     {&__pyx_n_s__3, __pyx_k__3, sizeof(__pyx_k__3), 0, 0, 1, 1},
@@ -5345,16 +5334,16 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __Pyx_GIVEREF(__pyx_tuple__2);
 
   /* "imahalanobis.pyx":8
- *     void c_C_imahalanobis(double * x, double * muk, double * wk, double * Qk, double * aki, int * pp, int * pN, int * pdi, double *res);
+ *     void C_imahalanobis(double * x, double * muk, double * wk, double * Qk, double * aki, int * pp, int * pN, int * pdi, double *res);
  * 
- * def C_imahalanobis(np.ndarray[np.float64_t, ndim=2]x, np.ndarray[np.float64_t, ndim=1]muk, np.ndarray[np.float64_t, ndim=2]wk, np.ndarray[np.float64_t, ndim=2]Qk, np.ndarray[np.float64_t, ndim=2]aki, int pp, int pN, int pdi, np.ndarray[np.float64_t, ndim=1]res):             # <<<<<<<<<<<<<<
- *     """
- *     Description
+ * def imahalanobis(np.ndarray[np.float64_t, ndim=2]x, np.ndarray[np.float64_t, ndim=1]muk, np.ndarray[np.float64_t, ndim=2]wk, np.ndarray[np.float64_t, ndim=2]Qk, np.ndarray[np.float64_t, ndim=2]aki, int pp, int pN, int pdi, np.ndarray[np.float64_t, ndim=1]res):             # <<<<<<<<<<<<<<
+ *     """The C_imahalanobis function is a Cython wrapper for the c_C_imahalanobis function found in src/mixture_wrapper.h, which loads a .dll file that calls the C_imahalanobis function found in the R API.
+ * 
  */
   __pyx_tuple__4 = PyTuple_Pack(18, __pyx_n_s_x, __pyx_n_s_muk, __pyx_n_s_wk, __pyx_n_s_Qk, __pyx_n_s_aki, __pyx_n_s_pp, __pyx_n_s_pN, __pyx_n_s_pdi, __pyx_n_s_res, __pyx_n_s_pp_val, __pyx_n_s_pN_val, __pyx_n_s_pdi_val, __pyx_n_s_new_x, __pyx_n_s_new_muk, __pyx_n_s_new_wk, __pyx_n_s_new_Qk, __pyx_n_s_new_aki, __pyx_n_s_new_res); if (unlikely(!__pyx_tuple__4)) __PYX_ERR(1, 8, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__4);
   __Pyx_GIVEREF(__pyx_tuple__4);
-  __pyx_codeobj__5 = (PyObject*)__Pyx_PyCode_New(9, 0, 0, 18, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__4, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_imahalanobis_pyx, __pyx_n_s_C_imahalanobis, 8, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__5)) __PYX_ERR(1, 8, __pyx_L1_error)
+  __pyx_codeobj__5 = (PyObject*)__Pyx_PyCode_New(9, 0, 0, 18, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__4, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_imahalanobis_pyx, __pyx_n_s_imahalanobis, 8, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__5)) __PYX_ERR(1, 8, __pyx_L1_error)
   __Pyx_RefNannyFinishContext();
   return 0;
   __pyx_L1_error:;
@@ -5782,7 +5771,7 @@ if (!__Pyx_RefNanny) {
  * cimport numpy as np
  * import numpy as np             # <<<<<<<<<<<<<<
  * 
- * cdef extern from "src/imahalanobis_wrapper.h":
+ * cdef extern from "src/imahalanobis.h":
  */
   __pyx_t_2 = __Pyx_ImportDottedModule(__pyx_n_s_numpy, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 3, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
@@ -5790,15 +5779,15 @@ if (!__Pyx_RefNanny) {
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
   /* "imahalanobis.pyx":8
- *     void c_C_imahalanobis(double * x, double * muk, double * wk, double * Qk, double * aki, int * pp, int * pN, int * pdi, double *res);
+ *     void C_imahalanobis(double * x, double * muk, double * wk, double * Qk, double * aki, int * pp, int * pN, int * pdi, double *res);
  * 
- * def C_imahalanobis(np.ndarray[np.float64_t, ndim=2]x, np.ndarray[np.float64_t, ndim=1]muk, np.ndarray[np.float64_t, ndim=2]wk, np.ndarray[np.float64_t, ndim=2]Qk, np.ndarray[np.float64_t, ndim=2]aki, int pp, int pN, int pdi, np.ndarray[np.float64_t, ndim=1]res):             # <<<<<<<<<<<<<<
- *     """
- *     Description
+ * def imahalanobis(np.ndarray[np.float64_t, ndim=2]x, np.ndarray[np.float64_t, ndim=1]muk, np.ndarray[np.float64_t, ndim=2]wk, np.ndarray[np.float64_t, ndim=2]Qk, np.ndarray[np.float64_t, ndim=2]aki, int pp, int pN, int pdi, np.ndarray[np.float64_t, ndim=1]res):             # <<<<<<<<<<<<<<
+ *     """The C_imahalanobis function is a Cython wrapper for the c_C_imahalanobis function found in src/mixture_wrapper.h, which loads a .dll file that calls the C_imahalanobis function found in the R API.
+ * 
  */
-  __pyx_t_2 = __Pyx_CyFunction_New(&__pyx_mdef_12imahalanobis_1C_imahalanobis, 0, __pyx_n_s_C_imahalanobis, NULL, __pyx_n_s_imahalanobis, __pyx_d, ((PyObject *)__pyx_codeobj__5)); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 8, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_CyFunction_New(&__pyx_mdef_12imahalanobis_1imahalanobis, 0, __pyx_n_s_imahalanobis, NULL, __pyx_n_s_imahalanobis, __pyx_d, ((PyObject *)__pyx_codeobj__5)); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 8, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_C_imahalanobis, __pyx_t_2) < 0) __PYX_ERR(1, 8, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_imahalanobis, __pyx_t_2) < 0) __PYX_ERR(1, 8, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
   /* "imahalanobis.pyx":1
