@@ -109,29 +109,51 @@ def fitAlzheimerFD(basis = 30):
     }
 
 def split_fda_chunks(fd1, fd2, num_chunks, labels):
-    n_samples = fd1.n_samples
-    indices = np.arange(n_samples)
-    np.random.shuffle(indices)  # Shuffle indices to make the splits random
+    """
+    Description
+    -----------
+    This function splits functional data into chunks that will be used when testing the model.
 
-    chunk_size = n_samples // num_chunks
+    Parameters
+    ----------
+    fd1: `FDataBasis` or `list` of `FDataBasis`
+        a `FDataBasis` object that contains functional data fit to a set of
+        basis functions, or a list of these
+
+    fd2: `FDataBasis` or `list` of `FDataBasis`
+        a `FDataBasis` object that contains functional data fit to a set of
+        basis functions, or a list of these
+
+    num_chunks: 'int'
+        The number of chunks you want the data split into. For example splitting the data into 4 smaller chunks of data.
+
+    labels: list of 'int'
+        The labels for each entry that notify which cluster it belongs to.
+    """
+    # Get indices for each cluster
+    label_cluster1_indices = np.random.permutation(np.where(labels == 0)[0])
+    label_cluster2_indices = np.random.permutation(np.where(labels == 1)[0])
+    
+    # Split indices into chunks
+    label_cluster1_chunks = np.array_split(label_cluster1_indices, num_chunks)
+    label_cluster2_chunks = np.array_split(label_cluster2_indices, num_chunks)
+    
+    # Combine chunks from both clusters
+    label_chunks = [labels[np.concatenate((label_cluster1_chunks[i], label_cluster2_chunks[i]))] for i in range(num_chunks)]
+    
+    # Create empty lists for functional data chunks
     chunks_fd1 = []
     chunks_fd2 = []
-    label_chunks = []
-
-    for i in range(num_chunks):
-        start_index = i * chunk_size
-        if i < num_chunks - 1:
-            end_index = start_index + chunk_size
-        else:
-            end_index = n_samples  # Handle the last chunk to include any remaining samples
-
-        chunk_indices = indices[start_index:end_index]
-        chunks_fd1.append(fd1[chunk_indices])
-        chunks_fd2.append(fd2[chunk_indices])
-        label_chunks.append(labels[chunk_indices])
-
+    
+    # Create chunks for fd1 and fd2 based on the label_chunks
+    for chunk in label_chunks:
+        chunks_fd1.append(fd1[chunk])
+        chunks_fd2.append(fd2[chunk])
+    
     return chunks_fd1, chunks_fd2, label_chunks
 
+
+    
 def select_and_combine_chunks(fd_chunks, selected_chunk_index):
     # Select the specified chunk
     selected_chunk = fd_chunks[selected_chunk_index]
@@ -159,7 +181,7 @@ def test_predict(number_of_chunks, threshold, region="cingulum"):
     confusion_matrices = []
     ari_scores = []
 
-    for i in range(len(split_data)):
+    for i in range(number_of_chunks):
         test_labels = np.array(split_labels[i])
 
         test_data, training_data = select_and_combine_chunks(split_data, i)
@@ -176,18 +198,8 @@ def test_predict(number_of_chunks, threshold, region="cingulum"):
 
     return ari_scores, confusion_matrices
 
-
-#Split the clusters, get 10% from each, combine them, use the new combined block format for testing and training.
-
-    
 if __name__ == "__main__":
-    data = fitAlzheimerFD()
-    fdobj = data['fdx']
-    fdobjy = data['fdy']
-    clm = data['groupd']
+    ari_scores, confusion_matrices = test_predict(2, 0.001)
 
-    model = "AkjBkQkDk"
-    modely = "EII"
-    model=model.upper()
-    res = funweight.funweightclust(fdobj, fdobjy, K=2, model = model, modely = modely, known = None, init="kmeans", nb_rep=1, verbose=False, threshold=0.01)
-
+    for i in range(10):
+        print(f"Testing Set {i}:\nARI Score: {ari_scores[i]}\nConfusion Matrix:\n{confusion_matrices[i]}")
