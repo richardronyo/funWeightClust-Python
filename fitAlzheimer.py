@@ -8,6 +8,11 @@ from sklearn import metrics as met
 
 
 def fitCorpusFD(basis = 30):
+    """
+    Description
+    -----------
+    This function  creates the Functional Data objects needed to run the model. Specifically gathering the functional data for the Corpus Callosum.
+    """
     if basis == 30:
         x = pd.read_csv("data/corpus_f30.csv")
     elif basis == 40:
@@ -57,7 +62,12 @@ def fitCorpusFD(basis = 30):
         'groupd': (clm - 1).to_numpy().flatten()
     }
 
-def fitAlzheimerFD(basis = 30):
+def fitCingulumFD(basis = 30):
+    """
+    Description
+    -----------
+    This function  creates the Functional Data objects needed to run the model. Specifically gathering functional data from the Cingulum
+    """
     if basis == 30:
         x = pd.read_csv("data/x.csv")
     elif basis == 40:
@@ -155,6 +165,19 @@ def split_fda_chunks(fd1, fd2, num_chunks, labels):
 
     
 def select_and_combine_chunks(fd_chunks, selected_chunk_index):
+    """
+    Description
+    -----------
+    This function selects the specified test data from fd_chunks, and flattens the rest into training_data.
+
+    Parameters
+    ----------
+    fd_chunks: list of 'FDataObject'
+        A list of FDataObjects from which one is the testing data and the rest are training data
+
+    selected_chunk_index: 'int'
+        The index of the chunk that is the testing data
+    """
     # Select the specified chunk
     selected_chunk = fd_chunks[selected_chunk_index]
     
@@ -167,10 +190,25 @@ def select_and_combine_chunks(fd_chunks, selected_chunk_index):
     return selected_chunk, combined_remaining_chunks
 
 def test_predict(number_of_chunks, threshold, region="cingulum"):
+    """
+    Description
+    -----------
+    This function tests the model by using the prediction. It does so by separating the functional data into equal chunks. With these chunks one chunk is chosen as the testing data, and the rest are used to train the model. This process is repeated until each respective chunk has been used as testing data.
+
+    Parameters
+    ----------
+    number_of_chunks: 'int'
+        The number of chunks the Functional Data is to be separated into
+
+    threshold: 'double'
+    
+    region: 'string'
+        Either "cingulum" or "corpus".
+    """
     if region == "corpus":
         data = fitCorpusFD()
     else:
-        data = fitAlzheimerFD()
+        data = fitCingulumFD()
     
     fdobj = data['fdx']
     fdobjy = data['fdy']
