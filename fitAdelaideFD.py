@@ -3,7 +3,7 @@ import pandas as pd
 from skfda.representation.basis import BSplineBasis
 from skfda.representation.grid import FDataGrid
 from matplotlib import pyplot as plt
-import skewfunHDDC as tfun
+import funweightclust as tfun
 from sklearn import metrics as met
 import time
 
