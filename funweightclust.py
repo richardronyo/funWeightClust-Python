@@ -360,9 +360,10 @@ class FunWeightClust:
         kcon = -np.apply_along_axis(np.max, 1, K_pen)
         K_pen += np.atleast_2d(kcon).T
         num = np.exp(K_pen)
+        
         t = num / np.atleast_2d(np.sum(num, axis=1)).T
-
         cl = np.argmax(t, axis=1)
+
         return {'t': t, 'class': cl}
 
 
@@ -494,13 +495,10 @@ def funweightclust(datax, datay, K=np.arange(1,11), model='AKJBKQKDK', modely = 
         x = fdobj.coefficients
         p = x.shape[1]
 
-        W = skfda.misc.inner_product_matrix(fdobj.basis, fdobj.basis)
-        #W[W<1.e-15] = 0
+        W = np.eye(p)
         W_m = scil.cholesky(W)
         dety = scil.det(W)
         Wlist = {'W': W, 'W_m': W_m, 'dety':dety}
-
-
     else:
         x = fdobj[0].coefficients
 
@@ -551,7 +549,6 @@ def funweightclust(datax, datay, K=np.arange(1,11), model='AKJBKQKDK', modely = 
         if len(K) > 1:
             raise ValueError("When using d_select='grid, K must be only one value (ie. not a list)")
         
-        #take first element of K since it is a list/array
         for i in range(K[0]):
             mkt_list[f'd{i}'] = [str(d_range)]
         mkt_list.update({'model':model, 'modely': modely, 'K':[str(a) for a in K], 'threshold':[str(a) for a in threshold]})
@@ -581,9 +578,6 @@ def funweightclust(datax, datay, K=np.arange(1,11), model='AKJBKQKDK', modely = 
         d[f'{i}'] = [a[f'd{i}'] for a in mkt_expand]
     
 
-    #TODO can we make this more efficient with the mkts?
-    #mkt_univariate = ['_'.join(list(a.values())) for a in mkt_expand]
-
     #Pass in dict from mkt_expand
     def hddcWrapper(mkt, verbose, start_time = 0, totmod=1):
         if verbose:
@@ -602,7 +596,7 @@ def funweightclust(datax, datay, K=np.arange(1,11), model='AKJBKQKDK', modely = 
             res = _T_funhddc_main1(fdobj=fdobj, fdobjy=fdobjy, wlist=Wlist, K=K, dfstart=dfstart, dfupdate=dfupdate, dfconstr=dfconstr, model=model, modely=modely,
                                     itermax=itermax, threshold=threshold,method=d_select, eps=eps, init=init, init_vector=init_vector,
                                     mini_nb=mini_nb, min_individuals=min_individuals, noise_ctrl=noise_ctrl,com_dim=com_dim, 
-                                    kmeans_control=kmeans_control, d_max=d_max, d_set=d_set, known=known, testing=testing, r_t=t)
+                                    kmeans_control=kmeans_control, d_max=d_max, d_set=d_set, known=known)
             if verbose:
                 _T_estimateTime(stage=modelNo, start_time=start_time, totmod=totmod)
 
@@ -626,7 +620,6 @@ def funweightclust(datax, datay, K=np.arange(1,11), model='AKJBKQKDK', modely = 
     if mc_cores == 1:
         if verbose:
             _T_estimateTime("init")
-            #Add model numbers if we are tracking time
             mkt_expand = np.c_[mkt_expand, np.arange(0, len(mkt_expand))]
 
         res = [hddcWrapper(a, verbose, start_time, len(mkt_expand)) for a in mkt_expand]
@@ -692,7 +685,7 @@ def funweightclust(datax, datay, K=np.arange(1,11), model='AKJBKQKDK', modely = 
     qui = np.nanargmax(CRIT)
     bestCritRes = chosenRes[qui]
     bestCritRes.criterion = criterion
-    #is complexity all really necessary?
+
     bestCritRes.complexity_all = [('_'.join(mkt_expand[modelKeep[i]].values()), allComplex[i]) for i in range(len(mkt_expand))]
     if show:
         if n > 1:
@@ -718,16 +711,13 @@ def funweightclust(datax, datay, K=np.arange(1,11), model='AKJBKQKDK', modely = 
 
     allCriteria = resPrint
     bestCritRes.allCriteria=allCriteria
-    #allcriteria goes here. Do we need it?
 
     if keepAllRes:
         allRes = chosenRes
         bestCritRes.allRes=allRes
-    #allresults goes here. Do we need it?
 
     return bestCritRes
 
-#TODO add default values
 def _T_funhddc_main1(fdobj, fdobjy, wlist, K, dfstart, dfupdate, dfconstr, model, modely,
                      itermax, threshold, method, eps, init, init_vector,
                      mini_nb, min_individuals, noise_ctrl, com_dim,
@@ -870,6 +860,8 @@ def _T_funhddc_main1(fdobj, fdobjy, wlist, K, dfstart, dfupdate, dfconstr, model
     q = y.shape[1]
 
     W = wlist['W']
+
+
     ones_row = np.ones((1, N))
     DATA = fdobj.coefficients.T
     intermediate_bigDATA = W@(DATA)
@@ -892,33 +884,24 @@ def _T_funhddc_main1(fdobj, fdobjy, wlist, K, dfstart, dfupdate, dfconstr, model
         if len(known) != N:
             raise ValueError("Known classifications vector not the same length as the number of samples (see help file)")
         
-        #TODO find out how to handle missing values. For now, using numpy NaN
 
-        #Known should use None when data is not known
-        #np.isnan(np.sum) is faster than np.isnan(np.min) for the general case
         else:
             if (not np.isnan(np.sum(known))):
-                #warnings.warn("No Nans in 'known' vector supplied. All values have known classification (parameter estimation only)")
-
                 test_index = np.linspace(0, n-1, n).astype(int)
                 kno = np.repeat(1, n)
                 unkno = (kno-1)*(-1)
                 K = len(np.unique(known))
-                #clas = len(training)/n
                 init_vector = known.astype(int)
                 init = "vector"
 
             else:
-                #isnan will detect only nan objects. Will crash if strings are supplied
-                #numpy arrays will convert None to nan if converted to float
+
                 training = np.where((np.invert(np.isnan(known))))
                 test_index = training
                 kno = np.zeros(n).astype(int)
                 kno[test_index] = 1
                 unkno = np.atleast_2d((kno - 1)*(-1))
 
-                #clas = len(training)/n
-            #why do the evaluations to clas if its set to 1 here?
             clas = 1
 
     if K > 1:
@@ -930,17 +913,10 @@ def _T_funhddc_main1(fdobj, fdobjy, wlist, K, dfstart, dfupdate, dfconstr, model
                 if clas > 0:
                     cn1 = len(np.unique(known[test_index]))
                     matchtab = np.repeat(-1, K*K).reshape((K,K))
-                    #ensure this is the correct size. In R: matchtab[1:cn1, 1:K]
                     temp = pd.crosstab(index = known, columns = init_vector).reindex(columns=np.arange(K), index=np.arange(cn1))
                     matchtab[0:cn1, 0:K] = temp.to_numpy()
                     table = _Table(data=matchtab, rownames=temp.index, colnames = temp.columns)
                     
-                    #___OLD___
-                    #matchtab[0:cn1, 0:K] = pd.crosstab(index = known, columns = init_vector, rownames = ["known"], colnames = ["init"]) 
-                    
-                    #numpy.where always returns a tuple of at least length 1 (useless since we're not multidim here),
-                    #so we need to access the zeroth element
-                    #np.isin behaves identical to %in% in R
                     rownames = np.concatenate(([table.rownames, np.nonzero(np.invert(np.isin(np.arange(0,K,1), np.unique(known[test_index]))))[0]]))
                     table.rownames = rownames
                     matchit = np.repeat(-1, K)
@@ -1109,48 +1085,31 @@ def _T_funhddc_main1(fdobj, fdobjy, wlist, K, dfstart, dfupdate, dfconstr, model
             if kno[i] == 1:
                 t[i, int(known[i])] = 1.
 
-    #R uses rep.int here: does it matter? (shouldn't)
     nux = np.repeat(dfstart, K)
-    #call to init function here
-    #initx = _T_funhddt_init(fdobj, wlist, K, t, nux, model, threshold, method, noise_ctrl, com_dim, d_max, d_set)
-    
-    #call to twinit function here
-    #tw = _T_funhddt_twinit(fdobj, wlist, initx, nux)
 
-    #Start I at 0, likely compared on second iteration when I == 1
     I = 0
-    #Check if 
     likely = []
     test = np.Inf
-    # I <= itermax means I + 1 iterations when starting at 0
     first_t = t.copy()
     if testing == True and r_t.all() != None:
         t = r_t
 
     while(I < itermax and test >= eps):
         if K > 1:
-            #does t have a NaN/None?
             if(np.isnan(np.sum(t))):
                 return "t matrix contatins NaNs/Nones"
             
-            #try numpy any
-            #does t have column sums less than min_individuals?
-            #if (any(npsum(np.where(t>1/K,t,0), axis=0) < min_individuals))
+
             if(np.any(np.sum(t>(1/K), axis=0) < min_individuals)):
                 return "pop<min_individuals"
-        #m_step1 called here
-        #   _T_funhddt_m_step1(fdobj, bigDATA, fdobjy, Wlist, N, p, q, K, t, model, modely, threshold, method, noise_ctrl, d_set, com_dim=101, d_max=100)
-        m = _T_funhddt_m_step1(fdobj, bigDATA, fdobjy, wlist, N, p, q, K, t, model, str(modely), threshold, method, noise_ctrl, d_set, com_dim, d_max)
-        #nux = m['nux'].copy()
 
-        #e_step1 called here
+        m = _T_funhddt_m_step1(fdobj, bigDATA, fdobjy, wlist, N, p, q, K, t, model, str(modely), threshold, method, noise_ctrl, d_set, com_dim, d_max)
         to = _T_funhddt_e_step1(fdobj, bigDATA, fdobjy, wlist, N, p, q, m, clas, known, kno)
         
         
         L = to['L']
         t = to['t']
-        #tw = to['tw']
-        #likely[I] = L in R. Is there a reason why we would need NAs?
+
         likely.append(L)
 
         if(I == 1):
@@ -1222,16 +1181,7 @@ def _T_funhddc_main1(fdobj, fdobjy, wlist, K, dfstart, dfupdate, dfconstr, model
     return tfunobj
 
 
-def py_imahalanobis(x, muk, wk, qk, aki):
-    x = x - muk
-    Qi = wk@qk
-    xQi = x@Qi
-    proj = xQi@aki
-    res = np.sum(proj**2, axis=1)
 
-
-
-# In R, this function doesn't return anything?
 from py_mixture import C_rmahalanobis
 from imahalanobis import imahalanobis
 def _T_funhddt_e_step1(fdobj, bigDATA, fdobjy, Wlist, N, p, q, par, clas=0, known=None, kno=None):
@@ -1335,7 +1285,9 @@ def _T_funhddt_e_step1(fdobj, bigDATA, fdobjy, Wlist, N, p, q, par, clas=0, know
     ldetcov = par["logi"]
     gam = par["gam"]
     dety = Wlist["dety"]
+    
     b[b<1e-6] = 1e-6
+    
     if clas > 0:
         unkno = np.atleast_2d((kno-1)*(-1)).T
 
@@ -1355,7 +1307,6 @@ def _T_funhddt_e_step1(fdobj, bigDATA, fdobjy, Wlist, N, p, q, par, clas=0, know
         aki = np.sqrt(np.diag(np.concatenate((1/a[i, 0:int(d[i])],np.repeat(1/b[i], p-int(d[i])) ))))
         muki = mu[i]
         Wki = Wlist["W_m"]
-        #aki and muki are not matching the R code
 
         pp = x.shape[1]
         pN = x.shape[0]
@@ -1364,7 +1315,6 @@ def _T_funhddt_e_step1(fdobj, bigDATA, fdobjy, Wlist, N, p, q, par, clas=0, know
 
 
         ans = imahalanobis(new_x, muki, Wki, Qk, aki, pp, pN, pdi, np.zeros(N))
-        py_imahalanobis(new_x, muki, Wki, Qk, aki)
         mah_pen[i, :] = ans
 
         dety = Wlist["dety"]
@@ -1372,15 +1322,6 @@ def _T_funhddt_e_step1(fdobj, bigDATA, fdobjy, Wlist, N, p, q, par, clas=0, know
         mah_pen1[i, :] = C_rmahalanobis(N, pqp, q, K, i, bigx, y, gam[i, :, :], icovy[i, :, :], delta)
         
         pi = math.pi
-        #The last two terms are not added in the R code base  + mah_pen1[i, :] + ldetcov[i]
-
-        # Assuming prop, p, q, pi, s, dety, d, b, mah_pen, mah_pen1, and ldetcov are already defined
-
-        # Calculate and print each term separately
-
- 
-
-        # Calculate the entire expression and print it
         K_pen[:, i] = (-2 * np.log(prop[i])) + (p + q) * np.log(2 * np.pi) + s[i] - np.log(dety) + (p - d[i]) * np.log(b[i]) + mah_pen[i, :] + mah_pen1[i, :] + ldetcov[i]
 
     A = (-1/2)*K_pen
@@ -1454,7 +1395,6 @@ def _T_funhddt_m_step1(fdobj, bigDATA, fdobjy, Wlist, N, p, q, K, t, model, mode
     -------
     result: dict
     """
-    #'list' in R means len(fdobj) > 1 -> MULTI = True
     t = (np.reshape(t, (N, K)))
 
     if(type(fdobj) == skfda.FDataBasis):
@@ -1500,25 +1440,25 @@ def _T_funhddt_m_step1(fdobj, bigDATA, fdobjy, Wlist, N, p, q, K, t, model, mode
             y = fdobjy[0].coefficients
             y = np.reshape(y, (N, q))
 
-    #After all matrices, reshape according to document
     bigx = np.transpose(bigDATA)
     bigx = np.reshape(bigx, (N, p+1))
 
-
+    #Formula 24, nk
     n = np.sum(t, axis=0)
 
     d_max = min(N, p, d_max)
-
+    #Formula 24, pik
     prop = n/N
-    #matrix with K rows and p columns
-    mu = np.zeros((K, p))
 
+    #Formula 25, muk
+    mu = np.zeros((K, p))
     for i in range(0, K):
         mu[i, :] = np.sum(x*((t[:, i]).reshape(-1, 1)), axis=0) / n[i]
     
 
-    ind = np.apply_along_axis(np.where, 1, t>0)
+    ind = [np.where(row > 0)[0] for row in t]
     n_bis = np.arange(0,K)
+
     for i in range(0,K):
         n_bis[i] = len(ind[i])
 
@@ -1542,36 +1482,24 @@ def _T_funhddt_m_step1(fdobj, bigDATA, fdobjy, Wlist, N, p, q, K, t, model, mode
         fpcaobj[f'{i}'] = {'valeurs_propres': valeurs_propres, 'cov': cov, 'U':U}
 
 
-    #Intrinsic dimensions selection
-    #TODO try refactoring this for numba
-
     if model in ["AJBQD", "ABQD"]:
         d = np.repeat(com_dim, K)
     elif model in ["AKJBKQKD", "AKBKQKD", "ABKQKD", "AKJBQKD", "AKBQKD", "ABQKD"]:
         threshold_exceeded = (ev > noise_ctrl)
     
-        # Create a repeated sequence of column indices
-        repeated_indices = np.repeat(np.arange(1, ev.shape[1] + 1), K).reshape(ev.shape[1], K).T
-        
-        # Find the first maximum index where ev > noise_ctrl per row
-        max_indices = np.apply_along_axis(lambda x: np.argmax(x) + 1, 1, threshold_exceeded * repeated_indices)
-        
-        # Calculate dmax
+        repeated_indices = np.repeat(np.arange(1, ev.shape[1] + 1), K).reshape(ev.shape[1], K).T        
+        max_indices = np.apply_along_axis(lambda x: np.argmax(x) + 1, 1, threshold_exceeded * repeated_indices)        
         dmax = np.min(max_indices) - 1
         
-        # Update com_dim if necessary
         if com_dim > dmax:
             com_dim = max(dmax, 1)
         
-        # Replicate com_dim to create vector d of length K
         d = np.full(K, com_dim)
     else:
         n = np.sum(t, axis=0)
         d = _T_hdclassif_dim_choice(ev, n, method, threshold, False, noise_ctrl, d_set)
 
 
-    #correct for Python indices
-    #Setup Qi matrices
     Q1 = Q.copy()
 
     for i in range(0, K):
@@ -1671,6 +1599,7 @@ def _T_mypcat_fd1_Uni(fdobj_coefficients, W_m, Ti):
     rep = (M * swept_fdobj_coefficients.T).T
     mat_cov = (rep.T@rep) / np.sum(Ti)
     cov = ((W_m@ mat_cov)@(W_m.T))
+    
     if not np.all(np.abs(cov-cov.T) < 1.e-12):
         ind = np.nonzero(cov - cov.T > 1.e-12)
         for i in ind:
@@ -1678,7 +1607,6 @@ def _T_mypcat_fd1_Uni(fdobj_coefficients, W_m, Ti):
     
     valeurs_propres, vecteurs_propres = np.linalg.eig(cov)
 
-    #R puts the eigenvalues in ascending order and puts the eigenvectors in matching order
     sorted_indices = np.argsort(-np.abs(valeurs_propres))
     valeurs_propres = valeurs_propres[sorted_indices]
     vecteurs_propres = vecteurs_propres[:, sorted_indices]
@@ -1724,8 +1652,6 @@ def _T_mypcat_fd1_Multi(data, W_m, Ti, corI):
     """
 
 
-    #Multivariate here
-    #Condense all dimensions of coefficients into one matrix
     coefficients = data.reshape(data.shape[1], data.shape[-1]*data.shape[0])
     coefmean = np.zeros((coefficients.shape))
 
@@ -1734,17 +1660,14 @@ def _T_mypcat_fd1_Multi(data, W_m, Ti, corI):
 
             coefmean[:, j] = np.sum(((np.ascontiguousarray(corI.TW)@np.atleast_2d(np.repeat(1., data[i].shape[-1]))).T * data[i].T)[:, i])/np.sum(corI)
 
-    # Swept values not used anywhere
-    # temp = np.zeros(coefmean.shape)
-    # for i in range(len(coefficients)):
-    #         temp[:, i] = coefficients[:, i] - coefmean[:, i]
 
     n = coefficients.shape[1]
     v = np.sqrt(corI)
     M = np.repeat(1., n).reshape((n, 1))@(v)
     rep = (M * coefficients.T).T
     mat_cov = (rep.T@rep) / np.sum(Ti)
-    cov = (W_m@ mat_cov)@(W_m.T) #sigma in the paper
+    cov = (W_m@ mat_cov)@(W_m.T)
+
     if not np.all(np.abs(cov-cov.T) < 1.e-12):
         ind = np.nonzero(cov - cov.T > 1.e-12)
         for i in ind:
@@ -1793,17 +1716,14 @@ def _T_hdclassif_dim_choice(ev, n, method, threshold, graph, noise_ctrl, d_set):
         p = len(ev[0])
 
         if (method == "cattell"):
-            #Trivial tests show that diff does the same thing in Python that it does in R
             dev = np.abs(np.apply_along_axis(np.diff, 1, ev))
             max_dev = np.apply_along_axis(np.nanmax, 1, dev)
             dev = (dev / np.repeat(max_dev, p-1).reshape(dev.shape)).T
-            #Apply's axis should cover this situation. Try axis=1 in *args if doesn't work
-            transpose_compare = (ev[:, 1:] > noise_ctrl).T  # Transpose after excluding the first column
-            range_vector = np.arange(1, p).reshape(-1, 1)  # Reshape to a column vector for proper broadcasting
+            transpose_compare = (ev[:, 1:] > noise_ctrl).T 
+            range_vector = np.arange(1, p).reshape(-1, 1)
 
-            #result_matrix = (dev > threshold) * range_vector * transpose_compare -> Despite the R code saying this is the calculation, it actually does not use this in the calculation of the d-matrix
             result_matrix =  (dev > threshold) *range_vector * transpose_compare
-            d = np.apply_along_axis(lambda col: np.argmax(col) + 1, 0, result_matrix)  # Adding 1 to match R's 1-based index
+            d = np.apply_along_axis(lambda col: np.argmax(col) + 1, 0, result_matrix)
             old_d = np.apply_along_axis(np.argmax, 1, (dev > threshold).T*(np.arange(0, p-1))*((ev[:,1:] > noise_ctrl)))
         elif (method == "bic"):
 
@@ -1817,9 +1737,8 @@ def _T_hdclassif_dim_choice(ev, n, method, threshold, graph, noise_ctrl, d_set):
 
                 for kdim in range(0, Nmax):
                     if d[i] != 0 and kdim > d[i] + 10: break
-                    #adjusted for python indices
-                    a = np.sum(ev[i, 0:(kdim+1)])/(kdim+1)
-           
+
+                    a = np.sum(ev[i, 0:(kdim+1)])/(kdim+1)           
                     b = np.sum(ev[i, (kdim + 1):p2])/(p2-(kdim+1))
                  
 
@@ -1827,7 +1746,6 @@ def _T_hdclassif_dim_choice(ev, n, method, threshold, graph, noise_ctrl, d_set):
                         B[kdim] = -np.inf
 
                     else:
-                        #Adjusted for python indices
                         L2 = -1/2*((kdim+1)*np.log(a) + (p2 - (kdim + 1))*np.log(b) - 2*np.log(prop[i]) +p2*(1+1/2*np.log(2*np.pi))) * n[i]
                         B[kdim] = 2*L2 - (p2+(kdim+1)*(p2-(kdim+2)/2)+1) * np.log(n[i])
                        
@@ -1927,7 +1845,6 @@ def _T_hdclassift_bic(par, p, q, dfconstr='yes'):
             - 'icl': float
                 Integrated Completed Likelihood value.
     """
-    #mux and mu not used, should we get rid of them?
     model = par['model']
     modely = par['modely']
     K = par['K']
@@ -1968,7 +1885,6 @@ def _T_hdclassift_bic(par, p, q, dfconstr='yes'):
     tot = np.sum(d*(p-(d+1)/2))
     D = np.sum(d)
     d = d[0]
-    #to = d*(p-(d+1)/2
 
     if model == 'AKJBKQKDK':
         m = ro + tot + D + K
@@ -2015,9 +1931,13 @@ def _T_hdclassift_bic(par, p, q, dfconstr='yes'):
             m += K * q * (q + 1) / 2
 
     bic = - (-2*L + m * np.log(N))
+    
     t = par['posterior']
+    
     Z = ( (t - np.atleast_2d(np.apply_along_axis(np.max, 1, t)).T) == 0. ) + 0.
+    
     icl = bic - 2*np.sum(Z*np.log(t + 1.e-15))
+    
     return {'bic': bic, 'icl': icl}
 
 def _T_hdc_getComplexityt(par, p, q, dfconstr='yes'):
@@ -2025,13 +1945,9 @@ def _T_hdc_getComplexityt(par, p, q, dfconstr='yes'):
     modely = par['modely']
 
     K = par['K']
-    #d should already be adjusted for Python indices
     d = par['d']
-    #These don't get used
-    #b = par['b']
     a = par['a']
-    #mu = par['mu']
-    #prop = par['prop']
+
 
 
     ro = K*p + K - 1
@@ -2097,7 +2013,6 @@ def _T_hdc_getTheModel(model, all2models = False):
     :rtype new_model: list[str]
     """
     model_in = model
-    #is the model a list or array?
     try:
         if type(model) == np.ndarray or type(model) == list:
             new_model = np.array(model,dtype='<U9')
@@ -2108,7 +2023,6 @@ def _T_hdc_getTheModel(model, all2models = False):
     except:
         raise ValueError("Model needs to be an array or list")
 
-    #one-dimensional please
     if(model.ndim > 1):
         raise ValueError("The argument 'model' must be 1-dimensional")
     #check for invalid values
@@ -2118,8 +2032,7 @@ def _T_hdc_getTheModel(model, all2models = False):
 
     #List of model names accepted
     ModelNames = np.array(["AKJBKQKDK", "AKBKQKDK", "ABKQKDK", "AKJBQKDK", "AKBQKDK", "ABQKDK"])
-    #numbers between 0 and 5 inclusive are accepted, so check if numbers are
-    #sent in as a string before capitalizing
+    #numbers between 0 and 5 inclusive are accepted, so check if numbers are sent in as a string before capitalizing
     if type(model[0]) == np.str_:
         if model[0].isnumeric():
             model = model.astype(np.int_)
@@ -2389,9 +2302,6 @@ def _T_hddc_control(params):
     if not (known[1] is None):
         checkType(known, (LIST_TYPES, (INT_TYPES, FLOAT_TYPES)))
 
-        # if(len(np.nonzero(np.array(known[1]).dtype == FLOAT_TYPES and known[1] != np.NaN)[0]) > 0):
-        #     raise ValueError("'Known' parameter should not contain values of type float except for NaN")
-    
         if isinstance(K[1], LIST_TYPES):
             k_temp = K[1][0]
             if len(K[1]) > 1:

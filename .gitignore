@@ -3,3 +3,4 @@ venv/*
 paperScenario*
 modelSimulation*
 triangleSimulation*
+*.ipynb

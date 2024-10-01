@@ -244,6 +244,8 @@ def test_predict(number_of_chunks, threshold, region="cingulum"):
     fdobjy = data['fdy']
     labels = data['groupd']
 
+    print("y:\n", fdobjy.coefficients)
+
     split_data, split_datay, split_labels = split_fda_chunks(fdobj, fdobjy, number_of_chunks, labels)
     
     plot_chunks(split_data, split_labels, "X")
@@ -273,8 +275,9 @@ def test_predict(number_of_chunks, threshold, region="cingulum"):
 
 if __name__ == "__main__":
     fd = fitCingulumFD()
-    num_chunks = 9
-    ari_scores, confusion_matrices = test_predict(num_chunks, 0.001, "corpus")
 
-    for i in range(num_chunks):
-        print(f"Testing Set {i}:\nARI Score: {ari_scores[i]}\nConfusion Matrix:\n{confusion_matrices[i]}")
+    ari, confusion = test_predict(9, 0.001)
+
+    for i in range(9):
+        print(f"ARI Score {i}:\t{ari[i]}")
+        print(f"Confusion Matrix {i}:\n{confusion[i]}\n\n")
