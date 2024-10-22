@@ -823,12 +823,10 @@ def _T_funhddc_main1(fdobj, fdobjy, wlist, K, dfstart, dfupdate, dfconstr, model
             MULTI = True
             data = []
             x = fdobj[0].coefficients
-            data.append(fdobj[0].coefficients)
             for i in range(1, len(fdobj)):
                 x = np.c_[x, fdobj[i].coefficients]
-                data.append(fdobj[i].coefficients)
 
-            data = np.array(data)
+            
         #univariate
         else:
             x = fdobj[0].coefficients
@@ -863,14 +861,14 @@ def _T_funhddc_main1(fdobj, fdobjy, wlist, K, dfstart, dfupdate, dfconstr, model
 
 
     ones_row = np.ones((1, N))
-    DATA = fdobj.coefficients.T
+    DATA = x.T
     intermediate_bigDATA = W@(DATA)
     bigDATA = np.vstack((intermediate_bigDATA, ones_row))
 
     com_ev = None
 
     d_max = min(N,p,d_max)
-    databig = np.hstack((data, datay))
+    databig = np.hstack((x, datay))
 
     #classification
     n = N
