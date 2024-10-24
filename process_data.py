@@ -3,6 +3,7 @@ import pandas as pd
 
 from skfda.representation.basis import BSplineBasis, FourierBasis
 from skfda.representation.grid import FDataGrid
+from matplotlib import pyplot as plt
 
 import funweightclust as fwc
 from sklearn import metrics as met
@@ -40,6 +41,16 @@ def constant_functional_data(values, domain = 200):
     fd = FDataGrid(data_matrix=values, grid_points=x_grid_points).to_basis(FourierBasis(domain_range=(1, domain + 1), n_basis=50))
 
     return fd
+
+def plot_fd(fd, labels=None):
+    if labels is not None:
+        fd.plot(group=labels)
+    else:
+        fd.plot()
+    
+    plt.show()
+
+    return
     
 
 if __name__ == "__main__":
@@ -52,8 +63,7 @@ if __name__ == "__main__":
     cingulum_labels = raw_cingulum["Research.Group"].replace({'AD':0, 'CN':1}).astype(int).to_numpy()
 
     cingulum_fd = create_functional_data(cingulum_voxelwise_data)
-    cingulum_fd.plot()
-
+    plot_fd(cingulum_fd, cingulum_labels)
     raw_cingulum_y_data = raw_cingulum["MMSE.Total.Score"].to_numpy()
     cingulum_fdy = constant_functional_data(raw_cingulum_y_data)
 
