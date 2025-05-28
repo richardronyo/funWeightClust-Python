@@ -191,16 +191,20 @@ class FunWeightClust:
         self.icovy = icovy
         self.logi = logi
         self.first_t = first_t
+
+    
     from imahalanobis import imahalanobis
     from py_mixture import C_rmahalanobis
     def predict(self, data, datay):
         '''
-        predict takes a FDataBasis fit on the same number of basis functions as
+        predict takes a FDataBasis object on the same number of basis functions as
         the original clustered data and uses the result of the original
         clustering to predict a clustering for the new set of data.
 
-        data -- functional data fit on the same number of basis functions as
+        data -- predictor functional data on the same number of basis functions as
         the original clustered data.
+
+        datay - response functional data on the same number of basis functions as the original clustered data.
         '''
 
         if data is None:
@@ -376,14 +380,7 @@ def funweightclust(datax, datay, K=np.arange(1,11), model='AKJBKQKDK', modely = 
     '''
     Description
     -----------
-    FunWeightClust takes the parameters from the user and sets them up to run the
-    main algorithm by checking that arguments are of the correct type and that
-    they are put into the correct format before running the algorithm. It also
-    handles multi-processing by running the algorithm asynchronously with the
-    number of cores specified by the user. After the algorithm finishes, the
-    output is then arranged into the correct format for display and the correct
-    set of parameters that gave the best fit clustering are outputted as a 
-    FunWeightClust object.
+    FunWeightClust is a clustering algorithm for functional data. It is based on the work developed by Dr. Cristina Anton and Iain Smith.
 
     Parameters
     ----------
@@ -1797,51 +1794,22 @@ def _T_hdclassif_dim_choice(ev, n, method, threshold, graph, noise_ctrl, d_set):
 
 def _T_hdclassift_bic(par, p, q, dfconstr='yes'):
     """
-    Calculates the Bayesian Information Criterion (BIC) and Integrated Completed Likelihood (ICL)
-    for a given statistical model. These criteria are used to evaluate the goodness of fit of the model while
-    penalizing for model complexity.
+    Processes the input model parameter to validate, standardize, and map it to predefined model names for modely. 
+    Ensures the input is valid, converts it to the appropriate format, and returns the corresponding modely names.
 
     Parameters
     ----------
-    par : dict
-        Dictionary containing parameters of the model:
-            - 'model': str
-                The model type for clustering.
-            - 'modely': str
-                The model type for the Y variable.
-            - 'K': int
-                Number of clusters.
-            - 'd': array-like
-                Array of dimensions.
-            - 'b': array-like
-                Array of values for b.
-            - 'a': array-like
-                Array of values for a.
-            - 'N': int
-                Number of data points.
-            - 'prop': array-like
-                Proportion of data points in each cluster.
-            - 'ev': array-like
-                Eigenvalues.
-            - 'loglik': float
-                Log-likelihood of the model.
-            - 'posterior': array-like
-                Posterior probabilities.
-    p : int
-        Number of dimensions for the X variable.
-    q : int
-        Number of dimensions for the Y variable.
-    dfconstr : str, optional
-        Degrees of freedom constraint, by default 'yes'.
+    model : list[str] or str
+        The input modely(s) to be processed. Can be a list or array of modely names or numbers, 
+        or a single modely name or number.
+    all2models : bool, optional
+        If True, and the input modely is 'ALL', returns an array of all modely names. 
+        Otherwise, returns 'ALL'. By default False.
 
     Returns
     -------
-    result : dict
-        Dictionary containing:
-            - 'bic': float
-                Bayesian Information Criterion value.
-            - 'icl': float
-                Integrated Completed Likelihood value.
+    new_model : list[str]
+        An array of validated and standardized modely names.
     """
     model = par['model']
     modely = par['modely']
@@ -1849,7 +1817,6 @@ def _T_hdclassift_bic(par, p, q, dfconstr='yes'):
     d = par['d']
     b = par['b']
     a = par['a']
-    mu = par['mu']
     N = par['N']
     prop = par['prop']
 
@@ -1944,7 +1911,6 @@ def _T_hdc_getComplexityt(par, p, q, dfconstr='yes'):
 
     K = par['K']
     d = par['d']
-    a = par['a']
 
 
 
@@ -1952,7 +1918,6 @@ def _T_hdc_getComplexityt(par, p, q, dfconstr='yes'):
     tot = np.sum(d*(p-(d+1)/2))
     D = np.sum(d)
     d = d[0]
-    to = d*(p-(d+1)/2)
   
     if model == 'AKJBKQKDK':
         m = ro + tot + D + K
@@ -1999,16 +1964,22 @@ def _T_hdc_getComplexityt(par, p, q, dfconstr='yes'):
 
 def _T_hdc_getTheModel(model, all2models = False):
     """
-    This function processes the input model parameter to validate, standardize, and map it to predefined model names for model.
-    It ensures that the input is valid, converts it to the appropriate format, and returns the corresponding model names.
+    Processes the input model parameter to validate, standardize, and map it to predefined model names.
+    Ensures the input is valid, converts it to the appropriate format, and returns the corresponding model names.
 
-    :param model: The input model(s) to be processed. Can be a list or array of model names or numbers, or a single model name or number.
-    :type model: list[str] or str
-    :param all2models: If True, and the input model is 'ALL', returns an array of all model names. Otherwise, returns 'ALL'.
-    :type all2models: bool
-    
-    :return new_model: An array of validated and standardized model names.
-    :rtype new_model: list[str]
+    Parameters
+    ----------
+    model : list[str] or str
+        The input model(s) to be processed. Can be a list or array of model names or numbers,
+        or a single model name or number.
+    all2models : bool, optional
+        If True, and the input model is 'ALL', returns an array of all model names.
+        Otherwise, returns 'ALL'. By default False.
+
+    Returns
+    -------
+    new_model : list[str]
+        An array of validated and standardized model names.
     """
     model_in = model
     try:
@@ -2078,16 +2049,23 @@ def _T_hdc_getTheModel(model, all2models = False):
 
 
 def _T_hdc_getTheModely(model, all2models = False):
-    """This function processes the input model parameter to validate, standardize, and map it to predefined model names for modely.
-    It ensures that the input is valid, converts it to the appropriate format, and returns the corresponding modely names.
+    """
+    Processes the input model parameter to validate, standardize, and map it to predefined model names for modely.
+    Ensures the input is valid, converts it to the appropriate format, and returns the corresponding modely names.
 
-    :param model: The input modely(s) to be processed. Can be a list or array of modely names or numbers, or a single modely name or number.
-    :type model: list[str] or str
-    :param all2models: If True, and the input modely is 'ALL', returns an array of all modely names. Otherwise, returns 'ALL'.
-    :type all2models: bool
-    
-    :return new_model: An array of validated and standardized modely names.
-    :rtype new_model: list[str]
+    Parameters
+    ----------
+    model : list[str] or str
+        Input modely(s) to process. Can be a list/array of modely names/numbers,
+        or a single modely name/number.
+    all2models : bool, optional
+        If True and input is 'ALL', returns all modely names.
+        Otherwise returns 'ALL'. Default is False.
+
+    Returns
+    -------
+    list[str]
+        Array of validated and standardized modely names.
     """
     model_in = model
     #is the model a list or array?
@@ -2160,33 +2138,39 @@ def _T_hdc_getTheModely(model, all2models = False):
 
 
 def _T_addCommas(x):
+    """
+    Vectorized function that formats numeric values with comma separators.
+    Applies comma formatting to each element in an array or to a single value.
+
+    Parameters
+    ----------
+    x : numeric or array-like
+        Input number(s) to be formatted. Can be a single value or array of numbers.
+
+    Returns
+    -------
+    str or numpy.ndarray
+        Formatted string(s) with comma separators and 2 decimal places.
+        Returns array if input is array-like, single string otherwise.
+
+    """
     vfunc = np.vectorize(_T_addCommas_single)
     return vfunc(x)
 
 def _T_addCommas_single(x):
-    #R code
-    '''if not np.isfinite(x):
-        return str(x)
-    
-    s = np.sign(x)
-    x = np.abs(x)
+    """
+    Formats a single numeric value with comma separators and fixed decimal places.
 
-    decimal = x - np.floor(x)
-    if decimal > 0:
-        dec_string = str(decimal)[1:4]
-    else:
-        dec_string = ""
+    Parameters
+    ----------
+    x : numeric
+        Input number to be formatted.
 
-    entier = str(np.floor(x))
-    quoi = list(entier[-1::-1])
-    n = len(quoi)
-    sol = []
-    for i in range(n):
-        sol.extend(quoi[i])
-        if i % 3 == 0 and i != n:
-            sol.append(",")
-
-    '''
+    Returns
+    -------
+    str
+        String representation of the number
+    """
     return "{:,.2f}".format(x)
 
 
