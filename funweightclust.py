@@ -20,7 +20,7 @@ import math
 
 #GLOBALS
 LIST_TYPES = (list, np.ndarray)
-UNKNOWNS = (np.NaN, np.inf, -np.inf, None)
+UNKNOWNS = (np.nan, np.inf, -np.inf, None)
 INT_TYPES = (int, np.integer)
 FLOAT_TYPES = (float, np.floating)
 NUMERIC_TYPES = (INT_TYPES, FLOAT_TYPES)
@@ -193,8 +193,7 @@ class FunWeightClust:
         self.first_t = first_t
 
     
-    from imahalanobis import imahalanobis
-    from py_mixture import C_rmahalanobis
+    from py_mixture import py_C_rmahalanobis, py_imahalanobis
     def predict(self, data, datay):
         '''
         predict takes a FDataBasis object on the same number of basis functions as
@@ -262,7 +261,7 @@ class FunWeightClust:
                     mah_pen[i, :] = imahalanobis(x, muki, wki, Qk, aki, pp, pN, pdi, np.zeros(N))
                     delta = np.zeros(N)
                     #scipy logamma vs math lgamma?
-                    mah_pen1[i, :] = C_rmahalanobis(N, pqp, q, self.K, i, bigx, y, gam[i, :, :], icovy[i, :, :], delta)
+                    mah_pen1[i, :] = py_C_rmahalanobis(N, pqp, q, self.K, i, bigx, y, gam[i, :, :], icovy[i, :, :], delta)
                     pi = math.pi
                     K_pen[:, i] = (-2 * np.log(prop[i])) + (p + q) * np.log(2 * pi) + s[i] - np.log(dety) + (p - d[i]) * np.log(b[i]) + mah_pen[i, :] + mah_pen1[i, :] + ldetcov[i]
             case 'AKJBQKDK':
@@ -282,7 +281,7 @@ class FunWeightClust:
                     mah_pen[i, :] = imahalanobis(x, muki, wki, Qk, aki, pp, pN, pdi, np.zeros(N))
                     delta = np.zeros(N)
                     #scipy logamma vs math lgamma?
-                    mah_pen1[i, :] = C_rmahalanobis(N, pqp, q, self.K, i, bigx, y, gam[i, :, :], icovy[i, :, :], delta)
+                    mah_pen1[i, :] = py_C_rmahalanobis(N, pqp, q, self.K, i, bigx, y, gam[i, :, :], icovy[i, :, :], delta)
                     pi = math.pi
                     K_pen[:, i] = (-2 * np.log(prop[i])) + (p + q) * np.log(2 * pi) + s[i] - np.log(dety) + (p - d[i]) * np.log(b[0]) + mah_pen[i, :] + mah_pen1[i, :] + ldetcov[i]
             case 'AKBKQKDK':
@@ -301,7 +300,7 @@ class FunWeightClust:
                     mah_pen[i, :] = imahalanobis(x, muki, wki, Qk, aki, pp, pN, pdi, np.zeros(N))
                     delta = np.zeros(N)
                     #scipy logamma vs math lgamma?
-                    mah_pen1[i, :] = C_rmahalanobis(N, pqp, q, self.K, i, bigx, y, gam[i, :, :], icovy[i, :, :], delta)
+                    mah_pen1[i, :] = py_C_rmahalanobis(N, pqp, q, self.K, i, bigx, y, gam[i, :, :], icovy[i, :, :], delta)
                     pi = math.pi
                     K_pen[:, i] = (-2 * np.log(prop[i])) + (p + q) * np.log(2 * pi) + s[i] - np.log(dety) + (p - d[i]) * np.log(b[i]) + mah_pen[i, :] + mah_pen1[i, :] + ldetcov[i]
 
@@ -321,7 +320,7 @@ class FunWeightClust:
                     mah_pen[i, :] = imahalanobis(x, muki, wki, Qk, aki, pp, pN, pdi, np.zeros(N))
                     delta = np.zeros(N)
                     #scipy logamma vs math lgamma?
-                    mah_pen1[i, :] = C_rmahalanobis(N, pqp, q, self.K, i, bigx, y, gam[i, :, :], icovy[i, :, :], delta)
+                    mah_pen1[i, :] = py_C_rmahalanobis(N, pqp, q, self.K, i, bigx, y, gam[i, :, :], icovy[i, :, :], delta)
                     pi = math.pi
                     K_pen[:, i] = (-2 * np.log(prop[i])) + (p + q) * np.log(2 * pi) + s[i] - np.log(dety) + (p - d[i]) * np.log(b[i]) + mah_pen[i, :] + mah_pen1[i, :] + ldetcov[i]
 
@@ -338,7 +337,7 @@ class FunWeightClust:
                     pdi = aki.shape[1]
                     mah_pen[i, :] = imahalanobis(x, muki, wki, Qk, aki, pp, pN, pdi, np.zeros(N))
                     delta = np.zeros(N)
-                    mah_pen1[i, :] = C_rmahalanobis(N, pqp, q, self.K, i, bigx, y, gam[i, :, :], icovy[i, :, :], delta)
+                    mah_pen1[i, :] = py_C_rmahalanobis(N, pqp, q, self.K, i, bigx, y, gam[i, :, :], icovy[i, :, :], delta)
                     pi = math.pi
                     K_pen[:, i] = (-2 * np.log(prop[i])) + (p + q) * np.log(2 * pi) + s[i] - np.log(dety) + (p - d[i]) * np.log(b[0]) + mah_pen[i, :] + mah_pen1[i, :] + ldetcov[i]
 
@@ -356,7 +355,7 @@ class FunWeightClust:
                     pdi = aki.shape[1]
                     mah_pen[i, :] = imahalanobis(x, muki, wki, Qk, aki, pp, pN, pdi, np.zeros(N))
                     delta = np.zeros(N)
-                    mah_pen1[i, :] = C_rmahalanobis(N, pqp, q, self.K, i, bigx, y, gam[i, :, :], icovy[i, :, :], delta)
+                    mah_pen1[i, :] = py_C_rmahalanobis(N, pqp, q, self.K, i, bigx, y, gam[i, :, :], icovy[i, :, :], delta)
                     pi = math.pi
 
                     K_pen[:, i] = (-2 * np.log(prop[i])) + (p + q) * np.log(2 * pi) + s[i] - np.log(dety) + (p - d[i]) * np.log(b[0]) + mah_pen[i, :] + mah_pen1[i, :] + ldetcov[i]
@@ -394,9 +393,9 @@ def funweightclust(datax, datay, K=np.arange(1,11), model='AKJBKQKDK', modely = 
         the type of model to be used. `FunWeightClust` supports the following
         model names: `'AKJBKQKDK'`, `'AKJBQKDK'`, `'AKBKQKDK'`, `'AKBQKDK'`, 
         `'ABKQKDK'`, `'ABQKDK'`. Can be given with any capitilization.
-    known : `list` of `ints` or `np.NaNs`, default=None
+    known : `list` of `ints` or `np.nans`, default=None
         a vector given known clustering of data. Values that are not known
-        should be given as `np.NaN`. When not None, FunWeightClust will perform
+        should be given as `np.nan`. When not None, FunWeightClust will perform
         classification. If all values are given in known, then FunWeightClust will 
         perform parameter estimation.
     dfstart : `int`, default=50
@@ -646,7 +645,7 @@ def funweightclust(datax, datay, K=np.arange(1,11), model='AKJBKQKDK', modely = 
     if verbose:
         mkt_expand = mkt_expand[:,0]
     res = np.array(res)
-    loglik_all = np.array([x.loglik if isinstance(x, FunWeightClust) else - np.Inf for x in res])
+    loglik_all = np.array([x.loglik if isinstance(x, FunWeightClust) else - np.inf for x in res])
     comment_all = np.array(["" if isinstance(x, FunWeightClust) else x for x in res])
 
     threshold = np.array([float(x['threshold']) for x in mkt_expand])
@@ -665,9 +664,9 @@ def funweightclust(datax, datay, K=np.arange(1,11), model='AKJBKQKDK', modely = 
     comment_all = comment_all[modelKeep]
     chosenRes = res[modelKeep]    
     
-    bic = [res.bic if isinstance(res, FunWeightClust) else -np.Inf for res in chosenRes]
-    icl = [res.icl if isinstance(res, FunWeightClust) else -np.Inf for res in chosenRes]
-    allComplex = [res.complexity if isinstance(res, FunWeightClust) else -np.Inf for res in chosenRes]
+    bic = [res.bic if isinstance(res, FunWeightClust) else -np.inf for res in chosenRes]
+    icl = [res.icl if isinstance(res, FunWeightClust) else -np.inf for res in chosenRes]
+    allComplex = [res.complexity if isinstance(res, FunWeightClust) else -np.inf for res in chosenRes]
     model = np.array(model)[modelKeep]
     modely = np.array(modely)[modelKeep]
     threshold = np.array(threshold)[modelKeep]
@@ -798,8 +797,8 @@ def _T_funhddc_main1(fdobj, fdobjy, wlist, K, dfstart, dfupdate, dfconstr, model
         speed up algorithm if intrinsic dimensions are signifcantly large.
     d_set: `int` or `list` of `ints`, default=2
         list of values to be used for the intrinsic dimension of each group when `d_select='grid'`.
-    known: `list` of `ints` or `np.NaNs`, default=None
-        a vector given known clustering of data. Values that are not known should be given as `np.NaN`. When not None, FunWeightClust will perform classification. If all values are given in known, then FunWeightClust will perform parameter estimation.
+    known: `list` of `ints` or `np.nans`, default=None
+        a vector given known clustering of data. Values that are not known should be given as `np.nan`. When not None, FunWeightClust will perform classification. If all values are given in known, then FunWeightClust will perform parameter estimation.
     
     Return
     ------
@@ -1084,7 +1083,7 @@ def _T_funhddc_main1(fdobj, fdobjy, wlist, K, dfstart, dfupdate, dfconstr, model
 
     I = 0
     likely = []
-    test = np.Inf
+    test = np.inf
     first_t = t.copy()
     if testing == True and r_t.all() != None:
         t = r_t
@@ -1177,8 +1176,7 @@ def _T_funhddc_main1(fdobj, fdobjy, wlist, K, dfstart, dfupdate, dfconstr, model
 
 
 
-from py_mixture import C_rmahalanobis
-from imahalanobis import imahalanobis
+from py_mixture import py_C_rmahalanobis, py_imahalanobis
 def _T_funhddt_e_step1(fdobj, bigDATA, fdobjy, Wlist, N, p, q, par, clas=0, known=None, kno=None):
     """
     Description
@@ -1309,12 +1307,12 @@ def _T_funhddt_e_step1(fdobj, bigDATA, fdobjy, Wlist, N, p, q, par, clas=0, know
         new_x = x.copy()
 
 
-        ans = imahalanobis(new_x, muki, Wki, Qk, aki, pp, pN, pdi, np.zeros(N))
+        ans = py_imahalanobis(new_x, muki, Wki, Qk, aki, pp, pN, pdi, np.zeros(N))
         mah_pen[i, :] = ans
 
         dety = Wlist["dety"]
         delta = np.zeros(N)
-        mah_pen1[i, :] = C_rmahalanobis(N, pqp, q, K, i, bigx, y, gam[i, :, :], icovy[i, :, :], delta)
+        mah_pen1[i, :] = py_C_rmahalanobis(N, pqp, q, K, i, bigx, y, gam[i, :, :], icovy[i, :, :], delta)
         
         pi = math.pi
         K_pen[:, i] = (-2 * np.log(prop[i])) + (p + q) * np.log(2 * np.pi) + s[i] - np.log(dety) + (p - d[i]) * np.log(b[i]) + mah_pen[i, :] + mah_pen1[i, :] + ldetcov[i]
@@ -1338,7 +1336,7 @@ def _T_funhddt_e_step1(fdobj, bigDATA, fdobjy, Wlist, N, p, q, par, clas=0, know
 
 
 
-from py_mixture import C_mstep
+from py_mixture import py_C_mstep
 def _T_funhddt_m_step1(fdobj, bigDATA, fdobjy, Wlist, N, p, q, K, t, model, modely, threshold, method, noise_ctrl, d_set, com_dim=None, d_max=100):
     """
     Description
@@ -1523,7 +1521,7 @@ def _T_funhddt_m_step1(fdobj, bigDATA, fdobjy, Wlist, N, p, q, K, t, model, mode
         ai = np.full((K, max(d)), a / eps)
 
     #Parameter b
-    bi = np.repeat(np.NaN, K)
+    bi = np.repeat(np.nan, K)
     denom = min(N, p)
 
     if model in ['AKJBKQKDK', 'AKBKQKDK', 'ABKQKDK']:
@@ -1549,7 +1547,7 @@ def _T_funhddt_m_step1(fdobj, bigDATA, fdobjy, Wlist, N, p, q, K, t, model, mode
     pqp = p+1
 
 
-    gami, covyi, icovyi, logi = C_mstep(modely, N, pqp, q, K, prop, bigx, y, t, gami, covyi, icovyi, logi, mtol=1e-10, mmax=10)
+    gami, covyi, icovyi, logi = py_C_mstep(modely, N, pqp, q, K, prop, bigx, y, t, gami, covyi, icovyi, logi, mtol=1e-10, mmax=10)
     result = {'model':model, 'modely': modely, "K": K, "d":d, "a":ai, "b": bi, "mu":mu, "prop": prop, "ev":ev, "Q":Q, "fpcaobj":fpcaobj, "Q1":Q1, "gam": gami, "covy": covyi, "icovy": icovyi, "logi": logi, "x": x, "y": y, "ev": ev, "N": N}    
     
     return result        
@@ -1835,7 +1833,7 @@ def _T_hdclassift_bic(par, p, q, dfconstr='yes'):
     if np.isscalar(a) or (len(np.atleast_1d(a)) == 1 or len(np.atleast_1d(a)) == K):
         a = np.repeat(np.max(d), K)
     if np.nanmin(a) <= 0 or np.any(b) < 0:
-        return -np.Inf
+        return -np.inf
     
     if par['loglik'] == None:
         som_a = np.zeros(K)
