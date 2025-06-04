@@ -19,7 +19,7 @@ def create_functional_data(values, basis_type = "FOURIER", n_basis=50):
 
     x_grid_points = np.arange(1, domain + 1)
 
-    if basis_type != "FOURIER":
+    if basis_type == "FOURIER":
         fd = FDataGrid(data_matrix=values, grid_points=x_grid_points).to_basis(FourierBasis(domain_range=(1, domain + 1), n_basis=n_basis))
     else:
         fd = FDataGrid(data_matrix=values, grid_points=x_grid_points).to_basis(BSplineBasis(domain_range=(1, domain + 1), n_basis=n_basis))
