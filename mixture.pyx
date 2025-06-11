@@ -2,11 +2,12 @@ from libc.stdlib cimport malloc, free
 cimport numpy as np
 import numpy as np
 
-cdef extern from "src/mixture_wrapper.h":
-    void c_C_mstep(char** modely, int *NN, int *pp, int* qq, int *GG, double *pi, double *x, double *y, double *t, double *gami, double *covyi, double *icovyi, double *logi, double *mtol, int *mmax)
-    void c_C_rmahalanobis(int *NN, int *pp,int *qq,int *GG, int *gg, double *x,double *y, double *gam, double *cov, double *delta)
+cdef extern from "libs/funclustweight.h":
+    void C_mstep(char** modely, int *NN, int *pp, int* qq, int *GG, double *pi, double *x, double *y, double *t, double *gami, double *covyi, double *icovyi, double *logi, double *mtol, int *mmax)
+    void C_rmahalanobis(int *NN, int *pp,int *qq,int *GG, int *gg, double *x,double *y, double *gam, double *cov, double *delta)
+    void C_imahalanobis(double * x, double * muk, double * wk, double * Qk, double * aki, int * pp, int * pN, int * pdi, double *res);
 
-def C_mstep(str modely, int NN, int pp, int qq, int GG, pi, x, y, t, gami, covyi, icovyi, logi, float mtol, int mmax):
+def py_C_mstep(str modely, int NN, int pp, int qq, int GG, pi, x, y, t, gami, covyi, icovyi, logi, float mtol, int mmax):
     """
     Description
     -----------
@@ -67,14 +68,14 @@ def C_mstep(str modely, int NN, int pp, int qq, int GG, pi, x, y, t, gami, covyi
     cdef np.ndarray[np.float64_t, ndim=1] new_logi = np.ascontiguousarray(np.transpose(logi))
 
     cdef double* pi_ptr = <double*>new_pi.data
-    c_C_mstep(&modely_cstr, &NN_val, &pp_val, &qq_val, &GG_val, pi_ptr, <double*>new_x.data, <double*>new_y.data, <double*>new_t.data, <double*>new_gami.data, <double*>new_covy.data, <double*>new_icovy.data, <double*>new_logi.data, &mtol_val, &mmax_val)
+    C_mstep(&modely_cstr, &NN_val, &pp_val, &qq_val, &GG_val, pi_ptr, <double*>new_x.data, <double*>new_y.data, <double*>new_t.data, <double*>new_gami.data, <double*>new_covy.data, <double*>new_icovy.data, <double*>new_logi.data, &mtol_val, &mmax_val)
 
     final_gami = new_gami.reshape((GG, qq, pp)).transpose(0, 2, 1)
     final_covyi = new_covy.reshape((GG, qq, qq)).transpose(0, 2, 1)
     final_icovyi = new_icovy.reshape(GG, qq, qq).transpose(0, 2, 1)
     return (final_gami, final_covyi, final_icovyi, logi)
 
-def C_rmahalanobis(int NN, int pp, int qq, int GG, int gg, np.ndarray[np.float64_t, ndim=2] x, np.ndarray[np.float64_t, ndim=2] y, np.ndarray[np.float64_t, ndim=2] gam, np.ndarray[np.float64_t, ndim=2] cov, np.ndarray[np.float64_t, ndim=1] delta):
+def py_C_rmahalanobis(int NN, int pp, int qq, int GG, int gg, np.ndarray[np.float64_t, ndim=2] x, np.ndarray[np.float64_t, ndim=2] y, np.ndarray[np.float64_t, ndim=2] gam, np.ndarray[np.float64_t, ndim=2] cov, np.ndarray[np.float64_t, ndim=1] delta):
     """
     Description
     -----------
@@ -115,5 +116,51 @@ def C_rmahalanobis(int NN, int pp, int qq, int GG, int gg, np.ndarray[np.float64
     cdef double* gam_ptr = <double*>new_gam.data
     cdef double* cov_ptr = <double*>new_cov.data
     cdef double* delta_ptr = <double*>final_delta.data
-    c_C_rmahalanobis(&NN, &pp, &qq, &GG, &gg, x_ptr, y_ptr, gam_ptr, cov_ptr, delta_ptr)
+    C_rmahalanobis(&NN, &pp, &qq, &GG, &gg, x_ptr, y_ptr, gam_ptr, cov_ptr, delta_ptr)
     return final_delta
+
+def py_imahalanobis(np.ndarray[np.float64_t, ndim=2]x, np.ndarray[np.float64_t, ndim=1]muk, np.ndarray[np.float64_t, ndim=2]wk, np.ndarray[np.float64_t, ndim=2]Qk, np.ndarray[np.float64_t, ndim=2]aki, int pp, int pN, int pdi, np.ndarray[np.float64_t, ndim=1]res):
+    """
+    Parameters
+    ----------
+        x: np.ndarray[np.float64_t, ndim=2], (pN, pp)
+            Coefficient matrix
+        mu: np.ndarray[np.float64_t, ndim=1], (pp)
+
+        wk: [np.float64_t, ndim=2], (pN, pN) or (pp, pp)
+
+        Qk: np.ndarray[np.float64_t, ndim=2], (pp, pp)
+            Coefficient matrix of all eigenfunctions
+        
+        aki: [np.float64_t, ndim=2], (pp, pdi)
+        
+        pp: (int)
+            Number of columns in coefficient matrix x. Also the number of points per curves
+        
+        pN: (int)
+            Number of rows in coefficient matrix x. Also the number of curves
+
+        pdi: (int)
+            Number of columns in aki
+
+        res: np.ndarray[np.float64_t, ndim=1], (N)
+
+    Returns
+    -------
+        res: np.ndarray[np.float64_t, ndim=1], (N)
+    """
+    cdef int pp_val = pp
+    cdef int pN_val = pN
+    cdef int pdi_val = pdi
+
+    cdef np.ndarray[np.float64_t, ndim=2] new_x = np.ascontiguousarray(np.transpose(x))
+    cdef np.ndarray[np.float64_t, ndim=1] new_muk = np.ascontiguousarray(np.transpose(muk))
+    cdef np.ndarray[np.float64_t, ndim=2] new_wk = np.ascontiguousarray(np.transpose(wk))
+    cdef np.ndarray[np.float64_t, ndim=2] new_Qk = np.ascontiguousarray(np.transpose(Qk))
+    cdef np.ndarray[np.float64_t, ndim=2] new_aki = np.ascontiguousarray(np.transpose(aki))
+    cdef np.ndarray[np.float64_t, ndim=1] new_res = np.ascontiguousarray(np.transpose(res))
+
+    C_imahalanobis(<double*>new_x.data, <double*>new_muk.data, <double*>new_wk.data, <double*>new_Qk.data, <double*>new_aki.data, &pp_val, &pN_val, &pdi_val, <double*>new_res.data)
+
+    return new_res
+    

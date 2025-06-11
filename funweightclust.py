@@ -258,7 +258,7 @@ class FunWeightClust:
                     pN = x.shape[0]
                     pdi = aki.shape[1]
 
-                    mah_pen[i, :] = imahalanobis(x, muki, wki, Qk, aki, pp, pN, pdi, np.zeros(N))
+                    mah_pen[i, :] =py_imahalanobis(x, muki, wki, Qk, aki, pp, pN, pdi, np.zeros(N))
                     delta = np.zeros(N)
                     #scipy logamma vs math lgamma?
                     mah_pen1[i, :] = py_C_rmahalanobis(N, pqp, q, self.K, i, bigx, y, gam[i, :, :], icovy[i, :, :], delta)
@@ -278,7 +278,7 @@ class FunWeightClust:
                     pdi = aki.shape[1]
                     delta = np.zeros(N)
 
-                    mah_pen[i, :] = imahalanobis(x, muki, wki, Qk, aki, pp, pN, pdi, np.zeros(N))
+                    mah_pen[i, :] =py_imahalanobis(x, muki, wki, Qk, aki, pp, pN, pdi, np.zeros(N))
                     delta = np.zeros(N)
                     #scipy logamma vs math lgamma?
                     mah_pen1[i, :] = py_C_rmahalanobis(N, pqp, q, self.K, i, bigx, y, gam[i, :, :], icovy[i, :, :], delta)
@@ -297,7 +297,7 @@ class FunWeightClust:
                     pdi = aki.shape[1]
                     delta = np.zeros(N)
 
-                    mah_pen[i, :] = imahalanobis(x, muki, wki, Qk, aki, pp, pN, pdi, np.zeros(N))
+                    mah_pen[i, :] =py_imahalanobis(x, muki, wki, Qk, aki, pp, pN, pdi, np.zeros(N))
                     delta = np.zeros(N)
                     #scipy logamma vs math lgamma?
                     mah_pen1[i, :] = py_C_rmahalanobis(N, pqp, q, self.K, i, bigx, y, gam[i, :, :], icovy[i, :, :], delta)
@@ -317,7 +317,7 @@ class FunWeightClust:
                     pp = x.shape[1]
                     pN = x.shape[0]
                     pdi = aki.shape[1]
-                    mah_pen[i, :] = imahalanobis(x, muki, wki, Qk, aki, pp, pN, pdi, np.zeros(N))
+                    mah_pen[i, :] =py_imahalanobis(x, muki, wki, Qk, aki, pp, pN, pdi, np.zeros(N))
                     delta = np.zeros(N)
                     #scipy logamma vs math lgamma?
                     mah_pen1[i, :] = py_C_rmahalanobis(N, pqp, q, self.K, i, bigx, y, gam[i, :, :], icovy[i, :, :], delta)
@@ -335,7 +335,7 @@ class FunWeightClust:
                     pp = x.shape[1]
                     pN = x.shape[0]
                     pdi = aki.shape[1]
-                    mah_pen[i, :] = imahalanobis(x, muki, wki, Qk, aki, pp, pN, pdi, np.zeros(N))
+                    mah_pen[i, :] =py_imahalanobis(x, muki, wki, Qk, aki, pp, pN, pdi, np.zeros(N))
                     delta = np.zeros(N)
                     mah_pen1[i, :] = py_C_rmahalanobis(N, pqp, q, self.K, i, bigx, y, gam[i, :, :], icovy[i, :, :], delta)
                     pi = math.pi
@@ -353,7 +353,7 @@ class FunWeightClust:
                     pp = x.shape[1]
                     pN = x.shape[0]
                     pdi = aki.shape[1]
-                    mah_pen[i, :] = imahalanobis(x, muki, wki, Qk, aki, pp, pN, pdi, np.zeros(N))
+                    mah_pen[i, :] =py_imahalanobis(x, muki, wki, Qk, aki, pp, pN, pdi, np.zeros(N))
                     delta = np.zeros(N)
                     mah_pen1[i, :] = py_C_rmahalanobis(N, pqp, q, self.K, i, bigx, y, gam[i, :, :], icovy[i, :, :], delta)
                     pi = math.pi
