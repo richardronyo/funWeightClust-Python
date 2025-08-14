@@ -486,12 +486,12 @@ def funweightclust(datax, datay, K=np.arange(1,11), model='AKJBKQKDK', modely = 
 
     fdobj = datax.copy()
     fdobjy= datay.copy()
-
-    if isinstance(fdobj, skfda.FDataBasis):
+    #print("datax", fdobj.coefficients.shape, "\n", fdobj.coefficients)
+    if (isinstance(fdobj, list) == False):
         x = fdobj.coefficients
         p = x.shape[1]
 
-        W = np.eye(p)
+        W = skfda.misc.inner_product_matrix(fdobj.basis, fdobj.basis) 
         W_m = scil.cholesky(W)
         dety = scil.det(W)
         Wlist = {'W': W, 'W_m': W_m, 'dety':dety}
@@ -500,7 +500,6 @@ def funweightclust(datax, datay, K=np.arange(1,11), model='AKJBKQKDK', modely = 
 
         for i in range(1, len(fdobj)):
             x = np.c_[x, fdobj[i].coefficients]
-
         p = x.shape[1]
 
         W_fdobj = []
@@ -527,9 +526,8 @@ def funweightclust(datax, datay, K=np.arange(1,11), model='AKJBKQKDK', modely = 
         W_m = scil.cholesky(W_tot)
         dety = scil.det(W_tot)
         Wlist = {'W':W_tot, 'W_m': W_m, 'dety': dety}
-
-
     
+ 
     if not(type(threshold) == list or type(threshold) == np.ndarray):
         threshold = np.array([threshold])
 
@@ -557,7 +555,6 @@ def funweightclust(datax, datay, K=np.arange(1,11), model='AKJBKQKDK', modely = 
         mkt_list.update({'model':model, 'modely': modely, 'K':[str(a) for a in K], 'threshold':[str(a) for a in threshold]})
 
         
-    
     mkt_expand = ParameterGrid(mkt_list)
     mkt_expand = list(mkt_expand)
     repeat = mkt_expand.copy()
@@ -811,17 +808,19 @@ def _T_funhddc_main1(fdobj, fdobjy, wlist, K, dfstart, dfupdate, dfconstr, model
     if(type(fdobj) == skfda.FDataBasis):
        MULTI = False
        x = fdobj.coefficients
+       #print("x", x.shape, "\n", x)
        data = x
-
     else:
         #Multivariate
         if len(fdobj) > 1:
             MULTI = True
             data = []
             x = fdobj[0].coefficients
+            data = fdobj[0].coefficients
+            data = np.array(data) 
             for i in range(1, len(fdobj)):
                 x = np.c_[x, fdobj[i].coefficients]
-
+                data = np.hstack([data, fdobj[i].coefficients])
             
         #univariate
         else:
@@ -829,23 +828,19 @@ def _T_funhddc_main1(fdobj, fdobjy, wlist, K, dfstart, dfupdate, dfconstr, model
             
 
     if(type(fdobjy) == skfda.FDataBasis):
-        MULTI = False
         y = fdobjy.coefficients
         datay = y
 
     else:
-
         if len(fdobjy) > 1:
-            MULTI = True
             datay = []
             y = fdobjy[0].coefficients
-            datay.append(fdobjy[0].coefficients)
+            datay = fdobjy[0].coefficients
+            datay = np.array(datay)
 
             for i in range(1, len(fdobjy)):
-                y = np.c_[y, fdobj[i].coefficients]
-                datay.append(fdobjy[i].coefficients)
-            
-            datay = np.array(datay)
+                y = np.c_[y, fdobjy[i].coefficients]
+                datay = np.hstack([datay, fdobjy[i].coefficients]) 
         else:
             y = fdobjy[0].coefficients
 
@@ -854,17 +849,17 @@ def _T_funhddc_main1(fdobj, fdobjy, wlist, K, dfstart, dfupdate, dfconstr, model
     q = y.shape[1]
 
     W = wlist['W']
-
-
+    
     ones_row = np.ones((1, N))
-    DATA = x.T
+    DATA = x.T  
     intermediate_bigDATA = W@(DATA)
+    #print("W", W.shape, "\n", W) 
     bigDATA = np.vstack((intermediate_bigDATA, ones_row))
-
+    #print("bigDATA", bigDATA.shape, "\n", bigDATA.T)
     com_ev = None
 
     d_max = min(N,p,d_max)
-    databig = np.hstack((x, datay))
+    #databig = np.hstack((x, data))
 
     #classification
     n = N
@@ -933,11 +928,11 @@ def _T_funhddc_main1(fdobj, fdobjy, wlist, K, dfstart, dfupdate, dfconstr, model
                 for i in range(0, K):
                     t[np.nonzero(init_vector == i)[0], i] = 1
 
-
+                print("Initial t", t.shape)
             case "kmeans":
                 kmc = kmeans_control
                 km = clust.KMeans(n_clusters = K, max_iter = kmeans_control['max_iter'], n_init = kmeans_control['n_init'], algorithm=kmeans_control['algorithm'])
-                cluster = km.fit_predict(databig)
+                cluster = km.fit_predict(data)
 
                 if clas > 0:
                     cn1 = len(np.unique(known[test_index]))
@@ -1229,13 +1224,11 @@ def _T_funhddt_e_step1(fdobj, bigDATA, fdobjy, Wlist, N, p, q, par, clas=0, know
         #Multivariate
         if len(fdobj) > 1:
             MULTI = True
-            data = []
             x = fdobj[0].coefficients
-            data.append(fdobj[0].coefficients)
+            data = fdobj[0].coefficients 
             for i in range(1, len(fdobj)):
                 x = np.c_[x, fdobj[i].coefficients]
-                data.append(fdobj[i].coefficients)
-
+                data = np.hstack([data, fdobj[i].coefficients])
             data = np.array(data)
         #univariate
         else:
@@ -1251,14 +1244,11 @@ def _T_funhddt_e_step1(fdobj, bigDATA, fdobjy, Wlist, N, p, q, par, clas=0, know
 
         if len(fdobjy) > 1:
             MULTI = True
-            datay = []
             y = fdobjy[0].coefficients
-            datay.append(fdobjy[0].coefficients)
-
+            datay = fdobjy[0].coefficients
             for i in range(1, len(fdobjy)):
-                y = np.c_[y, fdobj[i].coefficients]
-                data.append(fdobjy[i].coefficients)
-            
+                y = np.c_[y, fdobjy[i].coefficients]
+                datay = np.hstack([datay, fdobjy[i].coefficients]) 
             datay = np.array(datay)
         else:
             y = fdobjy[0].coefficients
@@ -1398,13 +1388,13 @@ def _T_funhddt_m_step1(fdobj, bigDATA, fdobjy, Wlist, N, p, q, K, t, model, mode
         #Multivariate
         if len(fdobj) > 1:
             MULTI = True
-            data = []
+            coefs = [fdobj[0].coefficients]
             x = fdobj[0].coefficients
-            data.append(fdobj[0].coefficients)
+            data = fdobj[0].coefficients
             for i in range(1, len(fdobj)):
                 x = np.c_[x, fdobj[i].coefficients]
-                data.append(fdobj[i].coefficients)
-
+                data = np.hstack([data, fdobj[i].coefficients])
+                coefs.append(fdobj[i].coefficients) 
             data = np.array(data)
         #univariate
         else:
@@ -1413,21 +1403,16 @@ def _T_funhddt_m_step1(fdobj, bigDATA, fdobjy, Wlist, N, p, q, K, t, model, mode
             
 
     if(type(fdobjy) == skfda.FDataBasis):
-        MULTI = False
         y = fdobjy.coefficients
 
     else:
 
         if len(fdobjy) > 1:
-            MULTI = True
-            datay = []
             y = fdobjy[0].coefficients
-            datay.append(fdobjy[0].coefficients)
-
+            datay = fdobjy[0].coefficients 
             for i in range(1, len(fdobjy)):
-                y = np.c_[y, fdobj[i].coefficients]
-                data.append(fdobjy[i].coefficients)
-            
+                y = np.c_[y, fdobjy[i].coefficients]
+                datay = np.hstack([datay, fdobjy[i].coefficients]) 
             datay = np.array(datay)
         else:
             y = fdobjy[0].coefficients
@@ -1438,16 +1423,13 @@ def _T_funhddt_m_step1(fdobj, bigDATA, fdobjy, Wlist, N, p, q, K, t, model, mode
 
     #Formula 24, nk
     n = np.sum(t, axis=0)
-
     d_max = min(N, p, d_max)
     #Formula 24, pik
     prop = n/N
-
     #Formula 25, muk
     mu = np.zeros((K, p))
     for i in range(0, K):
         mu[i, :] = np.sum(x*((t[:, i]).reshape(-1, 1)), axis=0) / n[i]
-    
 
     ind = [np.where(row > 0)[0] for row in t]
     n_bis = np.arange(0,K)
@@ -1464,7 +1446,7 @@ def _T_funhddt_m_step1(fdobj, bigDATA, fdobjy, Wlist, N, p, q, K, t, model, mode
 
     for i in range(0, K):
         if MULTI:
-            valeurs_propres, cov, U = _T_mypcat_fd1_Multi(data, Wlist['W_m'], np.atleast_2d(t[:,i]))
+            valeurs_propres, cov, U = _T_mypcat_fd1_Multi(np.array(coefs), Wlist['W_m'], np.atleast_2d(t[:,i]))
         else:
             valeurs_propres, cov, U = _T_mypcat_fd1_Uni(x, Wlist['W_m'], np.atleast_2d(t[:,i]))
 
@@ -1547,7 +1529,7 @@ def _T_funhddt_m_step1(fdobj, bigDATA, fdobjy, Wlist, N, p, q, K, t, model, mode
     pqp = p+1
 
 
-    gami, covyi, icovyi, logi = py_C_mstep(modely, N, pqp, q, K, prop, bigx, y, t, gami, covyi, icovyi, logi, mtol=1e-10, mmax=10)
+    gami, covyi, icovyi, logi = py_C_mstep(modely, N, pqp, q, K, prop, bigx, y, t, gami, covyi, icovyi, logi, mtol=1e-10, mmax=10) 
     result = {'model':model, 'modely': modely, "K": K, "d":d, "a":ai, "b": bi, "mu":mu, "prop": prop, "ev":ev, "Q":Q, "fpcaobj":fpcaobj, "Q1":Q1, "gam": gami, "covy": covyi, "icovy": icovyi, "logi": logi, "x": x, "y": y, "ev": ev, "N": N}    
     
     return result        
@@ -1580,7 +1562,9 @@ def _T_mypcat_fd1_Uni(fdobj_coefficients, W_m, Ti):
             Principal Component Scores
 
     """
-
+    #print("FDobj: ", fdobj_coefficients.shape, "\n", fdobj_coefficients)
+    #print("W_m", W_m.shape, "\n", W_m)
+    #print("Ti", Ti.shape, "\n", Ti)
     coefmean = np.sum(np.transpose(Ti) @ (np.ones((1, fdobj_coefficients.shape[1]))) * fdobj_coefficients, axis=0) / np.sum(Ti)
     swept_fdobj_coefficients = fdobj_coefficients.copy()
     swept_fdobj_coefficients = swept_fdobj_coefficients.astype(np.float64)
@@ -1610,71 +1594,56 @@ def _T_mypcat_fd1_Uni(fdobj_coefficients, W_m, Ti):
             valeurs_propres[i] = 0
     bj = np.linalg.solve(W_m, np.eye(W_m.shape[0]))@np.ascontiguousarray(np.real(vecteurs_propres))
 
-    
-
     return np.real(valeurs_propres), cov, bj   
 
 
-@nb.njit
-def _T_mypcat_fd1_Multi(data, W_m, Ti, corI):
-    """
-    Description
-    -----------
-    This function completes Principal Component Analysis on Multivariate Functional Data
+def _T_mypcat_fd1_Multi(coefs, W_m, Ti): 
+    mean_fd = []
+    for i in range(len(coefs)):
+        mean_fd.append(coefs[i])
 
-    Parameters
-    ----------
-        data: list of 'FDataBasis objects' (N, p)
-            a list of`FDataBasis` object that contains functional data fit to a set of
-            basis functions
-        W_m: (N, N) or (p, p)
-            The Cholesky of W
-        Ti: (N, 1)
-            A column of the probability matrix t
+    #Normalizing the coefficient matrices 
+    for i in range(len(coefs)): 
+        weighted_coefs = Ti.T * coefs[i]
+        coefmean = np.sum(weighted_coefs, axis=0) / np.sum(Ti)
 
-    Returns
-    -------
-        valeurs_propres: (p, 1)
-            Array containing the eigenvalues
-        cov: (p, p)
-            Covariance Matrix
-        bj: (p, p)
-            Principal Component Scores
+        coefs[i] = coefs[i] - coefmean
 
-    This function is not included in the R code, thus I could not describe corI
-    """
+        mean_fd.append(coefs[i])
+    
+    full_coef = coefs[0]
 
+    #Creating a combined normalized coefficient matrix  
+    for i in range(1, len(coefs)):
+        full_coef = np.hstack([full_coef, coefs[i]])
+    
+    #Finding the covariance matrix
+    sqrt_Ti = np.sqrt(Ti.flatten())
 
-    coefficients = data.reshape(data.shape[1], data.shape[-1]*data.shape[0])
-    coefmean = np.zeros((coefficients.shape))
+    full_coef_t = full_coef.T
+    sqrt_Ti_repeated = np.tile(sqrt_Ti, (full_coef_t.shape[0], 1))
+    weighted_coef = full_coef_t * sqrt_Ti_repeated
 
-    for i in range(len(data)):
-        for j in range(data[i].shape[-1]):
+    mat_cov = (weighted_coef @ weighted_coef.T) / np.sum(Ti)
 
-            coefmean[:, j] = np.sum(((np.ascontiguousarray(corI.TW)@np.atleast_2d(np.repeat(1., data[i].shape[-1]))).T * data[i].T)[:, i])/np.sum(corI)
+    cov = W_m @ mat_cov @ W_m.T
 
+    eigenvalues, eigenvectors = np.linalg.eig(cov)
 
-    n = coefficients.shape[1]
-    v = np.sqrt(corI)
-    M = np.repeat(1., n).reshape((n, 1))@(v)
-    rep = (M * coefficients.T).T
-    mat_cov = (rep.T@rep) / np.sum(Ti)
-    cov = (W_m@ mat_cov)@(W_m.T)
+    W_m_inv = np.linalg.inv(W_m)
+    bj = W_m_inv @ eigenvectors
+    
+    return np.real(eigenvalues), bj, cov
 
-    if not np.all(np.abs(cov-cov.T) < 1.e-12):
-        ind = np.nonzero(cov - cov.T > 1.e-12)
-        for i in ind:
-            cov[i] = cov.T[i]
+def _reg_repmat(v, n, p):
+    v = np.array(v)
 
-    valeurs_propres, vecteurs_propres = np.linalg.eig(cov.astype(complex128))
-    for i in range(len(valeurs_propres)):
-        if np.imag(i) > 0:
-            valeurs_propres[i] = 0
-    bj = np.linalg.solve(W_m, np.eye(W_m.shape[0]))@np.ascontiguousarray(np.real(vecteurs_propres))
+    if p == 1:
+        M = np.ones((n, 1)) @ v.reshape(1, -1)
+    else:
+        M = np.tile(v, (n, p))
 
-    return np.real(valeurs_propres), cov, bj
-
-
+        return M
 def _T_hdclassif_dim_choice(ev, n, method, threshold, graph, noise_ctrl, d_set):
     """
     Description
@@ -1818,7 +1787,9 @@ def _T_hdclassift_bic(par, p, q, dfconstr='yes'):
     N = par['N']
     prop = par['prop']
 
-
+    print("a", a.shape, "\n", a)
+    print("b", b.shape, "\n", b)
+    print("d", d.shape, "\n", d)
     if np.isscalar(b) or len(np.atleast_1d(b)) == 1:
         eps = np.sum(prop*d)
 
@@ -2525,3 +2496,45 @@ def checkKMC(kmc):
 
 def deafaultKMC(kmc):
     return {}
+
+
+import pandas as pd
+from process_data import constant_functional_data, create_functional_data
+
+if __name__ == "__main__":
+    adni_cingulum_data = pd.read_csv("data/ADNI/ADNI_Cingulum_ADCN.csv")
+    adni_corpus_data = pd.read_csv("data/ADNI/ADNI_Corpus_ADCN.csv")
+    adni_fa_scores = pd.read_csv("data/ADNI/FA_ADCN_MMSE_CDR_FAQ_Scores.csv")
+
+    adni_cingulum_adcn = pd.merge(adni_fa_scores, adni_cingulum_data, left_on='Image.ID', right_on='Image.ID')
+
+    adni_cingulum_mmse = adni_cingulum_adcn['MMSE.Total.Score_x']
+    adni_cingulum_gcdr = adni_cingulum_adcn['Global.CDR']
+    adni_cingulum_faq = adni_cingulum_adcn['FAQ.Total.Score']
+    adni_cingulum_npiq = adni_cingulum_adcn['NPI.Q.Total.Score']
+
+    adni_corpus_adcn = pd.merge(adni_fa_scores, adni_corpus_data, left_on='Image.ID', right_on='Image.ID')
+
+    adni_cingulum_fa = adni_cingulum_adcn.filter(like="Var")
+    adni_corpus_fa = adni_corpus_adcn.filter(like="Var")
+
+    models = ["AKJBKQKDK","AKJBQKDK", "AKBKQKDK", "ABKQKDK", "AKBQKDK", "ABQKDK"]
+    modelsy = ["EII", "VII", "EEI", "VEI", "EVI", "VVI", "EEE", "VEE", "EVE", "EEV", "VVE", "VEV","EVV","VVV"]
+    modelsys = ["EII", "VII", "EEI", "VEI"]
+
+    research_groups = adni_cingulum_adcn['Research.Group_x'].replace({"CN":0, "AD":1}).values.astype(int)
+
+    mmse_fd = constant_functional_data(adni_cingulum_mmse.values, 1104)
+    gcdr_fd = constant_functional_data(adni_cingulum_gcdr.values, 1104)
+    faq_fd = constant_functional_data(adni_cingulum_faq.values, 1104)
+    npiq_fd = constant_functional_data(adni_cingulum_npiq.values, 1104)
+
+
+
+    cingulum_fd = create_functional_data(adni_cingulum_fa, "FOURIER", n_basis=50)
+    corpus_fd = create_functional_data(adni_corpus_fa, "FOURIER", n_basis=50)
+    combined_fd = [cingulum_fd, corpus_fd]
+
+    response_fd = [mmse_fd, gcdr_fd, faq_fd, npiq_fd]
+    corpus_mmse = funweightclust(corpus_fd, response_fd, K=2,model=models, modely=modelsy, init="kmeans", nb_rep=5, threshold=0.05)
+    print(corpus_mmse.cl)
