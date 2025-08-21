@@ -1,8 +1,6 @@
 # readmetest
 This README provides instruction on how to run FunWeightClust in Visual Studio Code.
 
-> Note: Since the code depends on .dll files, you must run FunWeightClust on a WindowsOS
-
 ### Instructions
 1. Install the [Conda Package Manager](https://www.anaconda.com/download). The Anaconda distribution will come with every needed dependency. Ensure you also have [Visual Studio Code](https://code.visualstudio.com).
 
@@ -18,6 +16,11 @@ This README provides instruction on how to run FunWeightClust in Visual Studio C
 ![Step 3](images/Script%203.png)
 ![Step 4](images/Script%204.png)
 ![Step 5](images/Script%205.png)
+
+4. Install and run the FunWeightClust package in R. (See https://github.com/popescuc71/funclustweight.git) After installing, drag and drop the funclustweight.so (Apple/Linux) or funclustweight.dll (Windows) file from the directory your package is installed in, into the root directory of the Python package
+
+5. Install the scikit-fda package with the following command:
+    conda install conda-forge::scikit-fda
 
 ### Conclusion
 You can now run FunWeightClust in Visual Studio Code
