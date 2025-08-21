@@ -19,7 +19,10 @@ This README provides instruction on how to run FunWeightClust in Visual Studio C
 
 4. Install and run the FunWeightClust package in R. (See https://github.com/popescuc71/funclustweight.git) After installing, drag and drop the funclustweight.so (Apple/Linux) or funclustweight.dll (Windows) file from the directory your package is installed in, into the root directory of the Python package
 
-5. Install the scikit-fda package with the following command:
+5. Ensure cython is installed (if not 'conda install cython'), and run the following command:
+    python setup.py build_ext --inplace
+
+6. Install the scikit-fda package with the following command:
     conda install conda-forge::scikit-fda
 
 ### Conclusion
